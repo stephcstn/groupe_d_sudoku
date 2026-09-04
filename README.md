@@ -1,1 +1,4 @@
-# groupe_d_sudoku
+```bash
+docker build -t sudoku-app .
+docker run -it --rm sudoku-app
+```
