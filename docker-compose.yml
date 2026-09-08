@@ -6,8 +6,4 @@ services:
     container_name: groupe_d_sudoku
     restart: unless-stopped
     ports:
-      - "8080:8080"           # [Port de votre machine] : [Port écouté par votre appli dans le conteneur]
-    env_file:
-      - .env                  # Optionnel : injecte vos variables d'environnement locales
-    # volumes:
-    #   - .:/app              # À décommenter si vous voulez que les modifs de code se répercutent en direct (hot-reload)
+      - "8080:8080"           # Port de la machine hôte : Port du conteneur
