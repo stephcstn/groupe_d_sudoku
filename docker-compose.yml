@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: .              # Dossier où se trouve le Dockerfile (racine)
+      dockerfile: Dockerfile
+    container_name: mon_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"           # [Port de votre machine] : [Port écouté par votre appli dans le conteneur]
+    env_file:
+      - .env                  # Optionnel : injecte vos variables d'environnement locales
+    # volumes:
+    #   - .:/app              # À décommenter si vous voulez que les modifs de code se répercutent en direct (hot-reload)
