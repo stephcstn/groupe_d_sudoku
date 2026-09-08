@@ -1,26 +1,22 @@
-# Étape 1 : Build
-FROM maven:3.8-eclipse-temurin-11 AS build
-
+# Étape 1 : Compilation du projet Java avec Maven
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
+# Copie de la configuration des dépendances
 COPY pom.xml .
+# Téléchargement des dépendances hors ligne (mise en cache Docker)
 RUN mvn dependency:go-offline -B
 
+# Copie du code source et compilation du fichier .jar
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Étape 2 : Exécution sécurisée
-FROM eclipse-temurin:11-jre
-
+# Étape 2 : Exécution légère avec le JRE seul
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-# Création d'un groupe et d'un utilisateur non-root (appuser)
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+# Récupération du .jar généré depuis l'étape de build
+COPY --from=build /app/target/*.jar app.jar
 
-# Copie du jar en donnant la propriété à appuser
-COPY --from=build --chown=appuser:appgroup /app/target/*.jar app.jar
-
-# Bascule sur l'utilisateur non privilégié (résout docker:S6471)
-USER appuser
-
+# Configuration de démarrage
 ENTRYPOINT ["java", "-jar", "app.jar"]
