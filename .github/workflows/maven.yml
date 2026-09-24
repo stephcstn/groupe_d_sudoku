@@ -29,7 +29,7 @@ jobs:
       - name: Extraire le JAR
         run: |
           docker create --name temp-container sudoku-ci
-          docker cp temp-container:/app/target .
+          docker cp temp-container:/groupe_d_sudoku/target .
           docker rm temp-container
 
       # Sauvegarde le JAR sur GitHub (téléchargeable dans l'onglet Actions)
