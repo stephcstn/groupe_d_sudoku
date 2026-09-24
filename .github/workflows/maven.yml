@@ -25,14 +25,12 @@ jobs:
       - name: Build et tests dans Docker
         run: docker build -t sudoku-ci .
 
-      # On démarre le conteneur pour extraire le .jar généré dans target/
       - name: Extraire le JAR
         run: |
           docker create --name temp-container sudoku-ci
           docker cp temp-container:/groupe_d_sudoku/target .
           docker rm temp-container
 
-      # Sauvegarde le JAR sur GitHub (téléchargeable dans l'onglet Actions)
       - name: Mettre à disposition le JAR
         uses: actions/upload-artifact@v4
         with:
