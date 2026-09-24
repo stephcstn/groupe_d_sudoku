@@ -1,9 +1,0 @@
-services:
-  app:
-    build:
-      context: .              # Dossier où se trouve le Dockerfile (racine)
-      dockerfile: Dockerfile
-    container_name: groupe_d_sudoku
-    restart: unless-stopped
-    ports:
-      - "8080:8080"           # Port de la machine hôte : Port du conteneur
