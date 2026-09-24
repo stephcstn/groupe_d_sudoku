@@ -7,4 +7,4 @@ RUN mvn dependency:go-offline -B
 
 COPY src ./src
 
-CMD ["mvn", "clean", "test"]
+CMD ["mvn", "clean", "package"]
