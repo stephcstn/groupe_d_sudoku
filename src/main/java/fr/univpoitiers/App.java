@@ -10,7 +10,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/univpoitiers/vue.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/univpoitiers/views/vue.fxml"));
         Parent root = loader.load();
 
         primaryStage.setTitle("Sudoku");
