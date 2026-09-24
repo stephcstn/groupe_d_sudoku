@@ -7,7 +7,7 @@
 
   <groupId>fr.univpoitiers</groupId>
   <artifactId>groupe_d_sudoku</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.0.1-XXX</version>
 
   <name>groupe_d_sudoku</name>
   <url>http://groupe_d_sudoku.univpoitiers.fr</url>
@@ -41,7 +41,6 @@
   </dependencies>
 
   <build>
-    <!-- Plugins actifs exécutés pendant la compilation -->
     <plugins>
       <plugin>
         <groupId>org.openjfx</groupId>
@@ -53,7 +52,6 @@
       </plugin>
     </plugins>
 
-    <!-- Gestion des versions par défaut de Maven -->
     <pluginManagement>
       <plugins>
         <plugin>

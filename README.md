@@ -4,8 +4,8 @@ docker run -it --rm sudoku-app
 docker compose up --build
 ```
 
-mvn package
-mvn compile
-mvn exec:java "-Dexec.mainClass=fr.univpoitiers.App"
-mvn javafx:run
-mvn clean
+./mvnw package
+./mvnw compile
+./mvnw exec:java "-Dexec.mainClass=fr.univpoitiers.App"
+./mvnw javafx:run
+./mvnw clean test
