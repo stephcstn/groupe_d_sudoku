@@ -13,7 +13,7 @@ public class App extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/univpoitiers/views/vue.fxml"));
         Parent root = loader.load();
 
-        primaryStage.setTitle("Sudoku");
+        primaryStage.setTitle("Sudoku Grid");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
