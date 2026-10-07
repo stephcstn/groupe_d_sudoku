@@ -11,7 +11,7 @@ public class Cell {
 	 * @param value
 	 */
 	public void setNote(int value) {
-		// TODO - implement Cell.setNote
+		this.note[value] = 1;
 		throw new UnsupportedOperationException();
 	}
 
@@ -20,7 +20,7 @@ public class Cell {
 	 * @param value
 	 */
 	public void removeNote(int value) {
-		// TODO - implement Cell.removeNote
+		this.note[value] = 0;
 		throw new UnsupportedOperationException();
 	}
 
@@ -29,7 +29,7 @@ public class Cell {
 	}
 
 	public void lock() {
-		// TODO - implement Cell.lock
+		this.locked = true;
 		throw new UnsupportedOperationException();
 	}
 
