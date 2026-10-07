@@ -6,7 +6,7 @@ import fr.univpoitiers.core.rules.RuleApplier;
 public class Solver implements RuleApplier {
 
 	private ExecutionStack executionStack;
-	private java.util.ArrayList<Grid> solvedGrid;
+	private Grid solvedGrid;
 
 	public Solver() {
 		// TODO - implement Solver.Solver

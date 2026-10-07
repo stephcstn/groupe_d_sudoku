@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Grid {
 
-	private ArrayList<Cell> cells;
+	private Cell[] cells;
 	private int WIDTH;
 	private int HEIGHT;
 	private ArrayList<Integer> availableCells;
