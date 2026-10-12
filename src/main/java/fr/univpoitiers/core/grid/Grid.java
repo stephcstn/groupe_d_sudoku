@@ -15,8 +15,10 @@ public class Grid {
 	 * @param height
 	 */
 	public Grid(int width, int height) {
-		// TODO - implement Grid.Grid
-		throw new UnsupportedOperationException();
+		this.WIDTH = width;
+		this.HEIGHT = height;
+		this.cells = new ArrayList<>();
+		this.availableCells = new ArrayList<>();
 	}
 
 	/**
