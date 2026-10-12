@@ -13,8 +13,8 @@ public class SudokuAppController {
 	private ListProperty<Integer> listRules;
 
 	private SudokuAppController(SudokuCoreModel model, AppView view) {
-		// TODO - implement SudokuAppController.SudokuAppController
-		throw new UnsupportedOperationException();
+		coreModel = model;
+		appView = view;
 	}
 
 	/**
@@ -23,8 +23,7 @@ public class SudokuAppController {
 	 * @param view
 	 */
 	public static SudokuAppController create(SudokuCoreModel model, AppView view) {
-		SudokuAppController s = new SudokuAppController(model, view);
-		return null;
+		return new SudokuAppController(model, view);
 	}
 
 	private void buildListener() {
