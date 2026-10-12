@@ -1,0 +1,13 @@
+/* Style par défaut de la cellule */
+.cell-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #000000;
+    -fx-border-width: 0.5px;
+    -fx-alignment: center;
+}
+
+/* Style lorsque la souris survole la cellule (effet hover) */
+.cell-view:hover {
+    -fx-background-color: #c4defa; /* Un bleu très clair, idéal pour le survol */
+    -fx-cursor: hand; /* Change le curseur en petite main */
+}
