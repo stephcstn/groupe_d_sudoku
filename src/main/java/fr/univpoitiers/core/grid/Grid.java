@@ -5,12 +5,14 @@ import java.util.ArrayList;
 public class Grid {
 
 	private Cell[] cells;
-	private int WIDTH;
-	private int HEIGHT;
+	private final int WIDTH;
+	private final int HEIGHT;
 	private ArrayList<Integer> availableCells;
+    private final int BLOCK_WIDTH;
+    private final int BLOCK_HEIGHT;
 
 	/**
-	 * 
+	 *
 	 * @param width
 	 * @param height
 	 */
@@ -19,7 +21,21 @@ public class Grid {
 		this.HEIGHT = height;
 		this.cells = new Cell[width*height];
 		this.availableCells = new ArrayList<>();
+		this.BLOCK_WIDTH = (int) Math.sqrt(width);
+		this.BLOCK_HEIGHT = (int) Math.sqrt(height);
+        for (int i = 0; i < this.cells.length; i++) {
+            this.cells[i] = new Cell();
+            this.availableCells.add(i);
+        }
 	}
+
+    public int getWidth() {
+        return this.WIDTH;
+    }
+
+    public int getHeight() {
+        return this.HEIGHT;
+    }
 
 	/**
 	 * 
@@ -132,11 +148,19 @@ public class Grid {
         }
 	}
 
+    public int getRowIndex(int pos) {
+        return pos / this.WIDTH;
+    }
+
+    public int getColumnIndex(int pos) {
+        return pos % this.WIDTH;
+    }
+
     public int getBlockIndex(int pos) {
         int blockWidth = (int) Math.sqrt(this.WIDTH);
         int blockHeight = (int) Math.sqrt(this.HEIGHT);
-        int x = pos % this.WIDTH;
-        int y = pos / this.WIDTH;
+        int x = getColumnIndex(pos);
+        int y = getRowIndex(pos);
         int startX = x - (x % blockWidth);
         int startY = y - (y % blockHeight);
         return startY * this.WIDTH + startX;
@@ -148,20 +172,20 @@ public class Grid {
 	 * @param valeur
 	 */
 	public void blockUpdate(int pos, int valeur) {
-        int x = pos % this.WIDTH;
-        int y = pos / this.WIDTH;
+        int x = getColumnIndex(pos);
+        int y = getRowIndex(pos);
 
         if (x < 0 || x >= this.WIDTH || y < 0 || y >= this.HEIGHT) {
             throw new IllegalArgumentException("x and y must be within the grid bounds.");
         }
 
+        int startBlock = getBlockIndex(pos);
+
         int blockWidth = (int) Math.sqrt(this.WIDTH);
         int blockHeight = (int) Math.sqrt(this.HEIGHT);
-        int startX = x - (x % blockWidth);
-        int startY = y - (y % blockHeight);
 
-        for (int i = startY; i < startY + blockHeight; i++) {
-            for (int j = startX; j < startX + blockWidth; j++) {
+        for (int i = startBlock; i < startBlock + blockHeight * this.WIDTH; i += this.WIDTH) {
+            for (int j = startBlock; j < startBlock + blockWidth; j++) {
                 this.cells[i * this.WIDTH + j].removeNote(valeur);
             }
         }
@@ -173,8 +197,7 @@ public class Grid {
 	 * @param y
 	 */
 	public void diagonalUpdate(int x, int y) {
-		// TODO - implement Grid.diagonalUpdate
-		throw new UnsupportedOperationException();
+
 	}
 
 }
