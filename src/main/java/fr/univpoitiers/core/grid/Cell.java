@@ -12,8 +12,25 @@ public class Cell {
 	 */
 	public void setNote(int value) {
 		this.note[value] = 1;
-		throw new UnsupportedOperationException();
 	}
+
+    public int count(){
+        int count = 0;
+        for (int i = 0; i < this.note.length; i++) {
+            if (this.note[i] == 1) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     *
+     * @param value
+     */
+    public int getNote(int value) {
+        return this.note[value];
+    }
 
 	/**
 	 * 
@@ -21,7 +38,6 @@ public class Cell {
 	 */
 	public void removeNote(int value) {
 		this.note[value] = 0;
-		throw new UnsupportedOperationException();
 	}
 
 	public boolean isLocked() {
@@ -30,7 +46,6 @@ public class Cell {
 
 	public void lock() {
 		this.locked = true;
-		throw new UnsupportedOperationException();
 	}
 
 	public int getValue() {

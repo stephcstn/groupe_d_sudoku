@@ -5,9 +5,11 @@ import java.util.ArrayList;
 public class Grid {
 
 	private Cell[] cells;
-	private int WIDTH;
-	private int HEIGHT;
+	private final int WIDTH;
+	private final int HEIGHT;
 	private ArrayList<Integer> availableCells;
+    private final int BLOCK_WIDTH;
+    private final int BLOCK_HEIGHT;
 
 	/**
 	 * 
@@ -15,9 +17,25 @@ public class Grid {
 	 * @param height
 	 */
 	public Grid(int width, int height) {
-		// TODO - implement Grid.Grid
-		throw new UnsupportedOperationException();
+		this.WIDTH = width;
+		this.HEIGHT = height;
+		this.cells = new Cell[width*height];
+		this.availableCells = new ArrayList<>();
+		this.BLOCK_WIDTH = (int) Math.sqrt(width);
+		this.BLOCK_HEIGHT = (int) Math.sqrt(height);
+        for (int i = 0; i < this.cells.length; i++) {
+            this.cells[i] = new Cell();
+            this.availableCells.add(i);
+        }
 	}
+
+    public int getWidth() {
+        return this.WIDTH;
+    }
+
+    public int getHeight() {
+        return this.HEIGHT;
+    }
 
 	/**
 	 * 
@@ -36,8 +54,9 @@ public class Grid {
 	 * @param value
 	 */
 	public boolean addNumber(int x, int y, int value) {
-		// TODO - implement Grid.addNumber
-		throw new UnsupportedOperationException();
+        this.cells[y * this.WIDTH + x].setValue(value);
+        this.availableCells.remove(Integer.valueOf(y * this.WIDTH + x));
+        return true;
 	}
 
 	/**
@@ -46,13 +65,11 @@ public class Grid {
 	 * @param y
 	 */
 	public int getNumber(int x, int y) {
-		// TODO - implement Grid.getNumber
-		throw new UnsupportedOperationException();
+		return this.cells[y * this.WIDTH + x].getValue();
 	}
 
 	public int nextAvailableCell() {
-		// TODO - implement Grid.nextAvailableCell
-		throw new UnsupportedOperationException();
+		return this.availableCells.getFirst();
 	}
 
 	/**
@@ -60,8 +77,7 @@ public class Grid {
 	 * @param pos
 	 */
 	public void backCellAvailable(int pos) {
-		// TODO - implement Grid.backCellAvailable
-		throw new UnsupportedOperationException();
+		this.availableCells.add(pos);
 	}
 
 	/**
@@ -71,9 +87,8 @@ public class Grid {
 	 * @param note
 	 */
 	public boolean isCellContaining(int x, int y, int note) {
-		// TODO - implement Grid.isCellContaining
-		throw new UnsupportedOperationException();
-	}
+        return this.cells[y * this.WIDTH + x].getNote(note) == 1;
+    }
 
 	/**
 	 * 
@@ -81,55 +96,102 @@ public class Grid {
 	 * @param y
 	 */
 	public void removeNumber(int x, int y) {
-		// TODO - implement Grid.removeNumber
-		throw new UnsupportedOperationException();
+		this.cells[y * this.WIDTH + x].setValue(0);
 	}
 
 	public void lockFilledCells() {
-		// TODO - implement Grid.lockFilledCells
-		throw new UnsupportedOperationException();
+        for (Cell cell : this.cells) {
+            if (cell.getValue() != 0) {
+                cell.lock();
+            }
+        }
 	}
 
 	public void clearEntries() {
-		// TODO - implement Grid.clearEntries
-		throw new UnsupportedOperationException();
+        for (Cell cell : this.cells) {
+            if (!cell.isLocked()) {
+                cell.setValue(0);
+            }
+        }
 	}
 
 	public void resetGrid() {
-		// TODO - implement Grid.resetGrid
-		throw new UnsupportedOperationException();
-	}
+        for (Cell cell : this.cells) {
+            cell.setValue(0);
+        }
+    }
 
 	/**
 	 * 
 	 * @param x
+     * @param valeur
 	 */
-	public void lineUpdate(int x) {
-		// TODO - implement Grid.lineUpdate
-		throw new UnsupportedOperationException();
+	public void lineUpdate(int x, int valeur) {
+        for (int i = 0; i < this.cells.length; i++) {
+            if (i / this.WIDTH == x) {
+                this.cells[i].removeNote(valeur);
+            }
+        }
 	}
 
 	/**
-	 * 
+	 *
 	 * @param y
+     * @param valeur
 	 */
-	public void columnUpdate(int y) {
-		// TODO - implement Grid.columnUpdate
-		throw new UnsupportedOperationException();
+	public void columnUpdate(int y, int valeur) {
+        for (int i = 0; i < this.cells.length; i++) {
+            if (i % this.WIDTH == y) {
+                this.cells[i].removeNote(valeur);
+            }
+        }
+	}
+
+    public int getRowIndex(int pos) {
+        return pos / this.WIDTH;
+    }
+
+    public int getColumnIndex(int pos) {
+        return pos % this.WIDTH;
+    }
+
+    public int getBlockIndex(int pos) {
+        int blockWidth = (int) Math.sqrt(this.WIDTH);
+        int blockHeight = (int) Math.sqrt(this.HEIGHT);
+        int x = getColumnIndex(pos);
+        int y = getRowIndex(pos);
+        int startX = x - (x % blockWidth);
+        int startY = y - (y % blockHeight);
+        return startY * this.WIDTH + startX;
+    }
+
+	/**
+	 *
+	 * @param pos
+	 * @param valeur
+	 */
+	public void blockUpdate(int pos, int valeur) {
+        int x = getColumnIndex(pos);
+        int y = getRowIndex(pos);
+
+        if (x < 0 || x >= this.WIDTH || y < 0 || y >= this.HEIGHT) {
+            throw new IllegalArgumentException("x and y must be within the grid bounds.");
+        }
+
+        int startBlock = getBlockIndex(pos);
+
+        int blockWidth = (int) Math.sqrt(this.WIDTH);
+        int blockHeight = (int) Math.sqrt(this.HEIGHT);
+
+        for (int i = startBlock; i < startBlock + blockHeight * this.WIDTH; i += this.WIDTH) {
+            for (int j = startBlock; j < startBlock + blockWidth; j++) {
+                this.cells[i * this.WIDTH + j].removeNote(valeur);
+            }
+        }
 	}
 
 	/**
-	 * 
-	 * @param x
-	 * @param y
-	 */
-	public void blockUpdate(int x, int y) {
-		// TODO - implement Grid.blockUpdate
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 */
