@@ -17,7 +17,7 @@ public class Grid {
 	public Grid(int width, int height) {
 		this.WIDTH = width;
 		this.HEIGHT = height;
-		this.cells = new ArrayList<>();
+		this.cells = new Cell[width*height];
 		this.availableCells = new ArrayList<>();
 	}
 
@@ -29,7 +29,6 @@ public class Grid {
 	 * @param y1
 	 */
 	public boolean checkValidValues(int x0, int y0, int x1, int y1) {
-		// TODO - implement Grid.checkValidValues
 		throw new UnsupportedOperationException();
 	}
 
@@ -40,8 +39,9 @@ public class Grid {
 	 * @param value
 	 */
 	public boolean addNumber(int x, int y, int value) {
-		// TODO - implement Grid.addNumber
-		throw new UnsupportedOperationException();
+        this.cells[y * this.WIDTH + x].setValue(value);
+        this.availableCells.remove(Integer.valueOf(y * this.WIDTH + x));
+        return true;
 	}
 
 	/**
@@ -50,13 +50,11 @@ public class Grid {
 	 * @param y
 	 */
 	public int getNumber(int x, int y) {
-		// TODO - implement Grid.getNumber
-		throw new UnsupportedOperationException();
+		return this.cells[y * this.WIDTH + x].getValue();
 	}
 
 	public int nextAvailableCell() {
-		// TODO - implement Grid.nextAvailableCell
-		throw new UnsupportedOperationException();
+		return this.availableCells.getFirst();
 	}
 
 	/**
@@ -64,8 +62,7 @@ public class Grid {
 	 * @param pos
 	 */
 	public void backCellAvailable(int pos) {
-		// TODO - implement Grid.backCellAvailable
-		throw new UnsupportedOperationException();
+		this.availableCells.add(pos);
 	}
 
 	/**
@@ -75,9 +72,8 @@ public class Grid {
 	 * @param note
 	 */
 	public boolean isCellContaining(int x, int y, int note) {
-		// TODO - implement Grid.isCellContaining
-		throw new UnsupportedOperationException();
-	}
+        return this.cells[y * this.WIDTH + x].getNote(note) == 1;
+    }
 
 	/**
 	 * 
@@ -85,32 +81,37 @@ public class Grid {
 	 * @param y
 	 */
 	public void removeNumber(int x, int y) {
-		// TODO - implement Grid.removeNumber
-		throw new UnsupportedOperationException();
+		this.cells[y * this.WIDTH + x].setValue(); // a clarifier avec thomas car 0 est la valeur par défaut pour une cellule vide
 	}
 
 	public void lockFilledCells() {
-		// TODO - implement Grid.lockFilledCells
-		throw new UnsupportedOperationException();
+        for (int i = 0; i < this.cells.length; i++) {  // Parcours de toutes les cellules du tableau
+            if (this.cells[i].getValue() != 0) {
+                this.cells[i].lock();                  // Si la cellule n'est pas vide, on la verrouille
+            }
+        }
 	}
 
 	public void clearEntries() {
-		// TODO - implement Grid.clearEntries
-		throw new UnsupportedOperationException();
+        for (int i = 0; i < this.cells.length; i++) {  // Parcours de toutes les cellules du tableau
+            if (!this.cells[i].isLocked()) {
+                this.cells[i].setValue(0);             // Si la cellule n'est pas verrouillée, on la vide
+            }
+        }
 	}
 
 	public void resetGrid() {
-		// TODO - implement Grid.resetGrid
-		throw new UnsupportedOperationException();
-	}
+        for (int i = 0; i < this.cells.length; i++) {  // Parcours de toutes les cellules du tableau
+            this.cells[i].setValue(0);                 // On vide toutes les cellules}
+        }
+    }
 
 	/**
 	 * 
 	 * @param x
 	 */
-	public void lineUpdate(int x) {
-		// TODO - implement Grid.lineUpdate
-		throw new UnsupportedOperationException();
+	public void lineUpdate(int pos, int valeur) {
+
 	}
 
 	/**
