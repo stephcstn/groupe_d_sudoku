@@ -12,7 +12,6 @@ public class Cell {
 	 */
 	public void setNote(int value) {
 		this.note[value] = 1;
-		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -21,7 +20,6 @@ public class Cell {
 	 */
 	public void removeNote(int value) {
 		this.note[value] = 0;
-		throw new UnsupportedOperationException();
 	}
 
 	public boolean isLocked() {
@@ -30,7 +28,6 @@ public class Cell {
 
 	public void lock() {
 		this.locked = true;
-		throw new UnsupportedOperationException();
 	}
 
 	public int getValue() {
