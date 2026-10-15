@@ -8,26 +8,30 @@ public class Solver implements RuleApplier {
 	private ExecutionStack executionStack;
 	private Grid solvedGrid;
 
-	public Solver() {
-		// TODO - implement Solver.Solver
-		throw new UnsupportedOperationException();
+	public Solver(Grid solvedGrid) {
+		this.solvedGrid = solvedGrid;
+		executionStack = new ExecutionStack();
 	}
 
 	/**
-	 * 
-	 * @param grid
+	 * Replace the previous solution by another different solution of the grid.
+	 * @param newSolvedGrid
 	 */
-	private void addSolvedGrid(Grid grid) {
-
+	private void setSolvedGrid(Grid newSolvedGrid) {
+		solvedGrid = newSolvedGrid;
 	}
 
 	/**
-	 * 
-	 * @param grid
-	 * @param rules
+	 * Resolve the current grid based on rules that are given.
+	 * @param grid - The current grid to resolve
+	 * @param rules - All rules applied
 	 */
 	public boolean solve(Grid grid, int[] rules) {
 		return true;
+	}
+
+	private void lastFreeCell(Grid grid) {
+
 	}
 
 	/**
