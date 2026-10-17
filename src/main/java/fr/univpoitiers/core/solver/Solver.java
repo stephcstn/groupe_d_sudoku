@@ -4,7 +4,6 @@ import fr.univpoitiers.core.grid.Grid;
 import fr.univpoitiers.core.rules.RuleApplier;
 
 import java.util.ArrayList;
-import java.util.NoSuchElementException;
 
 public class Solver implements RuleApplier {
 
@@ -30,93 +29,7 @@ public class Solver implements RuleApplier {
 	 * @param rules - All rules applied
 	 */
 	public boolean solve(Grid grid, int[] rules) {
-		int ruleApplierIndex = 0;
-		boolean hasNextValue;
-		try {
-			grid.nextAvailableCell(); // Throws NoSuchElementException if there's
-			hasNextValue = true;
-		} catch (Exception e) {
-			hasNextValue = false;
-		}
-		annotate(grid);
-		while (ruleApplierIndex < rules.length && hasNextValue) {
-			Grid clonedGridToStack = new Grid(grid);
-			switch (ruleApplierIndex) {
-				case 0:
-					if (!RuleApplier.BasicRules(grid)) {
-						ruleApplierIndex++;
-					} else executionStack.stack(clonedGridToStack, ruleApplierIndex);
-					break;
-				case 1:
-					if (RuleApplier.KObvious(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
-						ruleApplierIndex = 0;
-					}
-					break;
-				case 2:
-					if (RuleApplier.KHidden(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
-						ruleApplierIndex = 0;
-					} else {
-						ruleApplierIndex++;
-					}
-					break;
-				case 3:
-					if (RuleApplier.PointingPair(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
-						ruleApplierIndex = 0;
-					} else {
-						ruleApplierIndex++;
-					}
-					break;
-				case 4:
-					if (RuleApplier.PointingTriple(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
-						ruleApplierIndex = 0;
-					} else {
-						ruleApplierIndex++;
-					}
-					break;
-				case 5:
-					if (RuleApplier.SwordFish(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
-						ruleApplierIndex = 0;
-					} else {
-						ruleApplierIndex++;
-					}
-					break;
-				case 6:
-					if (RuleApplier.XWing(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
-						ruleApplierIndex = 0;
-					} else {
-						ruleApplierIndex++;
-					}
-					break;
-				case 7:
-					if (RuleApplier.YWing(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
-						ruleApplierIndex = 0;
-					} else {
-						ruleApplierIndex++;
-					}
-					break;
-				case 8:
-					if (RuleApplier.FirstNaive(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
-						ruleApplierIndex = 0;
-					} else {
-						ruleApplierIndex++;
-					}
-					break;
-			}
-			try {
-				grid.nextAvailableCell(); // Throws NoSuchElementException if there's no more cells available
-			} catch (NoSuchElementException e) {
-				hasNextValue = false;
-			}
-		}
-		return ruleApplierIndex < rules.length && !hasNextValue;
+		return true;
 	}
 
 	private void restrictFromBlock(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
@@ -134,7 +47,7 @@ public class Solver implements RuleApplier {
 
 	private void restrictFromLine(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
 		int value;
-		int startIndex = grid.getRowIndex(currentPos);
+		int startIndex = grid.getLineIndex(currentPos);
 		for (int i = startIndex; i < startIndex + 9; i++) {
 			value = grid.getNumber(i);
 			if (value != 0 && notesToAdd.contains(value)) {
@@ -155,25 +68,24 @@ public class Solver implements RuleApplier {
 	}
 
 	private void annotate(Grid grid) {
+		ArrayList<Integer> allNumbers = new ArrayList<>();
+		for (int val = 1; val < grid.getWidth(); val++) {
+			allNumbers.add(val);
+		}
 		ArrayList<Integer> notesToAdd = new ArrayList<>();
 
 		for (int pos = 0; pos < grid.getWidth(); pos++) {
-			RuleApplier.fillValues(notesToAdd, grid.getWidth());
+			notesToAdd.addAll(allNumbers);
 			restrictFromBlock(grid, pos, notesToAdd);
 			restrictFromLine(grid, pos, notesToAdd);
 			restrictFromColumn(grid, pos, notesToAdd);
-			// restrictFromDiagonal(grid, pos, notesToAdd); TODO: NOT NOW
+			// restrictFromDiagonal(notesToAdd, startIndex); TODO: NOT NOW
 
 			for (Integer note : notesToAdd) {
-				grid.addNoteToCell(pos, note);
+				grid.addNoteToCell(i, note);
 			}
 			notesToAdd.clear();
 		}
-		executionStack.stack(grid, -1);
-	}
-
-	private void lastFreeCell(Grid grid) {
-
 	}
 
 	/**
