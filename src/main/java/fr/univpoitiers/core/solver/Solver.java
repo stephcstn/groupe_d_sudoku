@@ -176,10 +176,6 @@ public class Solver implements RuleApplier {
 		executionStack.stack(grid, -1);
 	}
 
-	private void lastFreeCell(Grid grid) {
-
-	}
-
 	/**
 	 * 
 	 * @param grid
