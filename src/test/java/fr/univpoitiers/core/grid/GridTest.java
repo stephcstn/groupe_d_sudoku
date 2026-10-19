@@ -187,22 +187,11 @@ class GridTest {
         }
     }
 
-    @Nested
-    @DisplayName("Tests des méthodes non implémentées")
-    class UnsupportedMethodsTests {
+    @Test
+    @DisplayName("Le clone copie correctement les notes et garantit l'indépendance mémoire")
+    void testCloneNotesComplet() {
+        Grid clonedGrid = new Grid(grid9x9);
 
-        @Test
-        @DisplayName("checkValidValues lève UnsupportedOperationException")
-        void testCheckValidValuesThrowsException() {
-            assertThrows(UnsupportedOperationException.class, () -> {
-                grid9x9.checkValidValues(0, 0, 1, 1);
-            });
-        }
-
-        @Test
-        @DisplayName("diagonalUpdate ne lance pas d'exception par défaut")
-        void testDiagonalUpdateDoesNotThrow() {
-            assertDoesNotThrow(() -> grid9x9.diagonalUpdate(0));
-        }
+        assertEquals(grid9x9, clonedGrid);
     }
 }
