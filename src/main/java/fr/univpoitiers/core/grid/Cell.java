@@ -6,6 +6,12 @@ public class Cell {
 	private boolean locked;
 	private int value;
 
+    public Cell(int nb_variables) {
+        this.note = new byte[nb_variables];
+        this.locked = false;
+        this.value = 0;
+    }
+
 	/**
 	 * 
 	 * @param value
