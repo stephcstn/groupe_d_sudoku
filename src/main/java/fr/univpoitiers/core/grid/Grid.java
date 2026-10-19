@@ -184,6 +184,43 @@ public class Grid {
         }
 	}
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Grid otherGrid = (Grid) obj;
+
+        if (this.WIDTH != otherGrid.WIDTH || this.HEIGHT != otherGrid.HEIGHT) return false;
+
+        for (int i = 0; i < this.cells.length; i++) {
+            if (this.cells[i].getValue() != otherGrid.cells[i].getValue()) {
+                return false;
+            }
+            for (int j = 0; j < Math.max(this.WIDTH, this.HEIGHT); j++) {
+                if (this.cells[i].getNote(j) != otherGrid.cells[i].getNote(j)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public Grid clone() {
+        Grid clonedGrid = new Grid(this.WIDTH, this.HEIGHT);
+        int max = Math.max(this.WIDTH, this.HEIGHT);
+        for (int i = 0; i < this.cells.length; i++) {
+            clonedGrid.cells[i] = new Cell(max);
+            clonedGrid.cells[i].setValue(this.cells[i].getValue());
+            for (int j = 0; j < max; j++) {
+                if (this.cells[i].getNote(j) == 1) {
+                    clonedGrid.cells[i].setNote(j);
+                }
+            }
+        }
+        return clonedGrid;
+    }
+
 	/**
 	 *
 	 * @param pos
