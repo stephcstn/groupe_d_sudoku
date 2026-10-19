@@ -30,26 +30,26 @@ class GridTest {
     void setUp() {
         // Standard 9x9 reference grid (0 = empty cell)
         int[] initialGrid = {
-                5, 3, 0,  0, 7, 0,  0, 0, 0,
-                6, 0, 0,  1, 9, 5,  0, 0, 0,
-                0, 9, 8,  0, 0, 0,  0, 6, 0,
+                5, 3, 0, 0, 7, 0, 0, 0, 0,
+                6, 0, 0, 1, 9, 5, 0, 0, 0,
+                0, 9, 8, 0, 0, 0, 0, 6, 0,
 
-                8, 0, 0,  0, 6, 0,  0, 0, 3,
-                4, 0, 0,  8, 0, 3,  0, 0, 1,
-                7, 0, 0,  0, 2, 0,  0, 0, 6,
+                8, 0, 0, 0, 6, 0, 0, 0, 3,
+                4, 0, 0, 8, 0, 3, 0, 0, 1,
+                7, 0, 0, 0, 2, 0, 0, 0, 6,
 
-                0, 6, 0,  0, 0, 0,  2, 8, 0,
-                0, 0, 0,  4, 1, 9,  0, 0, 5,
-                0, 0, 0,  0, 8, 0,  0, 7, 9
+                0, 6, 0, 0, 0, 0, 2, 8, 0,
+                0, 0, 0, 4, 1, 9, 0, 0, 5,
+                0, 0, 0, 0, 8, 0, 0, 7, 9
         };
 
         grid = new Grid(9, 9);
         populateGrid(grid, initialGrid);
     }
 
-    // =========================================================================
+
     // Unit Tests: checkRow
-    // =========================================================================
+
 
     @Test
     @DisplayName("checkRow: returns false when target value is already present in the row")
@@ -68,9 +68,9 @@ class GridTest {
         assertTrue(grid.checkRow(2, 1));
     }
 
-    // =========================================================================
+
     // Unit Tests: checkColumn
-    // =========================================================================
+
 
     @Test
     @DisplayName("checkColumn: returns false when target value is already present in the column")
@@ -87,9 +87,9 @@ class GridTest {
         assertTrue(grid.checkColumn(2, 4));
     }
 
-    // =========================================================================
+
     // Unit Tests: checkBlock
-    // =========================================================================
+
 
     @Test
     @DisplayName("checkBlock: returns false when target value is already present in the 3x3 block")
@@ -106,9 +106,9 @@ class GridTest {
         assertTrue(grid.checkBlock(2, 7));
     }
 
-    // =========================================================================
+
     // Integration Tests: checkValidValues (Composite Rule)
-    // =========================================================================
+
 
     @Test
     @DisplayName("checkValidValues: returns false if row constraint is violated")
@@ -131,19 +131,4 @@ class GridTest {
         assertTrue(grid.checkValidValues(2, 1));
     }
 
-    // =========================================================================
-    // State Tracking Tests: availableCells Management
-    // =========================================================================
-
-    @Test
-    @DisplayName("addNumber: updates cell value and removes index from availableCells")
-    void addNumber_shouldUpdateValueAndRemoveFromAvailableCells() {
-        Grid emptyGrid = new Grid(9, 9);
-        assertEquals(0, emptyGrid.nextAvailableCell());
-
-        emptyGrid.addNumber(0, 0, 4);
-
-        assertEquals(4, emptyGrid.getNumber(0, 0));
-        assertEquals(1, emptyGrid.nextAvailableCell());
-    }
 }

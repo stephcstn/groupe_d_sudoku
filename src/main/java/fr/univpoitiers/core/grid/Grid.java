@@ -219,14 +219,15 @@ public class Grid {
 	 *
 	 */
 	public boolean checkRow(int pos, int value) {
-		int y = pos / WIDTH;
+		int y = getRowIndex(pos);
+		for (int c = 0; c < this.WIDTH; c++) {
+			int index = cellToIndex(c, y);
 
-		for (int x = 0; x < WIDTH; x++) {
-			int index = cellToIndex(x, y);
-			Cell cell = cells[index];
-
-			if (cell != null && cell.getValue() == value) {
-				return false;
+			if (index != pos) {
+				Cell cell = cells[index];
+				if (cell != null && cell.getValue() == value) {
+					return false;
+				}
 			}
 		}
 		return true;
@@ -239,14 +240,15 @@ public class Grid {
 	 *
 	 */
 	public boolean checkColumn(int pos, int value) {
-		int x = pos % WIDTH;
+		int x = getColumnIndex(pos);
+		for (int r = 0; r < this.HEIGHT; r++) {
+			int index = cellToIndex(x, r);
 
-		for (int y = 0; y < HEIGHT; y++) {
-			int index = cellToIndex(x, y);
-			Cell cell = cells[index];
-
-			if (cell != null && cell.getValue() == value) {
-				return false;
+			if (index != pos) {
+				Cell cell = cells[index];
+				if (cell != null && cell.getValue() == value) {
+					return false;
+				}
 			}
 		}
 		return true;
@@ -259,19 +261,19 @@ public class Grid {
 	 *
 	 */
 	public boolean checkBlock(int pos, int value) {
-		int x = pos % WIDTH;
-		int y = pos / WIDTH;
+		int startBlock = getBlockIndex(pos);
+		int startX = getColumnIndex(startBlock);
+		int startY = getRowIndex(startBlock);
 
-		int startX = (x / 3) * 3;
-		int startY = (y / 3) * 3;
-
-		for (int r = startY; r < startY + 3; r++) {
-			for (int c = startX; c < startX + 3; c++) {
+		for (int r = startY; r < startY + this.BLOCK_HEIGHT; r++) {
+			for (int c = startX; c < startX + this.BLOCK_WIDTH; c++) {
 				int index = cellToIndex(c, r);
-				Cell cell = cells[index];
 
-				if (cell != null && cell.getValue() == value) {
-					return false;
+				if (index != pos) {
+					Cell cell = cells[index];
+					if (cell != null && cell.getValue() == value) {
+						return false;
+					}
 				}
 			}
 		}
