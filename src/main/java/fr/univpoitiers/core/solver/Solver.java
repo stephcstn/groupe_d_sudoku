@@ -4,6 +4,7 @@ import fr.univpoitiers.core.grid.Grid;
 import fr.univpoitiers.core.rules.RuleApplier;
 
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 public class Solver implements RuleApplier {
 
@@ -29,7 +30,80 @@ public class Solver implements RuleApplier {
 	 * @param rules - All rules applied
 	 */
 	public boolean solve(Grid grid, int[] rules) {
-		return true;
+		int ruleApplierIndex = 0;
+		boolean hasNextValue;
+		try {
+			grid.nextAvailableCell(); // Throws NoSuchElementException if there's
+			hasNextValue = true;
+		} catch (Exception e) {
+			hasNextValue = false;
+		}
+		annotate(grid);
+		while (ruleApplierIndex < rules.length && hasNextValue) {
+			switch (ruleApplierIndex) {
+				case 0:
+					if (!RuleApplier.KObvious(grid)) {
+						ruleApplierIndex++;
+					}
+					break;
+				case 1:
+					if (RuleApplier.KHidden(grid)) {
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+				case 2:
+					if (RuleApplier.PointingPair(grid)) {
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+				case 3:
+					if (RuleApplier.PointingTriple(grid)) {
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+				case 4:
+					if (RuleApplier.SwordFish(grid)) {
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+				case 5:
+					if (RuleApplier.XWing(grid)) {
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+				case 6:
+					if (RuleApplier.YWing(grid)) {
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+				case 7:
+					if (RuleApplier.FirstNaive(grid)) {
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+			}
+			try {
+				grid.nextAvailableCell(); // Throws NoSuchElementException if there's no more cells available
+				hasNextValue = true;
+			} catch (NoSuchElementException e) {
+				hasNextValue = false;
+			}
+		}
+		return ruleApplierIndex < rules.length && !hasNextValue;
 	}
 
 	private void restrictFromBlock(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
@@ -86,6 +160,7 @@ public class Solver implements RuleApplier {
 			}
 			notesToAdd.clear();
 		}
+		executionStack.stack(grid, -1);
 	}
 
 	/**
