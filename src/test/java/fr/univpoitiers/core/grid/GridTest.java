@@ -190,8 +190,8 @@ class GridTest {
     @Test
     @DisplayName("Le clone copie correctement les notes et garantit l'indépendance mémoire")
     void testCloneNotesComplet() {
-        Grid clonedGrid = grid9x9.clone();
+        Grid clonedGrid = new Grid(grid9x9);
 
-        assertEquals(grid9x9.clone(), clonedGrid);
+        assertEquals(grid9x9, clonedGrid);
     }
 }

@@ -2,7 +2,7 @@ package fr.univpoitiers.core.grid;
 
 import java.util.ArrayList;
 
-public class Grid {
+public class Grid implements Cloneable {
 
 	private Cell[] cells;
 	private final int WIDTH;
@@ -26,9 +26,21 @@ public class Grid {
 		this.BLOCK_HEIGHT = (int) Math.sqrt(height);
         for (int i = 0; i < this.cells.length; i++) {
             this.cells[i] = new Cell(max);
-            this.availableCells.add(i);
+            this.availableCells.add(i); // a modifier
         }
 	}
+
+    public Grid(Grid other) {
+        this.WIDTH = other.WIDTH;
+        this.HEIGHT = other.HEIGHT;
+        this.cells = new Cell[other.cells.length];
+        this.availableCells = new ArrayList<>(other.availableCells);
+        this.BLOCK_WIDTH = other.BLOCK_WIDTH;
+        this.BLOCK_HEIGHT = other.BLOCK_HEIGHT;
+        for (int i = 0; i < other.cells.length; i++) {
+            this.cells[i] = new Cell(other.cells[i]);
+        }
+    }
 
     public int getRowIndex(int pos) {
         return pos / this.WIDTH;
@@ -204,21 +216,6 @@ public class Grid {
         }
 
         return true;
-    }
-
-    public Grid clone() {
-        Grid clonedGrid = new Grid(this.WIDTH, this.HEIGHT);
-        int max = Math.max(this.WIDTH, this.HEIGHT);
-        for (int i = 0; i < this.cells.length; i++) {
-            clonedGrid.cells[i] = new Cell(max);
-            clonedGrid.cells[i].setValue(this.cells[i].getValue());
-            for (int j = 0; j < max; j++) {
-                if (this.cells[i].getNote(j) == 1) {
-                    clonedGrid.cells[i].setNote(j);
-                }
-            }
-        }
-        return clonedGrid;
     }
 
 	/**
