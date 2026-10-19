@@ -2,7 +2,7 @@ package fr.univpoitiers.core.grid;
 
 import java.util.ArrayList;
 
-public class Grid implements Cloneable {
+public class Grid {
 
 	private Cell[] cells;
 	private final int WIDTH;
