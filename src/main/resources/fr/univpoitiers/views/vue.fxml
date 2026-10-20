@@ -1,20 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
-
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.paint.LinearGradient?>
+<?import javafx.scene.paint.Stop?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="689.0" prefWidth="878.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.univpoitiers.app.SudokuAppController">
    <right>
-      <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+      <BorderPane fx:id="rightPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <bottom>
+            <Button mnemonicParsing="false" text="CLEAR" BorderPane.alignment="CENTER" />
+         </bottom></BorderPane>
    </right>
    <left>
-      <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+      <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <center>
+            <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="5.0" BorderPane.alignment="CENTER">
+               <children>
+                  <CheckBox fx:id="checkAllRules" mnemonicParsing="false" selected="true" text="ALL RULES" />
+                  <CheckBox fx:id="checkLastFreeCell" mnemonicParsing="false" text="Last Free Cell" />
+                  <CheckBox fx:id="checkLastRemainingCell" mnemonicParsing="false" text="Last Remaining Cell" />
+                  <CheckBox fx:id="checkLastPossibleNumber" mnemonicParsing="false" text="Last Possible Number" />
+                  <CheckBox fx:id="checkNakedSingles" mnemonicParsing="false" text="Naked Singles" />
+                  <CheckBox fx:id="checkNakedPairs" mnemonicParsing="false" text="Naked Pairs" />
+                  <CheckBox fx:id="checkNakedTriples" mnemonicParsing="false" text="Naked Triples" />
+                  <CheckBox fx:id="checkNakedTuples" mnemonicParsing="false" text="Naked Tuples" />
+                  <CheckBox fx:id="checkHiddenSingles" mnemonicParsing="false" text="Hidden Singles" />
+                  <CheckBox fx:id="checkHiddenPairs" mnemonicParsing="false" text="Hidden Pairs" />
+                  <CheckBox fx:id="checkHiddenTriples" mnemonicParsing="false" text="Hidden Triples" />
+                  <CheckBox fx:id="checkHiddenTuples" mnemonicParsing="false" text="Hidden Tuples" />
+                  <CheckBox fx:id="checkPointingPairs" mnemonicParsing="false" text="Pointing Pairs" />
+                  <CheckBox fx:id="checkPointingTriples" mnemonicParsing="false" text="Pointing Triples" />
+                  <CheckBox fx:id="checkBoxReduction" mnemonicParsing="false" text="Box reduction" />
+                  <CheckBox fx:id="checkX_wing" mnemonicParsing="false" text="X-wing" />
+                  <CheckBox fx:id="checkY_wing" mnemonicParsing="false" text="Y-wing" />
+                  <CheckBox fx:id="checkSword_fish" mnemonicParsing="false" text="Sword-fish" />
+                  <Button fx:id="runAutoResolution" mnemonicParsing="false" text="RUN AUTO RESOLUTION" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets bottom="30.0" left="30.0" top="30.0" />
+               </padding>
+            </VBox>
+         </center></BorderPane>
    </left>
    <top>
-      <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+      <BorderPane prefHeight="91.0" prefWidth="878.0" BorderPane.alignment="CENTER">
+         <center>
+            <Label prefHeight="67.0" prefWidth="331.0" text="SUDOKU" BorderPane.alignment="CENTER">
+               <textFill>
+                  <LinearGradient endX="1.0" endY="1.0">
+                     <stops>
+                        <Stop>
+                           <color>
+                              <Color red="0.09113060683012009" green="0.5789473652839661" blue="0.09926088154315948" />
+                           </color>
+                        </Stop>
+                        <Stop offset="1.0">
+                           <color>
+                              <Color green="0.5931209921836853" blue="0.9599999785423279" />
+                           </color>
+                        </Stop>
+                     </stops>
+                  </LinearGradient>
+               </textFill>
+               <font>
+                  <Font name="System Bold Italic" size="84.0" />
+               </font>
+            </Label>
+         </center></BorderPane>
    </top>
    <bottom>
-      <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+      <BorderPane prefHeight="57.0" prefWidth="878.0" BorderPane.alignment="CENTER" />
    </bottom>
    <center>
       <BorderPane fx:id="centerPane" prefHeight="358.0" prefWidth="549.0" BorderPane.alignment="CENTER" />

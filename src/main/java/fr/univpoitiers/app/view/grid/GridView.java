@@ -31,6 +31,7 @@ public class GridView extends GridPane {
      * @param h La hauteur de la grille (nombre de lignes).
      */
     public GridView(int w, int h,String css) {
+        this.setAlignment(javafx.geometry.Pos.CENTER);
         this.getStylesheets().add(css);
         WIDTH = w;
         HEIGHT = h;
@@ -51,25 +52,6 @@ public class GridView extends GridPane {
                         "-fx-border-color: black;" +
                                 "-fx-border-width: " + borderWidthTop + " 1px 1px " + borderWidthLeft + ";"
                 );
-
-
-
-                /*
-                label.addMouseListener(new MouseListener() {
-                    @Override
-                    public void mouseEntered(MouseEvent e) {
-                        label.setBackground(Color.YELLOW); // Change la couleur au survol
-                    }
-
-                    @Override
-                    public void mouseExited(MouseEvent e) {
-                        label.setBackground(Color.WHITE);
-                    }
-
-                    @Override public void mouseClicked(MouseEvent e) {}
-                    @Override public void mousePressed(MouseEvent e) {}
-                    @Override public void mouseReleased(MouseEvent e) {}
-                });*/
 
 
                 this.add(cellView, x, y);
