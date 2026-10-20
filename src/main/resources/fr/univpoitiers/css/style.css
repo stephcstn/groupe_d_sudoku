@@ -6,8 +6,8 @@
     -fx-alignment: center;
 }
 
-/* Style lorsque la souris survole la cellule (effet hover) */
+/* Style lorsque la souris survole la cellule */
 .cell-view:hover {
-    -fx-background-color: #c4defa; /* Un bleu très clair, idéal pour le survol */
-    -fx-cursor: hand; /* Change le curseur en petite main */
+    -fx-background-color: #c4defa;
+    -fx-cursor: hand;
 }

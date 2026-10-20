@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 
 public class App extends Application {
@@ -15,20 +16,14 @@ public class App extends Application {
 
         primaryStage.setTitle("Sudoku Grid");
         primaryStage.setScene(new Scene(root));
+
+        //Désactive le redimensionnement manuel
+        primaryStage.setResizable(false);
+
+        // Fenetre de la taille maximum possible
+        primaryStage.setMaximized(true);
+
         primaryStage.show();
-        /*
-        double racineCarree1 = Math.sqrt(25);
-        int racineCarree2 = (int) Math.sqrt(25);
-        if ( racineCarree1 == (double) racineCarree2){
-            System.out.println("==");
-
-        }else{
-            System.out.println("=!!!=");
-
-        }
-
-         */
-
     }
 
     public static void main(String[] args) {
