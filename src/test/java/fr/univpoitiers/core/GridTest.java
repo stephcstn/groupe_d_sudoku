@@ -15,13 +15,14 @@ class GridTest {
      * Helper method to populate a grid from a 1D array representation.
      * 0 represents an empty cell.
      */
+    /**
+     * Helper method to populate a grid from a 1D array representation.
+     * 0 represents an empty cell.
+     */
     private void populateGrid(Grid targetGrid, int[] values) {
-        int width = targetGrid.getWidth();
         for (int i = 0; i < values.length; i++) {
             if (values[i] != 0) {
-                int x = i % width;
-                int y = i / width;
-                targetGrid.addNumber(x, y, values[i]);
+                targetGrid.addNumber(i, values[i]);
             }
         }
     }

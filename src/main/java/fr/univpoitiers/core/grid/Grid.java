@@ -258,7 +258,6 @@ public class Grid {
 		}
 		return true;
 	}
-	public void diagonalUpdate(int pos) {
 
 	/**
 	 * Vérifie que la valeur n'est pas déjà présente sur la colonne.
