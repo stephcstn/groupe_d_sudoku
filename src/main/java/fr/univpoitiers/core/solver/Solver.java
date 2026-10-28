@@ -155,10 +155,6 @@ public class Solver implements RuleApplier {
 	}
 
 	private void annotate(Grid grid) {
-		ArrayList<Integer> allNumbers = new ArrayList<>();
-		for (int val = 1; val < grid.getWidth(); val++) {
-			allNumbers.add(val);
-		}
 		ArrayList<Integer> notesToAdd = new ArrayList<>();
 
 		for (int pos = 0; pos < grid.getWidth(); pos++) {
