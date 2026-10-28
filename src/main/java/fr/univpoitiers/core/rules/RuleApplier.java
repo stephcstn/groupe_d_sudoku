@@ -7,11 +7,11 @@ import java.util.ArrayList;
 public interface RuleApplier {
 
 	/**
-	 * Fill the initial domain values from 1 to k.
+	 * Fill the initial domain values from 1 to k included.
 	 * @param listOfValues domain values list to fill
 	 * @param k maximum value of the domain
 	 */
-	private static void fillValues(ArrayList<Integer> listOfValues, int k) {
+	static void fillValues(ArrayList<Integer> listOfValues, int k) {
 		listOfValues.clear();
 		for (int i = 1; i < k + 1; i++) {
 			listOfValues.add(i);
