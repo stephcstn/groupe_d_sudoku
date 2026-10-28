@@ -32,7 +32,7 @@ public interface RuleApplier {
 				int cellValue = grid.getNumber(j);
 				if (cellValue != 0) {
 					if (listOfValues.contains(cellValue)) {
-						listOfValues.remove(cellValue);
+						listOfValues.remove((Integer) cellValue);
 					}
 				}
 			}
@@ -51,7 +51,7 @@ public interface RuleApplier {
 			int cellValue = grid.getNumber(i);
 			if (cellValue != 0) {
 				if (listOfValues.contains(cellValue)) {
-					listOfValues.remove(cellValue);
+					listOfValues.remove((Integer) cellValue);
 				}
 			}
 		}
@@ -69,7 +69,7 @@ public interface RuleApplier {
 			int cellValue = grid.getNumber(i);
 			if (cellValue != 0) {
 				if (listOfValues.contains(cellValue)) {
-					listOfValues.remove(cellValue);
+					listOfValues.remove((Integer) cellValue);
 				}
 			}
 		}
@@ -79,7 +79,7 @@ public interface RuleApplier {
 	 * Process if the next cell available is the last in the block or in the row or in the column and a value can be assigned.
 	 * If possible, the value is set in the grid and removed from the available cells.
 	 * @param grid current grid
-	 * @return If the cell is updated
+	 * @return If it has changed grid state
 	 */
 	private static boolean lastFreeCell(Grid grid) {
 		int cellIndex = grid.nextAvailableCell();
@@ -108,17 +108,76 @@ public interface RuleApplier {
 		return false;
 	}
 
+	/**
+	 * Select all rows and columns in the block that doesn't include the current cell
+	 * and try to check if only one value can only be in the current cell and insert it if possible.
+	 * @param grid the current grid
+	 * @return If it has changed grid state
+	 */
 	private static boolean lastRemainingCell(Grid grid) {
 		int cellIndex = grid.nextAvailableCell();
 		ArrayList<Integer> listOfValues = new ArrayList<>();
 		fillValues(listOfValues, grid.getWidth());
 		listOfValuesBlock(grid, listOfValues, cellIndex);
+		// Remove all values present in rows and columns in the block that doesn't include this cell
+		int blockPosX = cellIndex % 3;
+		int blockPosY = (cellIndex / 9) % 3;
+		int startBlock = grid.getBlockIndex(cellIndex);
+		for (int j = startBlock; j < startBlock + grid.getHeight() * 2; j += grid.getHeight()) {
+			for (int i = j; i < j + 3; j++) {
+				if (i % 3 != blockPosX
+						&& (i / 9) % 3 != blockPosY
+						&& grid.getNumber(i) != 0
+						&& listOfValues.contains(grid.getNumber(i))) {
+					listOfValues.remove((Integer) grid.getNumber(i));
+				}
+			}
+		}
+		if (listOfValues.size() == 1) {
+			grid.removeAvailableCell(cellIndex);
+			return grid.addNumber(cellIndex, listOfValues.getFirst());
+		}
 
 		return false;
 	}
 
 	/**
-	 * @param grid
+	 * Get the last possible value to assign to the current cell taking
+	 * in account the block, the row and the columns values already present that it belongs.
+	 * @param grid The current grid
+	 * @return If it changed the grid state
+	 */
+	private static boolean lastPossibleCell(Grid grid) {
+		int cellIndex = grid.nextAvailableCell();
+		ArrayList<Integer> listOfValues = new ArrayList<>();
+		fillValues(listOfValues, grid.getWidth());
+		listOfValuesBlock(grid, listOfValues, cellIndex);
+		// Remove all values present in rows and columns in the block that doesn't include this cell
+		int blockPosX = cellIndex % 3;
+		int blockPosY = (cellIndex / 9) % 3;
+		int startBlock = grid.getBlockIndex(cellIndex);
+		for (int j = startBlock; j < startBlock + grid.getHeight() * 2; j += grid.getHeight()) {
+			for (int i = j; i < j + 3; j++) {
+				if (i % 3 == blockPosX
+						&& (i / 9) % 3 == blockPosY
+						&& grid.getNumber(i) != 0
+						&& listOfValues.contains(grid.getNumber(i))) {
+					listOfValues.remove((Integer) grid.getNumber(i));
+				}
+			}
+		}
+		if (listOfValues.size() == 1) {
+			grid.removeAvailableCell(cellIndex);
+			return grid.addNumber(cellIndex, listOfValues.getFirst());
+		}
+
+		return false;
+	}
+
+	/**
+	 * Wrap all basic rules : Last free cell, Last remaining cell, and Last possible cell.
+	 * @param grid The current grid
+	 * @return If one of those rule has changed the grid state
 	 */
 	static boolean BasicRules(Grid grid) {
 		return lastFreeCell(grid) || lastRemainingCell(grid) || lastPossibleCell(grid);
@@ -128,46 +187,8 @@ public interface RuleApplier {
 	 * 
 	 * @param grid
 	 */
-	static boolean KObvious(Grid grid, int k) {
-        // Init list of value that will be present in
-        ArrayList<Integer> listOfValues = new ArrayList<>();
-        for (int i = 1; i < 10; i++) {
-            listOfValues.add(i);
-        }
-        int startBlockIndex = grid.getBlockIndex(grid.nextAvailableCell());
-        int indexToSet = -1;
-        // Iterating line by line 2 times more after the first
-        for (int i = startBlockIndex; i <= startBlockIndex + grid.getHeight() * 2; i *= 9) {
-            for (int j = i; j < i + 3 ; j++) {
-                int cellValue = grid.getNumber(j);
-                if (cellValue != 0) {
-                    if (listOfValues.contains(cellValue)) {
-                        listOfValues.remove(cellValue);
-                    }
-                } else {
-                    indexToSet = indexToSet == -1 ? j : -1;
-                }
-            }
-        }
-        if (listOfValues.size() == 1) {
-            return grid.addNumber(indexToSet, listOfValues.getFirst());
-        }
-		int startRowIndex = grid.getRowIndex(grid.nextAvailableCell());
-		for (int i = startRowIndex; i < startRowIndex + grid.getWidth(); i++) {
-			int cellValue = grid.getNumber(i);
-			if (cellValue != 0) {
-				if (listOfValues.contains(cellValue)) {
-					listOfValues.remove(cellValue);
-				}
-			} else {
-				indexToSet = indexToSet == -1 ? j : -1;
-			}
-		}
-		if (listOfValues.size() == 1) {
-			return grid.addNumber(indexToSet, listOfValues.getFirst());
-		}
-
-		return false;
+	static boolean KObvious(Grid grid) {
+		return true;
 	}
 
 	/**
