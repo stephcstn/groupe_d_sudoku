@@ -235,4 +235,8 @@ public class Grid {
 
 	}
 
+	public void removeNote(int pos, int note) {
+	}
+	public int getBlockWidth() { return this.BLOCK_WIDTH; }
+	public int getBlockHeight() { return this.BLOCK_HEIGHT; }
 }
