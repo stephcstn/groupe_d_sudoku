@@ -218,17 +218,21 @@ public interface RuleApplier {
 	}
 
 	/**
-	 * 
-	 * @param grid
-	 */
+     * Applies the X-Wing deductive rule on both rows and columns.
+     *
+     * @param grid the Sudoku grid to process
+     * @return true if at least one candidate note was removed, false otherwise
+     */
 	static boolean XWing(Grid grid){
 		return XWingRows(grid) || XWingCols(grid);
 	}
 
 	/**
-	 * 
-	 * @param grid
-	 */
+     * Applies the X-Wing rule on rows to eliminate candidate notes in columns.
+     *
+     * @param grid the Sudoku grid to process
+     * @return true if at least one candidate note was removed, false otherwise
+     */
 	static boolean XWingRows(Grid grid) {
         boolean modified = false;
         int n = grid.getWidth();
@@ -267,14 +271,15 @@ public interface RuleApplier {
         }
         return false;
     }
-
-	/**
-	 * 
-	 * @param grid
-	 * @param r
-	 * @param noteIndex
-	 * @param n
-	 */
+/**
+     * Finds column indices on a given row that can contain the candidate note.
+     *
+     * @param grid the Sudoku grid
+     * @param r the row index
+     * @param noteIndex the zero-based index of the candidate note
+     * @param n the width of the grid
+     * @return the list of column indices containing the candidate
+     */
 	static List<Integer> getColumnsWithCandidate(Grid grid, int r, int noteIndex, int n) {
         List<Integer> cols = new ArrayList<>();
         for (int c = 0; c < n; c++) {
@@ -287,9 +292,11 @@ public interface RuleApplier {
     }
 
 	/**
-	 * 
-	 * @param grid
-	 */
+     * Applies the X-Wing rule on columns to eliminate candidate notes in rows.
+     *
+     * @param grid the Sudoku grid to process
+     * @return true if at least one candidate note was removed, false otherwise
+     */
 	static boolean XWingCols(Grid grid) {
         boolean modified = false;
         int n = grid.getWidth();
@@ -330,12 +337,15 @@ public interface RuleApplier {
     }
 
 	/**
-	 * 
-	 * @param grid
-	 * @param r
-	 * @param noteIndex
-	 * @param n
-	 */
+     * Finds row indices on a given column that can contain the candidate note.
+     *
+     * @param grid the Sudoku grid
+     * @param c the column index
+     * @param noteIndex the zero-based index of the candidate note
+     * @param n the width of the grid
+     * @param nbRows the height of the grid
+     * @return the list of row indices containing the candidate
+     */
     static List<Integer> getRowsWithCandidate(Grid grid, int c, int noteIndex, int n, int nbRows) {
         List<Integer> rows = new ArrayList<>();
         for (int r = 0; r < nbRows; r++) {
