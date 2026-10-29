@@ -5,9 +5,6 @@ import java.util.List;
 
 import fr.univpoitiers.core.grid.Grid;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public interface RuleApplier {
 
 	/**
