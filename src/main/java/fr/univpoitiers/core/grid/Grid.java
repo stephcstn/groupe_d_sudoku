@@ -127,6 +127,15 @@ public class Grid {
 		this.cells[pos].setValue(0);
 	}
 
+    /**
+	 *
+	 * @param pos
+	 * @param note
+	 */
+    public void removeNote(int pos, int note) {
+        this.cells[pos].removeNote(note);
+    }
+
 	public void lockFilledCells() {
         for (Cell cell : this.cells) {
             if (cell.getValue() != 0) {
