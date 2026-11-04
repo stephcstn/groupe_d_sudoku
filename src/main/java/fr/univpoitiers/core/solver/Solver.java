@@ -112,7 +112,6 @@ public class Solver implements RuleApplier {
 			}
 			try {
 				grid.nextAvailableCell(); // Throws NoSuchElementException if there's no more cells available
-				hasNextValue = true;
 			} catch (NoSuchElementException e) {
 				hasNextValue = false;
 			}
@@ -135,7 +134,7 @@ public class Solver implements RuleApplier {
 
 	private void restrictFromLine(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
 		int value;
-		int startIndex = grid.getLineIndex(currentPos);
+		int startIndex = grid.getRowIndex(currentPos);
 		for (int i = startIndex; i < startIndex + 9; i++) {
 			value = grid.getNumber(i);
 			if (value != 0 && notesToAdd.contains(value)) {
