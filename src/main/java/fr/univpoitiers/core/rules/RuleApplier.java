@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public interface RuleApplier {
 
 	/**
-	 * Fill the initial domain values from 1 to k included.
+	 * Clear and fill the initial domain values from 1 to k included.
 	 * @param listOfValues domain values list to fill
 	 * @param k maximum value of the domain
 	 */
@@ -88,22 +88,28 @@ public interface RuleApplier {
 		fillValues(listOfValues, grid.getWidth());
 		listOfValuesBlock(grid, listOfValues, cellIndex);
 		if (listOfValues.size() == 1) {
-			grid.removeAvailableCell(cellIndex);
-			return grid.addNumber(cellIndex, listOfValues.getFirst());
+			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
+				grid.removeAvailableCell(cellIndex);
+				return true;
+			}
 		}
 
 		fillValues(listOfValues, grid.getWidth());
 		listOfValuesRow(grid, listOfValues, cellIndex);
 		if (listOfValues.size() == 1) {
-			grid.removeAvailableCell(cellIndex);
-			return grid.addNumber(cellIndex, listOfValues.getFirst());
+			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
+				grid.removeAvailableCell(cellIndex);
+				return true;
+			}
 		}
 
 		fillValues(listOfValues, grid.getWidth());
 		listOfValuesColumn(grid , listOfValues, cellIndex);
 		if (listOfValues.size() == 1) {
-			grid.removeAvailableCell(cellIndex);
-			return grid.addNumber(cellIndex, listOfValues.getFirst());
+			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
+				grid.removeAvailableCell(cellIndex);
+				return true;
+			}
 		}
 		return false;
 	}
@@ -134,8 +140,10 @@ public interface RuleApplier {
 			}
 		}
 		if (listOfValues.size() == 1) {
-			grid.removeAvailableCell(cellIndex);
-			return grid.addNumber(cellIndex, listOfValues.getFirst());
+			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
+				grid.removeAvailableCell(cellIndex);
+				return true;
+			}
 		}
 
 		return false;
@@ -167,8 +175,10 @@ public interface RuleApplier {
 			}
 		}
 		if (listOfValues.size() == 1) {
-			grid.removeAvailableCell(cellIndex);
-			return grid.addNumber(cellIndex, listOfValues.getFirst());
+			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
+				grid.removeAvailableCell(cellIndex);
+				return true;
+			}
 		}
 
 		return false;

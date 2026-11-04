@@ -90,6 +90,15 @@ public class Grid {
         return true;
 	}
 
+    /**
+     * Add a note (value) to a cell.
+     * @param pos The cell receiving the note
+     * @param value Note value to add
+     */
+    public void addNoteToCell(int pos, int value) {
+        this.cells[pos].setNote(value);
+    }
+
 	/**
 	 *
 	 * @param pos
@@ -101,6 +110,14 @@ public class Grid {
 	public int nextAvailableCell() {
 		return this.availableCells.getFirst();
 	}
+
+    /**
+     * Remove the cell value index in the available cells list.
+     * @param indexValue (not null) The index value to remove in the list.
+     */
+    public void removeAvailableCell(Integer indexValue) {
+        if (indexValue != null) this.availableCells.remove(indexValue);
+    }
 
 	/**
 	 * 
