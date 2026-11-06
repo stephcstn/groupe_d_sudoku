@@ -136,6 +136,16 @@ public class Grid {
         this.cells[pos].removeNote(note);
     }
 
+	/**
+	 * Ajoute une note (candidat) dans une case.
+	 *
+	 * @param pos position de la case (index 1D)
+	 * @param note index de la note (valeur - 1)
+	 */
+	public void setNote(int pos, int note) {
+		this.cells[pos].setNote(note);
+	}
+
 	public void lockFilledCells() {
         for (Cell cell : this.cells) {
             if (cell.getValue() != 0) {
