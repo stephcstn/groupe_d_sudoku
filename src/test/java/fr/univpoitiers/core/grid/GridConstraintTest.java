@@ -1,20 +1,15 @@
-package fr.univpoitiers.core;
+package fr.univpoitiers.core.grid;
 
-import fr.univpoitiers.core.grid.Grid;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GridTest {
+class GridConstraintTest {
 
     private Grid grid;
 
-    /**
-     * Helper method to populate a grid from a 1D array representation.
-     * 0 represents an empty cell.
-     */
     /**
      * Helper method to populate a grid from a 1D array representation.
      * 0 represents an empty cell.
@@ -132,4 +127,42 @@ class GridTest {
         assertTrue(grid.checkValidValues(2, 1));
     }
 
+    @Test
+    @DisplayName("checkValidValues: returns false for out-of-range values (0 = empty cell, > 9)")
+    void checkValidValues_whenValueOutOfRange_shouldReturnFalse() {
+        assertFalse(grid.checkValidValues(2, 0));
+        assertFalse(grid.checkValidValues(2, 10));
+        assertFalse(grid.checkValidValues(2, -1));
+    }
+
+    @Test
+    @DisplayName("checkValidValues: a filled cell does not conflict with itself")
+    void checkValidValues_whenCheckingOwnValue_shouldIgnoreTheCellItself() {
+        // Index 0 contains 5; 5 appears nowhere else in row 0, column 0 or block 0
+        assertTrue(grid.checkValidValues(0, 5));
+    }
+
+
+    // Unit Tests: blockUpdate
+
+
+    @Test
+    @DisplayName("blockUpdate: removes the note only in the block of the position (non top-left block)")
+    void blockUpdate_onCenterBlock_shouldRemoveNoteOnlyInThatBlock() throws Exception {
+        Grid g = new Grid(9, 9);
+        java.lang.reflect.Field f = Grid.class.getDeclaredField("cells");
+        f.setAccessible(true);
+        Cell[] cells = (Cell[]) f.get(g);
+        for (Cell c : cells) {
+            c.setNote(4);
+        }
+
+        // Position 40 = (x=4, y=4), in the center block (rows 3-5, cols 3-5)
+        g.blockUpdate(40, 4);
+
+        for (int pos = 0; pos < 81; pos++) {
+            boolean inCenterBlock = g.getBlockIndex(pos) == g.getBlockIndex(40);
+            assertEquals(!inCenterBlock, g.isCellContaining(pos, 4), "pos " + pos);
+        }
+    }
 }
