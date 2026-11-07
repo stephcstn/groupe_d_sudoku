@@ -1,116 +1,184 @@
 package fr.univpoitiers.app.view.grid;
 
 import javafx.scene.control.Label;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
+import java.util.function.Consumer;
 
 /**
  * Représente la vue d'une cellule dans la grille du jeu de Sudoku.
- * Une cellule peut contenir une grille secondaire (pour les notes ou hypothèses)
- * ainsi qu'une valeur finale affichée par-dessus.
- *
- * <p>Cette classe hérite de {@link StackPane} pour superposer la grille de notes
- * et le panneau de la valeur finale.</p>
- *
- * @author Votre Nom / Groupe D
- * @version 1.0
+ * Gère l'affichage des notes, de la valeur finale et des interactions utilisateur (clics).
  */
 public class CellView extends StackPane {
 
-    /** Grille contenant les petites notes ou candidats de la cellule. */
     private GridPane gridNotes;
-
-    /** Panneau conteneur pour afficher la valeur finale de la cellule. */
-    private Pane finalPane;
-
-    /** Label affichant la valeur finale principale de la cellule. */
+    private StackPane finalPane;
     private Label finalValue;
-    private String cssPath;
+    private final fr.univpoitiers.core.grid.Cell cell;
+    private final NoteView[] noteViews;
 
-    private boolean isSelected;
     private int posX;
     private int posY;
+    private boolean isSelected;
+
+    /** Callback exécuté lorsque la cellule est cliquée pour notifier la grille parente. */
+    private Consumer<CellView> onClickAction;
 
     /**
-     * Construit une nouvelle vue de cellule en fonction du nombre de notes possibles.
-     * Détermine dynamiquement la disposition en grille (racine carrée arrondie au supérieur)
-     * pour répartir les étiquettes de notes.
+     * Construit une nouvelle vue de cellule.
      *
-     * @param howManyNotes Le nombre total de notes/candidats à intégrer dans la cellule
-     *                     (par exemple, 9 pour une grille de Sudoku standard 9x9).
+     * @param howManyNotes Le nombre total de notes/candidats possibles.
+     * @param css Le chemin vers la feuille de style CSS.
+     * @param xP La position X (colonne) dans la grille.
+     * @param yP La position Y (ligne) dans la grille.
      */
     public CellView(int howManyNotes, String css, int xP, int yP) {
-        isSelected = false;
-        posX=xP;
-        posY=yP;
+        this.posX = xP;
+        this.posY = yP;
+        this.isSelected = false;
+        this.cell = new fr.univpoitiers.core.grid.Cell(howManyNotes);
+        this.noteViews = new NoteView[howManyNotes + 1];
+
         this.getStylesheets().add(css);
-
-        double x_double = Math.sqrt(howManyNotes);
-        int x_int = (int) x_double;
-        int y_int = x_int;
-
-        // Si le nombre de notes n'est pas un carré parfait (ex: 9 -> 3*3)
-        if (x_double != (double) x_int) {
-            x_int += 1;
-        }
+        this.getStyleClass().add("cell-view");
 
         gridNotes = new GridPane();
-
-        // Création et positionnement de chaque label de note dans la grille
-        for (int y = 0; y < y_int; y++) {
-            for (int x = 0; x < x_int; x++) {
-                Label labelNote = new Label("0");
-                gridNotes.add(labelNote, x, y);
-            }
+        int columns = (int) Math.ceil(Math.sqrt(howManyNotes));
+        int rows = (int) Math.ceil((double) howManyNotes / columns);
+        for (int column = 0; column < columns; column++) {
+            ColumnConstraints constraint = new ColumnConstraints();
+            constraint.setPercentWidth(100.0 / columns);
+            gridNotes.getColumnConstraints().add(constraint);
         }
-
-        // Ajout de la grille de notes dans le conteneur principal
+        for (int row = 0; row < rows; row++) {
+            RowConstraints constraint = new RowConstraints();
+            constraint.setPercentHeight(100.0 / rows);
+            gridNotes.getRowConstraints().add(constraint);
+        }
+        for (int value = 1; value <= howManyNotes; value++) {
+            NoteView noteView = new NoteView(value);
+            noteViews[value] = noteView;
+            gridNotes.add(noteView, (value - 1) % columns, (value - 1) / columns);
+        }
         this.getChildren().add(gridNotes);
 
-        finalValue = new Label("*");
-
-        // Initialisation et ajout du panneau de la valeur finale au StackPane
-        finalPane = new Pane();
+        finalValue = new Label("");
+        finalValue.getStyleClass().add("cell-value");
+        finalPane = new StackPane();
         finalPane.getChildren().add(finalValue);
+        finalPane.getStyleClass().add("cell-value-pane");
         this.getChildren().add(finalPane);
 
-        finalPane.getStylesheets().add(css);
-        finalPane.getStyleClass().add("cell-view");
-        //finalPane.setStyle("-fx-background-color: rgba(255, 255, 255, 1);");
-
-
-
-        this.getStyleClass().add("cell-view");
-        // Exemple dans CellView.java
-        this.setOnMouseEntered(event -> {
-            // Action exécutée lorsque la souris survole la cellule
-            //this.setStyle("-fx-background-color: #3799a6;");
-        });
-
-
-        // Définir une taille fixe ou préférée (ex: 50x50 pixels)
         this.setPrefSize(50, 50);
         this.setMinSize(50, 50);
         this.setMaxSize(50, 50);
 
-        // --------------------------EVENTS-----------------------------
-        this.setOnMouseExited(event -> {
-            // Action exécutée lorsque la souris quitte la cellule
-            //this.getStyleClass().add("cell-view");
-        });
-
+        // Gestion du clic sur la cellule
         this.setOnMouseClicked(event -> {
-            if (isSelected){
-                isSelected=false;
-                finalPane.setOpacity(1);
-
-            }else{
-                isSelected=true;
-                finalPane.setOpacity(0.3);
-
-
+            if (onClickAction != null) {
+                onClickAction.accept(this);
             }
         });
+    }
+
+    /**
+     * Définit l'action à exécuter lors du clic sur la cellule.
+     *
+     * @param action Le consommateur prenant cette cellule en paramètre.
+     */
+    public void setOnClickAction(Consumer<CellView> action) {
+        this.onClickAction = action;
+    }
+
+    /**
+     * Applique ou retire l'état sélectionné de la cellule.
+     *
+     * @param selected Vrai si la cellule doit être marquée comme sélectionnée.
+     */
+    public void setSelectedStyle(boolean selected) {
+        this.isSelected = selected;
+        if (selected) {
+            if (!this.getStyleClass().contains("selected")) {
+                this.getStyleClass().add("selected");
+            }
+        } else {
+            this.getStyleClass().remove("selected");
+        }
+    }
+
+    /**
+     * Applique ou retire l'état mis en surbrillance (ligne/colonne/bloc).
+     *
+     * @param highlighted Vrai si la cellule fait partie des pairs à colorer.
+     */
+    public void setHighlightedStyle(boolean highlighted) {
+        if (highlighted) {
+            if (!this.getStyleClass().contains("highlighted")) {
+                this.getStyleClass().add("highlighted");
+            }
+        } else {
+            this.getStyleClass().remove("highlighted");
+        }
+    }
+
+    /** @return L'indice de la colonne dans la grille. */
+    public int getPosX() { return posX; }
+
+    /** @return L'indice de la ligne dans la grille. */
+    public int getPosY() { return posY; }
+
+    /** @return La cellule du modèle associée à cette vue. */
+    public fr.univpoitiers.core.grid.Cell getCell() {
+        return cell;
+    }
+
+    /**
+     * Définit la valeur de la cellule et actualise son affichage.
+     *
+     * @param value Valeur à saisir, ou 0 pour vider la cellule.
+     */
+    public void setCellValue(int value) {
+        cell.setValue(value);
+        refresh();
+    }
+
+    /**
+     * Ajoute ou retire une note, puis actualise l'affichage.
+     * La cellule doit être vide et non verrouillée pour modifier ses notes.
+     *
+     * @param value Valeur de la note à modifier.
+     */
+    public void toggleNote(int value) {
+        if (cell.hasNote(value)) {
+            cell.removeNote(value);
+        } else {
+            cell.setNote(value);
+        }
+        refresh();
+    }
+
+    /** Efface la valeur et les notes, sauf si la cellule est verrouillée. */
+    public void clearCell() {
+        cell.setValue(0);
+        refresh();
+    }
+
+    /** Efface la valeur et les notes et déverrouille la cellule. */
+    public void resetCell() {
+        cell.reset();
+        refresh();
+    }
+
+    /** Synchronise l'affichage de la valeur et des notes avec le modèle. */
+    private void refresh() {
+        int value = cell.getValue();
+        finalValue.setText(value == 0 ? "" : String.valueOf(value));
+        gridNotes.setVisible(value == 0);
+        gridNotes.setManaged(value == 0);
+        for (int note = 1; note < noteViews.length; note++) {
+            noteViews[note].setNoteActive(value == 0 && cell.hasNote(note));
+        }
     }
 }

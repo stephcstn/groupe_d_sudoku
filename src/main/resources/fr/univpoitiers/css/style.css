@@ -1,13 +1,82 @@
-/* Style par défaut de la cellule */
+.root {
+    -fx-background-color: #f7f4f2;
+    -fx-font-family: "System";
+}
+
+.app-title {
+    -fx-font-family: "Serif";
+    -fx-font-size: 64px;
+    -fx-text-fill: #bd1026;
+}
+
+.button, .toggle-button {
+    -fx-background-color: #bd1026;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.button:hover, .toggle-button:hover {
+    -fx-background-color: #971021;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #63534d;
+}
+
+.check-box {
+    -fx-text-fill: #403632;
+}
+
+.check-box:selected .box {
+    -fx-background-color: #bd1026;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: white;
+}
+
+/* Style par défaut de la cellule principale */
 .cell-view {
     -fx-background-color: #ffffff;
-    -fx-border-color: #000000;
+    -fx-border-color: #8f7a70;
     -fx-border-width: 0.5px;
     -fx-alignment: center;
 }
 
 /* Style lorsque la souris survole la cellule */
 .cell-view:hover {
-    -fx-background-color: #c4defa;
+    -fx-background-color: #f4dce0;
     -fx-cursor: hand;
+}
+
+/* Style de la cellule sélectionnée */
+.cell-view.selected {
+    -fx-background-color: #e8a9b2;
+}
+
+/* Style des cellules de la même ligne/colonne/bloc */
+.cell-view.highlighted {
+    -fx-background-color: #eee5e0;
+}
+
+.cell-value-pane {
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+}
+
+.cell-value {
+    -fx-font-size: 24px;
+    -fx-text-fill: #332a27;
+}
+
+.note-view {
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+}
+
+.note-label {
+    -fx-font-size: 10px;
+    -fx-text-fill: #63534d;
 }

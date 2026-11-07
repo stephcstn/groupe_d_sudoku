@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.paint.Color?>
-<?import javafx.scene.paint.LinearGradient?>
-<?import javafx.scene.paint.Stop?>
-<?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="689.0" prefWidth="878.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.univpoitiers.app.SudokuAppController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="689.0" prefWidth="878.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.univpoitiers.app.SudokuAppController">
    <right>
-      <BorderPane fx:id="rightPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-         <bottom>
-            <Button mnemonicParsing="false" text="CLEAR" BorderPane.alignment="CENTER" />
-         </bottom></BorderPane>
+       <BorderPane fx:id="rightPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+          <center>
+             <VBox fx:id="rightContent" alignment="CENTER" maxWidth="170.0" spacing="8.0" BorderPane.alignment="CENTER">
+                <children>
+                   <Button fx:id="clearButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#clearSelectedCell" text="CLEAR" />
+                   <Button fx:id="resetButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#resetGrid" text="RESET GRID" />
+                </children>
+             </VBox>
+          </center></BorderPane>
    </right>
    <left>
       <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <center>
-            <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="5.0" BorderPane.alignment="CENTER">
+            <VBox alignment="CENTER_LEFT" maxWidth="170.0" spacing="5.0" BorderPane.alignment="CENTER">
                <children>
                   <CheckBox fx:id="checkAllRules" mnemonicParsing="false" selected="true" text="ALL RULES" />
                   <CheckBox fx:id="checkLastFreeCell" mnemonicParsing="false" text="Last Free Cell" />
@@ -43,39 +43,13 @@
                   <CheckBox fx:id="checkSword_fish" mnemonicParsing="false" text="Sword-fish" />
                   <Button fx:id="runAutoResolution" mnemonicParsing="false" text="RUN AUTO RESOLUTION" />
                </children>
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
-               <padding>
-                  <Insets bottom="30.0" left="30.0" top="30.0" />
-               </padding>
             </VBox>
          </center></BorderPane>
    </left>
    <top>
       <BorderPane prefHeight="91.0" prefWidth="878.0" BorderPane.alignment="CENTER">
          <center>
-            <Label prefHeight="67.0" prefWidth="331.0" text="SUDOKU" BorderPane.alignment="CENTER">
-               <textFill>
-                  <LinearGradient endX="1.0" endY="1.0">
-                     <stops>
-                        <Stop>
-                           <color>
-                              <Color red="0.09113060683012009" green="0.5789473652839661" blue="0.09926088154315948" />
-                           </color>
-                        </Stop>
-                        <Stop offset="1.0">
-                           <color>
-                              <Color green="0.5931209921836853" blue="0.9599999785423279" />
-                           </color>
-                        </Stop>
-                     </stops>
-                  </LinearGradient>
-               </textFill>
-               <font>
-                  <Font name="System Bold Italic" size="84.0" />
-               </font>
-            </Label>
+            <Label styleClass="app-title" text="SUDOKU" BorderPane.alignment="CENTER" />
          </center></BorderPane>
    </top>
    <bottom>

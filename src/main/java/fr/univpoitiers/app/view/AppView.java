@@ -4,6 +4,10 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.Button;
 
+/**
+ * Ébauche de vue d'application regroupant les propriétés et commandes de l'interface.
+ * Son instanciation et ses accesseurs ne sont pas encore implémentés.
+ */
 public class AppView {
 
 	private javafx.beans.property.SimpleIntegerProperty cellIndex;

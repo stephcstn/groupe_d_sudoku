@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 
 import java.util.List;
 
@@ -39,8 +40,11 @@ public class SudokuAppController {
 	@FXML public CheckBox checkY_wing;
 	@FXML public CheckBox checkSword_fish;
 
-	@FXML public Button runAutoResolution;
+    @FXML public Button runAutoResolution;
+    @FXML public Button clearButton;
+    @FXML public Button resetButton;
 	@FXML public BorderPane rightPane;
+	@FXML private VBox rightContent;
 
 
 	private SudokuCoreModel coreModel;
@@ -60,25 +64,6 @@ public class SudokuAppController {
 
 	@FXML
 	private BorderPane centerPane;
-/*
-	private SudokuAppController(SudokuCoreModel model, AppView view) {
-		// TODO - implement SudokuAppController.SudokuAppController
-		throw new UnsupportedOperationException();
-	}*/
-/*
-	/**
-	 * 
-	 * @param model
-	 * @param view
-	 */
-
-	/*
-	public static SudokuAppController create(SudokuCoreModel model, AppView view) {
-		SudokuAppController s = new SudokuAppController(model, view);
-		return null;
-	}
-
-	*/
 
 	private void buildListener() {
 		// TODO - implement SudokuAppController.buildListener
@@ -118,8 +103,8 @@ public class SudokuAppController {
 		}
 
 		bindAutoResolvedButton();
-		padView=new PadView(sizeH);
-		rightPane.setCenter(padView);
+		padView = new PadView(sizeH, gridView::inputNumber, gridView::setNotesMode);
+		rightContent.getChildren().add(0, padView);
 
 
 
@@ -127,6 +112,20 @@ public class SudokuAppController {
 
 
 
+	}
+
+	@FXML
+	public void clearSelectedCell() {
+		if (gridView != null) {
+			gridView.clearSelectedCell();
+		}
+	}
+
+	@FXML
+	public void resetGrid() {
+		if (gridView != null) {
+			gridView.resetGrid();
+		}
 	}
 
 
@@ -181,7 +180,7 @@ public class SudokuAppController {
 
 	}
 
-	// Regrouper toutes les règles dans une liste
+	// Regroupe toutes les règles dans une liste
 	private List<CheckBox> initAllRules(){
 		return List.of(
 				checkLastFreeCell, checkLastRemainingCell, checkLastPossibleNumber,
