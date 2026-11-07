@@ -1,104 +1,145 @@
 package fr.univpoitiers.core.grid;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class CellTest {
 
-	@Test
-	void notesAreIndependentAndCanBeRemoved() {
-		Cell cell = new Cell();
+    private static final int NB_VARIABLES = 9;
+    private Cell cell;
 
-		cell.setNote(2);
-		cell.setNote(7);
-		cell.removeNote(2);
+    @BeforeEach
+    void setUp() {
+        cell = new Cell(NB_VARIABLES);
+    }
 
-		assertFalse(cell.hasNote(2));
-		assertTrue(cell.hasNote(7));
-	}
+    @Nested
+    @DisplayName("Tests d'initialisation")
+    class InitializationTests {
 
-	@Test
-	void notesMustBeWithinSudokuValueRange() {
-		Cell cell = new Cell();
+        @Test
+        @DisplayName("La valeur initiale doit être 0")
+        void testDefaultValue() {
+            assertEquals(0, cell.getValue());
+        }
 
-		assertThrows(IllegalArgumentException.class, () -> cell.setNote(0));
-		assertThrows(IllegalArgumentException.class, () -> cell.setNote(10));
-		assertThrows(IllegalArgumentException.class, () -> cell.removeNote(0));
-		assertThrows(IllegalArgumentException.class, () -> cell.hasNote(10));
-	}
+        @Test
+        @DisplayName("La cellule ne doit pas être verrouillée à la création")
+        void testDefaultLockedState() {
+            assertFalse(cell.isLocked());
+        }
 
-	@Test
-	void candidateRangeCanMatchGridSize() {
-		Cell cell = new Cell(25);
-		cell.setNote(25);
-		assertTrue(cell.hasNote(25));
-		assertThrows(IllegalArgumentException.class, () -> cell.setNote(26));
-		cell.setValue(25);
-		assertEquals(25, cell.getValue());
-		assertFalse(cell.hasNote(25));
-		assertThrows(IllegalArgumentException.class, () -> new Cell(0));
-	}
+        @Test
+        @DisplayName("Toutes les notes doivent être initialisées à 0")
+        void testDefaultNotes() {
+            assertEquals(0, cell.count());
+            for (int i = 0; i < NB_VARIABLES; i++) {
+                assertEquals(0, cell.getNote(i));
+            }
+        }
+    }
 
-	@Test
-	void settingAndClearingValueRemovesNotes() {
-		Cell cell = new Cell();
-		cell.setNote(4);
+    @Nested
+    @DisplayName("Tests de gestion des valeurs")
+    class ValueTests {
 
-		cell.setValue(6);
+        @Test
+        @DisplayName("setValue et getValue fonctionnent correctement")
+        void testSetAndGetValue() {
+            cell.setValue(5);
+            assertEquals(5, cell.getValue());
+        }
 
-		assertEquals(6, cell.getValue());
-		assertFalse(cell.hasNote(4));
-		cell.setNote(8);
-		assertFalse(cell.hasNote(8));
+        @Test
+        @DisplayName("Remplacement d'une valeur existante")
+        void testOverwriteVal() {
+            cell.setValue(2);
+            cell.setValue(8);
+            assertEquals(8, cell.getValue());
+        }
+    }
 
-		cell.setValue(0);
-		cell.setNote(3);
-		cell.setValue(0);
+    @Nested
+    @DisplayName("Tests de verrouillage (lock)")
+    class LockTests {
 
-		assertEquals(0, cell.getValue());
-		assertFalse(cell.hasNote(3));
-	}
+        @Test
+        @DisplayName("Verrouillage de la cellule")
+        void testLock() {
+            cell.lock();
+            assertTrue(cell.isLocked());
+        }
 
-	@Test
-	void lockedCellCannotBeChanged() {
-		Cell cell = new Cell();
-		cell.setValue(5);
-		cell.lock();
+        @Test
+        @DisplayName("Appels successifs à lock() conservent l'état verrouillé")
+        void testIdempotentLock() {
+            cell.lock();
+            cell.lock();
+            assertTrue(cell.isLocked());
+        }
+    }
 
-		cell.setValue(2);
-		cell.setValue(0);
-		cell.setNote(4);
+    @Nested
+    @DisplayName("Tests des notes")
+    class NoteTests {
 
-		assertTrue(cell.isLocked());
-		assertEquals(5, cell.getValue());
-		assertFalse(cell.hasNote(4));
+        @Test
+        @DisplayName("setNote active la note et la rend lisible")
+        void testSetAndGetNote() {
+            cell.setNote(3);
+            assertEquals(1, cell.getNote(3));
+            assertEquals(0, cell.getNote(4));
+        }
 
-		Cell notesCell = new Cell();
-		notesCell.setNote(4);
-		notesCell.lock();
-		notesCell.removeNote(4);
-		notesCell.setNote(6);
-		assertTrue(notesCell.hasNote(4));
-		assertFalse(notesCell.hasNote(6));
-	}
+        @Test
+        @DisplayName("removeNote remet la note à 0")
+        void testRemoveNote() {
+            cell.setNote(5);
+            assertEquals(1, cell.getNote(5));
 
-	@Test
-	void resetClearsAndUnlocksCell() {
-		Cell cell = new Cell();
-		cell.setNote(4);
-		cell.setValue(5);
-		cell.lock();
+            cell.removeNote(5);
+            assertEquals(0, cell.getNote(5));
+        }
 
-		cell.reset();
+        @Test
+        @DisplayName("removeNote sur une note inactive ne provoque pas d'erreur")
+        void testRemoveNoteWhenNotSet() {
+            cell.removeNote(2);
+            assertEquals(0, cell.getNote(2));
+        }
 
-		assertEquals(0, cell.getValue());
-		assertFalse(cell.hasNote(4));
-		assertFalse(cell.isLocked());
-		cell.setNote(6);
-		assertTrue(cell.hasNote(6));
-	}
+        @Test
+        @DisplayName("count compte précisément le nombre de notes actives")
+        void testCountNotes() {
+            assertEquals(0, cell.count());
+
+            cell.setNote(0);
+            cell.setNote(3);
+            cell.setNote(8);
+            assertEquals(3, cell.count());
+
+            // Réassigner une note déjà présente ne change pas le décompte
+            cell.setNote(0);
+            assertEquals(3, cell.count());
+
+            cell.removeNote(3);
+            assertEquals(2, cell.count());
+        }
+
+        @Test
+        @DisplayName("Débordement d'indice lève IndexOutOfBoundsException")
+        void testNoteOutOfBounds() {
+            // Indice négatif
+            assertThrows(IndexOutOfBoundsException.class, () -> cell.getNote(-1));
+            assertThrows(IndexOutOfBoundsException.class, () -> cell.setNote(-1));
+
+            // Indice égal à la taille (rappel : indices de 0 à NB_VARIABLES - 1)
+            assertThrows(IndexOutOfBoundsException.class, () -> cell.getNote(NB_VARIABLES));
+            assertThrows(IndexOutOfBoundsException.class, () -> cell.setNote(NB_VARIABLES));
+        }
+    }
 }

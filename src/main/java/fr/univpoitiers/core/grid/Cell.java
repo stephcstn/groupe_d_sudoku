@@ -7,48 +7,51 @@ public class Cell {
 	private boolean locked;
 	private int value;
 
-	public Cell() {
-		this(DEFAULT_MAX_VALUE);
-	}
+    public Cell(int nb_variables) {
+        this.note = new byte[nb_variables];
+        this.locked = false;
+        this.value = 0;
+    }
 
-	public Cell(int maxValue) {
-		if (maxValue < 1) {
-			throw new IllegalArgumentException("Le nombre de valeurs possibles doit être positif.");
-		}
-		this.note = new byte[maxValue + 1];
-	}
+    public Cell(Cell other) {
+        this.note = new byte[other.note.length];
+        System.arraycopy(other.note, 0, this.note, 0, other.note.length);
+        this.locked = other.locked;
+        this.value = other.value;
+    }
 
 	/**
 	 * 
 	 * @param value
 	 */
 	public void setNote(int value) {
-		checkNoteValue(value);
-		if (!locked && this.value == 0) {
-			this.note[value] = 1;
-		}
+		this.note[value] = 1;
 	}
+
+    public int count(){
+        int count = 0;
+        for (int i = 0; i < this.note.length; i++) {
+            if (this.note[i] == 1) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     *
+     * @param value
+     */
+    public int getNote(int value) {
+        return this.note[value];
+    }
 
 	/**
 	 * 
 	 * @param value
 	 */
 	public void removeNote(int value) {
-		checkNoteValue(value);
-		if (!locked && this.value == 0) {
-			this.note[value] = 0;
-		}
-	}
-
-	public boolean hasNote(int value) {
-		checkNoteValue(value);
-		return this.note[value] == 1;
-	}
-
-	private void checkNoteValue(int value) {
-		if (value < 1 || value >= note.length) {
-			throw new IllegalArgumentException("Une note doit être comprise entre 1 et " + (note.length - 1) + ".");
-		}
+		this.note[value] = 0;
 	}
 
 	public boolean isLocked() {
