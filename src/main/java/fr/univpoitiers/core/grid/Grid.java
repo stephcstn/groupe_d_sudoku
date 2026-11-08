@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 public class Grid {
 
-	private Cell[] cells;
-	private int WIDTH;
-	private int HEIGHT;
-	private ArrayList<Integer> availableCells;
+	private final Cell[] cells;
+	private final int WIDTH;
+	private final int HEIGHT;
+	private final ArrayList<Integer> availableCells;
 
 	/**
 	 * 
@@ -15,8 +15,17 @@ public class Grid {
 	 * @param height
 	 */
 	public Grid(int width, int height) {
-		// TODO - implement Grid.Grid
-		throw new UnsupportedOperationException();
+		if (width < 0 || height < 0 || (width == 0) != (height == 0)) {
+			throw new IllegalArgumentException("Les dimensions doivent être positives ou toutes deux nulles.");
+		}
+		this.WIDTH = width;
+		this.HEIGHT = height;
+		this.cells = new Cell[width * height];
+		this.availableCells = new ArrayList<>(cells.length);
+		for (int position = 0; position < cells.length; position++) {
+			cells[position] = new Cell();
+			availableCells.add(position);
+		}
 	}
 
 	/**
@@ -38,8 +47,10 @@ public class Grid {
 	 * @param value
 	 */
 	public boolean addNumber(int x, int y, int value) {
-		// TODO - implement Grid.addNumber
-		throw new UnsupportedOperationException();
+		if (value < 0 || value > Math.max(WIDTH, HEIGHT)) {
+			throw new IllegalArgumentException("La valeur est hors limites pour cette grille.");
+		}
+		return getCell(x, y).setValue(value);
 	}
 
 	/**
@@ -48,8 +59,7 @@ public class Grid {
 	 * @param y
 	 */
 	public int getNumber(int x, int y) {
-		// TODO - implement Grid.getNumber
-		throw new UnsupportedOperationException();
+		return getCell(x, y).getValue();
 	}
 
 	public int nextAvailableCell() {
@@ -83,13 +93,21 @@ public class Grid {
 	 * @param y
 	 */
 	public void removeNumber(int x, int y) {
-		// TODO - implement Grid.removeNumber
-		throw new UnsupportedOperationException();
+		getCell(x, y).setValue(0);
 	}
 
 	public void lockFilledCells() {
-		// TODO - implement Grid.lockFilledCells
-		throw new UnsupportedOperationException();
+		for (Cell cell : cells) {
+			if (cell.getValue() != 0) {
+				cell.lock();
+			}
+		}
+	}
+
+	public void unlockCells() {
+		for (Cell cell : cells) {
+			cell.unlock();
+		}
 	}
 
 	public void clearEntries() {
@@ -98,8 +116,22 @@ public class Grid {
 	}
 
 	public void resetGrid() {
-		// TODO - implement Grid.resetGrid
-		throw new UnsupportedOperationException();
+		availableCells.clear();
+		for (int position = 0; position < cells.length; position++) {
+			cells[position].reset();
+			availableCells.add(position);
+		}
+	}
+
+	public boolean isCellLocked(int x, int y) {
+		return getCell(x, y).isLocked();
+	}
+
+	private Cell getCell(int x, int y) {
+		if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
+			throw new IllegalArgumentException("Les coordonnées ne correspondent pas à une cellule.");
+		}
+		return cells[y * WIDTH + x];
 	}
 
 	/**

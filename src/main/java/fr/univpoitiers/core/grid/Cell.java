@@ -2,7 +2,7 @@ package fr.univpoitiers.core.grid;
 
 public class Cell {
 
-	private byte[] note;
+	private byte[] note = new byte[10];
 	private boolean locked;
 	private int value;
 
@@ -30,7 +30,10 @@ public class Cell {
 
 	public void lock() {
 		this.locked = true;
-		throw new UnsupportedOperationException();
+	}
+
+	public void unlock() {
+		this.locked = false;
 	}
 
 	public int getValue() {
@@ -41,8 +44,18 @@ public class Cell {
 	 * 
 	 * @param value
 	 */
-	public void setValue(int value) {
+	public boolean setValue(int value) {
+		if (this.locked) {
+			return false;
+		}
 		this.value = value;
+		return true;
+	}
+
+	public void reset() {
+		this.value = 0;
+		this.note = new byte[10];
+		this.locked = false;
 	}
 
 }
