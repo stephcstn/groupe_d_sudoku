@@ -65,7 +65,7 @@ public interface RuleApplier {
 	 */
 	private static void listOfValuesColumn(Grid grid, ArrayList<Integer> listOfValues, int cellIndex) {
 		int startColumnIndex = grid.getColumnIndex(cellIndex);
-		for (int i = startColumnIndex; i < startColumnIndex + (grid.getHeight() - 1) * grid.getHeight(); i += grid.getHeight()) {
+		for (int i = startColumnIndex; i <= startColumnIndex + (grid.getHeight() - 1) * grid.getHeight(); i += grid.getHeight()) {
 			int cellValue = grid.getNumber(i);
 			if (cellValue != 0) {
 				if (listOfValues.contains(cellValue)) {
@@ -81,7 +81,7 @@ public interface RuleApplier {
 	 * @param grid current grid
 	 * @return If it has changed grid state
 	 */
-	private static boolean lastFreeCell(Grid grid) {
+	static boolean lastFreeCell(Grid grid) {
 		int cellIndex = grid.nextAvailableCell();
 		ArrayList<Integer> listOfValues = new ArrayList<>();
 
@@ -120,7 +120,7 @@ public interface RuleApplier {
 	 * @param grid the current grid
 	 * @return If it has changed grid state
 	 */
-	private static boolean lastRemainingCell(Grid grid) {
+	static boolean lastRemainingCell(Grid grid) {
 		int cellIndex = grid.nextAvailableCell();
 		ArrayList<Integer> listOfValues = new ArrayList<>();
 		fillValues(listOfValues, grid.getWidth());
@@ -155,7 +155,7 @@ public interface RuleApplier {
 	 * @param grid The current grid
 	 * @return If it changed the grid state
 	 */
-	private static boolean lastPossibleCell(Grid grid) {
+	static boolean lastPossibleCell(Grid grid) {
 		int cellIndex = grid.nextAvailableCell();
 		ArrayList<Integer> listOfValues = new ArrayList<>();
 		fillValues(listOfValues, grid.getWidth());
