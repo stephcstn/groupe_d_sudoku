@@ -1,116 +1,173 @@
 package fr.univpoitiers.app.view.grid;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.control.Label;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 
 /**
- * Représente la vue d'une cellule dans la grille du jeu de Sudoku.
- * Une cellule peut contenir une grille secondaire (pour les notes ou hypothèses)
- * ainsi qu'une valeur finale affichée par-dessus.
+ * Affiche une cellule de la grille de Sudoku.
  *
- * <p>Cette classe hérite de {@link StackPane} pour superposer la grille de notes
- * et le panneau de la valeur finale.</p>
- *
- * @author Votre Nom / Groupe D
- * @version 1.0
+ * <p>La cellule affiche une valeur ou des notes fournies par le contrôleur ;
+ * elle ne modifie pas le modèle du jeu.</p>
  */
 public class CellView extends StackPane {
 
-    /** Grille contenant les petites notes ou candidats de la cellule. */
-    private GridPane gridNotes;
+    private static final double CELL_SIZE = 50.0;
 
-    /** Panneau conteneur pour afficher la valeur finale de la cellule. */
-    private Pane finalPane;
-
-    /** Label affichant la valeur finale principale de la cellule. */
-    private Label finalValue;
-    private String cssPath;
-
-    private boolean isSelected;
-    private int posX;
-    private int posY;
+    private final Label finalValue;
+    private final List<Label> noteLabels = new ArrayList<>();
+    private boolean selected;
+    private boolean highlighted;
 
     /**
-     * Construit une nouvelle vue de cellule en fonction du nombre de notes possibles.
-     * Détermine dynamiquement la disposition en grille (racine carrée arrondie au supérieur)
-     * pour répartir les étiquettes de notes.
+     * Crée une cellule affichant le nombre demandé d'emplacements de notes.
+     * Les emplacements sont répartis sur autant de lignes et de colonnes que
+     * nécessaire, sans ajouter de note fictive lorsque le nombre n'est pas carré.
      *
-     * @param howManyNotes Le nombre total de notes/candidats à intégrer dans la cellule
-     *                     (par exemple, 9 pour une grille de Sudoku standard 9x9).
+     * @param howManyNotes nombre d'emplacements de notes, strictement positif
+     * @param css          feuille de style à appliquer à la cellule
+     * @throws IllegalArgumentException si le nombre d'emplacements n'est pas positif
      */
-    public CellView(int howManyNotes, String css, int xP, int yP) {
-        isSelected = false;
-        posX=xP;
-        posY=yP;
-        this.getStylesheets().add(css);
-
-        double x_double = Math.sqrt(howManyNotes);
-        int x_int = (int) x_double;
-        int y_int = x_int;
-
-        // Si le nombre de notes n'est pas un carré parfait (ex: 9 -> 3*3)
-        if (x_double != (double) x_int) {
-            x_int += 1;
+    public CellView(int howManyNotes, String css) {
+        if (howManyNotes <= 0) {
+            throw new IllegalArgumentException("Le nombre de notes doit être positif.");
         }
 
-        gridNotes = new GridPane();
+        getStylesheets().add(css);
+        getChildren().add(createNotesGrid(howManyNotes));
 
-        // Création et positionnement de chaque label de note dans la grille
-        for (int y = 0; y < y_int; y++) {
-            for (int x = 0; x < x_int; x++) {
-                Label labelNote = new Label("0");
-                gridNotes.add(labelNote, x, y);
-            }
+        finalValue = new Label();
+        finalValue.getStyleClass().add("cell-value");
+        StackPane valuePane = new StackPane(finalValue);
+        valuePane.getStyleClass().add("cell-value-pane");
+        getChildren().add(valuePane);
+
+        getStyleClass().add("cell-view");
+        setPrefSize(CELL_SIZE, CELL_SIZE);
+        setMinSize(CELL_SIZE, CELL_SIZE);
+        setMaxSize(CELL_SIZE, CELL_SIZE);
+    }
+
+    private GridPane createNotesGrid(int howManyNotes) {
+        int columns = (int) Math.ceil(Math.sqrt(howManyNotes));
+        int rows = (int) Math.ceil((double) howManyNotes / columns);
+        GridPane notesGrid = new GridPane();
+
+        for (int column = 0; column < columns; column++) {
+            ColumnConstraints constraints = new ColumnConstraints();
+            constraints.setPercentWidth(100.0 / columns);
+            constraints.setHalignment(HPos.CENTER);
+            constraints.setFillWidth(false);
+            notesGrid.getColumnConstraints().add(constraints);
+        }
+        for (int row = 0; row < rows; row++) {
+            RowConstraints constraints = new RowConstraints();
+            constraints.setPercentHeight(100.0 / rows);
+            constraints.setValignment(VPos.CENTER);
+            constraints.setFillHeight(false);
+            notesGrid.getRowConstraints().add(constraints);
         }
 
-        // Ajout de la grille de notes dans le conteneur principal
-        this.getChildren().add(gridNotes);
+        for (int value = 0; value < howManyNotes; value++) {
+            Label note = new Label();
+            note.getStyleClass().add("cell-note");
+            noteLabels.add(note);
+            notesGrid.add(note, value % columns, value / columns);
+        }
+        return notesGrid;
+    }
 
-        finalValue = new Label("*");
+    /**
+     * Affiche une valeur, ou vide l'affichage pour la valeur zéro.
+     *
+     * @param value valeur à afficher, entre zéro et le nombre de notes
+     * @throws IllegalArgumentException si la valeur est hors limites
+     */
+    public void setValue(int value) {
+        if (value < 0 || value > noteLabels.size()) {
+            throw new IllegalArgumentException("La valeur doit être comprise entre 0 et "
+                    + noteLabels.size() + ".");
+        }
+        finalValue.setText(value == 0 ? "" : Integer.toString(value));
+    }
 
-        // Initialisation et ajout du panneau de la valeur finale au StackPane
-        finalPane = new Pane();
-        finalPane.getChildren().add(finalValue);
-        this.getChildren().add(finalPane);
-
-        finalPane.getStylesheets().add(css);
-        finalPane.getStyleClass().add("cell-view");
-        //finalPane.setStyle("-fx-background-color: rgba(255, 255, 255, 1);");
-
-
-
-        this.getStyleClass().add("cell-view");
-        // Exemple dans CellView.java
-        this.setOnMouseEntered(event -> {
-            // Action exécutée lorsque la souris survole la cellule
-            //this.setStyle("-fx-background-color: #3799a6;");
-        });
-
-
-        // Définir une taille fixe ou préférée (ex: 50x50 pixels)
-        this.setPrefSize(50, 50);
-        this.setMinSize(50, 50);
-        this.setMaxSize(50, 50);
-
-        // --------------------------EVENTS-----------------------------
-        this.setOnMouseExited(event -> {
-            // Action exécutée lorsque la souris quitte la cellule
-            //this.getStyleClass().add("cell-view");
-        });
-
-        this.setOnMouseClicked(event -> {
-            if (isSelected){
-                isSelected=false;
-                finalPane.setOpacity(1);
-
-            }else{
-                isSelected=true;
-                finalPane.setOpacity(0.3);
-
-
+    /**
+     * Affiche exactement les notes candidates fournies.
+     *
+     * @param notes candidats à afficher, numérotés à partir de un
+     * @throws IllegalArgumentException si un candidat est hors limites
+     */
+    public void setNotes(Set<Integer> notes) {
+        Objects.requireNonNull(notes, "Les notes ne peuvent pas être nulles.");
+        for (int note : notes) {
+            if (note < 1 || note > noteLabels.size()) {
+                throw new IllegalArgumentException("Une note doit être comprise entre 1 et "
+                        + noteLabels.size() + ".");
             }
-        });
+        }
+        for (int index = 0; index < noteLabels.size(); index++) {
+            int value = index + 1;
+            noteLabels.get(index).setText(notes.contains(value) ? Integer.toString(value) : "");
+        }
+    }
+
+    /**
+     * Modifie l'état visuel de sélection de la cellule.
+     *
+     * @param selected vrai si la cellule est sélectionnée
+     */
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+        if (selected) {
+            if (!getStyleClass().contains("selected")) {
+                getStyleClass().add("selected");
+            }
+        } else {
+            getStyleClass().remove("selected");
+        }
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    /**
+     * Modifie l'état visuel de surbrillance d'une cellule liée à la sélection.
+     *
+     * @param highlighted vrai si la cellule partage la ligne, la colonne ou le bloc sélectionné
+     */
+    public void setHighlighted(boolean highlighted) {
+        this.highlighted = highlighted;
+        if (highlighted) {
+            if (!getStyleClass().contains("highlighted")) {
+                getStyleClass().add("highlighted");
+            }
+        } else {
+            getStyleClass().remove("highlighted");
+        }
+    }
+
+    public boolean isHighlighted() {
+        return highlighted;
+    }
+
+    public int getValue() {
+        return finalValue.getText().isEmpty() ? 0 : Integer.parseInt(finalValue.getText());
+    }
+
+    public boolean hasNote(int value) {
+        if (value < 1 || value > noteLabels.size()) {
+            throw new IllegalArgumentException("La note doit être comprise entre 1 et "
+                    + noteLabels.size() + ".");
+        }
+        return !noteLabels.get(value - 1).getText().isEmpty();
     }
 }
