@@ -125,13 +125,14 @@ public class CellView extends StackPane {
      * @param selected vrai si la cellule est sélectionnée
      */
     public void setSelected(boolean selected) {
+        String style = "selected";
         this.selected = selected;
         if (selected) {
-            if (!getStyleClass().contains("selected")) {
-                getStyleClass().add("selected");
+            if (!getStyleClass().contains(style)) {
+                getStyleClass().add(style);
             }
         } else {
-            getStyleClass().remove("selected");
+            getStyleClass().remove(style);
         }
     }
 
@@ -146,12 +147,13 @@ public class CellView extends StackPane {
      */
     public void setHighlighted(boolean highlighted) {
         this.highlighted = highlighted;
+        String style = "highlighted";
         if (highlighted) {
-            if (!getStyleClass().contains("highlighted")) {
-                getStyleClass().add("highlighted");
+            if (!getStyleClass().contains(style)) {
+                getStyleClass().add(style);
             }
         } else {
-            getStyleClass().remove("highlighted");
+            getStyleClass().remove(style);
         }
     }
 
