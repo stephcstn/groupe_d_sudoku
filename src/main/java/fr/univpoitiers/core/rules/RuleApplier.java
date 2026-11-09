@@ -1,7 +1,9 @@
 package fr.univpoitiers.core.rules;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import fr.univpoitiers.core.grid.Grid;
 
@@ -232,42 +234,45 @@ public interface RuleApplier {
             int candA = pivotNotes.get(0);
             int candB = pivotNotes.get(1);
             for (int j = 0; j < bivalueCells.size(); j++) {
-                if (i == j) continue;
-                int wing1 = bivalueCells.get(j);
-                if (!cellsSeeEachOther(grid, pivot, wing1)) continue;
-                List<Integer> notes1 = getCandidates(grid, wing1, nbValues);
-                int sharedWithPivot;
-                int candC;
-                if (notes1.contains(candA) && !notes1.contains(candB)) {
-                    sharedWithPivot = candA;
-                    candC = (notes1.get(0) == candA) ? notes1.get(1) : notes1.get(0);
-                } else if (notes1.contains(candB) && !notes1.contains(candA)) {
-                    sharedWithPivot = candB;
-                    candC = (notes1.get(0) == candB) ? notes1.get(1) : notes1.get(0);
-                } else {
-                    continue;
-                }
-                int requiredForWing2 = (sharedWithPivot == candA) ? candB : candA;
-                for (int k = j + 1; k < bivalueCells.size(); k++) {
-                    if (k == i) continue;
-                    int wing2 = bivalueCells.get(k);
-                    if (!cellsSeeEachOther(grid, pivot, wing2)) continue;
-                    List<Integer> notes2 = getCandidates(grid, wing2, nbValues);
-                    if (notes2.contains(requiredForWing2) && notes2.contains(candC)) {
-                        boolean modified = false;
-                        for (int target = 0; target < totalCells; target++) {
-                            if (target != pivot && target != wing1 && target != wing2) {
-                                if (grid.getNumber(target) == 0 && grid.isCellContaining(target, candC)) {
-                                    if (cellsSeeEachOther(grid, target, wing1) && cellsSeeEachOther(grid, target, wing2)) {
-                                        grid.removeNote(target, candC);
-                                        modified = true;
+                if (i != j) {
+                    int wing1 = bivalueCells.get(j);
+                    if (cellsSeeEachOther(grid, pivot, wing1)) {
+                        List<Integer> notes1 = getCandidates(grid, wing1, nbValues);
+                        int sharedWithPivot = -1;
+                        int candC = -1;
+                        if (notes1.contains(candA) && !notes1.contains(candB)) {
+                            sharedWithPivot = candA;
+                            candC = (notes1.get(0) == candA) ? notes1.get(1) : notes1.get(0);
+                        } else if (notes1.contains(candB) && !notes1.contains(candA)) {
+                            sharedWithPivot = candB;
+                            candC = (notes1.get(0) == candB) ? notes1.get(1) : notes1.get(0);
+                        }
+                        if (sharedWithPivot != -1) {
+                            int requiredForWing2 = (sharedWithPivot == candA) ? candB : candA;
+                            for (int k = j + 1; k < bivalueCells.size(); k++) {
+                                if (k != i) {
+                                    int wing2 = bivalueCells.get(k);
+                                    if (cellsSeeEachOther(grid, pivot, wing2)) {
+                                        List<Integer> notes2 = getCandidates(grid, wing2, nbValues);
+                                        if (notes2.contains(requiredForWing2) && notes2.contains(candC)) {
+                                            boolean modified = false;
+                                            for (int target = 0; target < totalCells; target++) {
+                                                if (target != pivot && target != wing1 && target != wing2) {
+                                                    if (grid.getNumber(target) == 0 && grid.isCellContaining(target, candC)) {
+                                                        if (cellsSeeEachOther(grid, target, wing1) && cellsSeeEachOther(grid, target, wing2)) {
+                                                            grid.removeNote(target, candC);
+                                                            modified = true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            if (modified) {
+                                                return true;
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
-
-                        if (modified) {
-                            return true;
                         }
                     }
                 }
@@ -285,7 +290,9 @@ public interface RuleApplier {
      * @return true if the two cells share a line, column or block, false otherwise
      */
     private static boolean cellsSeeEachOther(Grid grid, int pos1, int pos2) {
-        if (pos1 == pos2) return false;
+        if (pos1 == pos2) {
+            return false;
+        }
         boolean sameRow = grid.getRowIndex(pos1) == grid.getRowIndex(pos2);
         boolean sameCol = grid.getColumnIndex(pos1) == grid.getColumnIndex(pos2);
         boolean sameBlock = grid.getBlockIndex(pos1) == grid.getBlockIndex(pos2);
@@ -468,13 +475,117 @@ public interface RuleApplier {
         return rows;
     }
 
-	/**
-	 * 
-	 * @param grid
-	 */
-	static boolean SwordFish(Grid grid){
-		return true;
-	}
+/**
+     * Applies the Swordfish deductive rule on both rows and columns.
+     *
+     * @param grid the Sudoku grid to process
+     * @return true if at least one candidate note was removed, false otherwise
+     */
+    static boolean Swordfish(Grid grid) {
+        return SwordfishRows(grid) || SwordfishCols(grid);
+    }
+
+    /**
+     * Applies the Swordfish rule on rows to eliminate candidate notes in columns.
+     *
+     * @param grid the Sudoku grid to process
+     * @return true if at least one candidate note was removed, false otherwise
+     */
+    static boolean SwordfishRows(Grid grid) {
+        boolean modified = false;
+        int n = grid.getWidth();
+        int nbRows = grid.getHeight();
+        for (int i = 1; i <= n; i++) {
+            int noteIndex = i - 1;
+            for (int iR1 = 0; iR1 < nbRows - 2; iR1++) {
+                List<Integer> colsR1 = getColumnsWithCandidate(grid, iR1, noteIndex, n);
+                if (colsR1.size() >= 2 && colsR1.size() <= 3) {
+                    for (int iR2 = iR1 + 1; iR2 < nbRows - 1; iR2++) {
+                        List<Integer> colsR2 = getColumnsWithCandidate(grid, iR2, noteIndex, n);
+                        if (colsR2.size() >= 2 && colsR2.size() <= 3) {
+                            for (int iR3 = iR2 + 1; iR3 < nbRows; iR3++) {
+                                List<Integer> colsR3 = getColumnsWithCandidate(grid, iR3, noteIndex, n);
+                                if (colsR3.size() >= 2 && colsR3.size() <= 3) {
+                                    Set<Integer> unionCols = new HashSet<>();
+                                    unionCols.addAll(colsR1);
+                                    unionCols.addAll(colsR2);
+                                    unionCols.addAll(colsR3);
+                                    if (unionCols.size() == 3) {
+                                        for (int col : unionCols) {
+                                            for (int r = 0; r < nbRows; r++) {
+                                                if (r != iR1 && r != iR2 && r != iR3) {
+                                                    int pos = r * n + col;
+                                                    if (grid.getNumber(pos) == 0 && grid.isCellContaining(pos, noteIndex)) {
+                                                        grid.removeNote(pos, noteIndex);
+                                                        modified = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (modified) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Applies the Swordfish rule on columns to eliminate candidate notes in rows.
+     *
+     * @param grid the Sudoku grid to process
+     * @return true if at least one candidate note was removed, false otherwise
+     */
+    static boolean SwordfishCols(Grid grid) {
+        boolean modified = false;
+        int n = grid.getWidth();
+        int nbRows = grid.getHeight();
+        for (int i = 1; i <= n; i++) {
+            int noteIndex = i - 1;
+            for (int iC1 = 0; iC1 < n - 2; iC1++) {
+                List<Integer> rowsC1 = getRowsWithCandidate(grid, iC1, noteIndex, n, nbRows);
+                if (rowsC1.size() >= 2 && rowsC1.size() <= 3) {
+                    for (int iC2 = iC1 + 1; iC2 < n - 1; iC2++) {
+                        List<Integer> rowsC2 = getRowsWithCandidate(grid, iC2, noteIndex, n, nbRows);
+                        if (rowsC2.size() >= 2 && rowsC2.size() <= 3) {
+                            for (int iC3 = iC2 + 1; iC3 < n; iC3++) {
+                                List<Integer> rowsC3 = getRowsWithCandidate(grid, iC3, noteIndex, n, nbRows);
+                                if (rowsC3.size() >= 2 && rowsC3.size() <= 3) {
+                                    Set<Integer> unionRows = new HashSet<>();
+                                    unionRows.addAll(rowsC1);
+                                    unionRows.addAll(rowsC2);
+                                    unionRows.addAll(rowsC3);
+                                    if (unionRows.size() == 3) {
+                                        for (int row : unionRows) {
+                                            for (int c = 0; c < n; c++) {
+                                                if (c != iC1 && c != iC2 && c != iC3) {
+                                                    int pos = row * n + c;
+                                                    if (grid.getNumber(pos) == 0 && grid.isCellContaining(pos, noteIndex)) {
+                                                        grid.removeNote(pos, noteIndex);
+                                                        modified = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (modified) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
 	/**
 	 * 
