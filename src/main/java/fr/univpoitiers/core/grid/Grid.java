@@ -68,13 +68,20 @@ public class Grid {
     }
 
 	/**
-	 * 
-	 * @param pos
-	 * @param value
+
+	 * Vérifie que la valeur peut être placée à cette position :
+	 * elle ne doit pas déjà être présente sur la ligne, la colonne ou le bloc.
 	 *
+	 * @param pos position de la case (index 1D)
+	 * @param value valeur à placer (de 1 au nombre de valeurs possibles)
+	 * @return true si la valeur respecte les trois contraintes, false sinon
+	 *         (y compris si la valeur est hors bornes, par exemple 0 = case vide)
 	 */
 	public boolean checkValidValues(int pos, int value) {
-		return checkBlock(pos,value) && checkColumn(pos,value) && checkRow(pos, value);
+		if (value < 1 || value > Math.max(this.WIDTH, this.HEIGHT)) {
+			return false;
+		}
+		return checkBlock(pos, value) && checkColumn(pos, value) && checkRow(pos, value);
 	}
 
 	/**
@@ -308,9 +315,35 @@ public class Grid {
 			int index = cellToIndex(x, r);
 
 			if (index != pos) {
-				Cell cell = cells[index];
-				if (cell != null && cell.getValue() == value) {
+				if (cells[index].getValue() == value) {
 					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Vérifie que la valeur n'est pas déjà présente dans le bloc de la case
+	 * (taille BLOCK_WIDTH x BLOCK_HEIGHT).
+	 *
+	 * @param pos position de la case (index 1D)
+	 * @param value valeur à vérifier
+	 * @return true si aucune autre case du bloc ne contient cette valeur
+	 */
+	public boolean checkBlock(int pos, int value) {
+		int startBlock = getBlockIndex(pos);
+		int startX = getColumnIndex(startBlock);
+		int startY = getRowIndex(startBlock);
+
+		for (int r = startY; r < startY + this.BLOCK_HEIGHT; r++) {
+			for (int c = startX; c < startX + this.BLOCK_WIDTH; c++) {
+				int index = cellToIndex(c, r);
+
+				if (index != pos) {
+					if (cells[index].getValue() == value) {
+						return false;
+					}
 				}
 			}
 		}
