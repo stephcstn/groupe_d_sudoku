@@ -1,6 +1,7 @@
 package fr.univpoitiers.core.grid;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Grid {
 
@@ -51,12 +52,10 @@ public class Grid {
     }
 
     public int getBlockIndex(int pos) {
-        int blockWidth = (int) Math.sqrt(this.WIDTH);
-        int blockHeight = (int) Math.sqrt(this.HEIGHT);
         int x = getColumnIndex(pos);
         int y = getRowIndex(pos);
-        int startX = x - (x % blockWidth);
-        int startY = y - (y % blockHeight);
+        int startX = x - (x % this.BLOCK_WIDTH);
+        int startY = y - (y % this.BLOCK_HEIGHT);
         return startY * this.WIDTH + startX;
     }
 
@@ -101,13 +100,23 @@ public class Grid {
 		return this.availableCells.getFirst();
 	}
 
+    public void insertSorted(ArrayList<Integer> list, int value) {
+        int index = Collections.binarySearch(list, value);
+
+        // Si l'élément n'est pas déjà présent, binarySearch renvoie (-point_insertion - 1)
+        if (index < 0) {
+            int insertIndex = -(index + 1);
+            list.add(insertIndex, value);
+        }
+    }
+
 	/**
 	 * 
 	 * @param pos
 	 */
-	public void backCellAvailable(int pos) {
-		this.availableCells.add(pos);
-	}
+    public void backCellAvailable(int pos) {
+        this.insertSorted(this.availableCells, pos);
+    }
 
 	/**
 	 *
@@ -122,10 +131,10 @@ public class Grid {
 	 *
 	 * @param pos
 	 */
-	public void removeNumber(int pos) {
-		this.cells[pos].setValue(0);
-        this.availableCells.add(pos);
-	}
+    public void removeNumber(int pos) {
+        this.cells[pos].setValue(0);
+        backCellAvailable(pos);
+    }
 
 	public void lockFilledCells() {
         for (Cell cell : this.cells) {
@@ -135,17 +144,22 @@ public class Grid {
         }
 	}
 
-	public void clearEntries() {
-        for (Cell cell : this.cells) {
-            if (!cell.isLocked()) {
-                cell.setValue(0);
+    public void clearEntries() {
+        for (int i = 0; i < this.cells.length; i++) {
+            if (!this.cells[i].isLocked()) {
+                this.cells[i].setValue(0);
+                if (!this.availableCells.contains(i)) {
+                    this.availableCells.add(i);
+                }
             }
         }
-	}
+    }
 
-	public void resetGrid() {
-        for (Cell cell : this.cells) {
-            cell.setValue(0);
+    public void resetGrid() {
+        this.availableCells.clear();
+        for (int i = 0; i < this.cells.length; i++) {
+            this.cells[i].setValue(0);
+            this.availableCells.add(i);
         }
     }
 
@@ -176,7 +190,27 @@ public class Grid {
 	 * @param pos
 	 * @param valeur
 	 */
-	public void blockUpdate(int pos, int valeur) {
+    public void blockUpdate(int pos, int valeur) {
+        if (pos < 0 || pos >= this.cells.length) {
+            throw new IllegalArgumentException("pos must be within the grid bounds.");
+        }
+
+        int startBlock = getBlockIndex(pos);
+
+        for (int r = 0; r < this.BLOCK_HEIGHT; r++) {
+            for (int c = 0; c < this.BLOCK_WIDTH; c++) {
+                int index = startBlock + r * this.WIDTH + c;
+                this.cells[index].removeNote(valeur);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param pos
+     * @param valeur
+     */
+    public void diagonalUpdate(int pos, int valeur) {
         int x = getColumnIndex(pos);
         int y = getRowIndex(pos);
 
@@ -184,17 +218,20 @@ public class Grid {
             throw new IllegalArgumentException("x and y must be within the grid bounds.");
         }
 
-        int startBlock = getBlockIndex(pos);
-
-        int blockWidth = (int) Math.sqrt(this.WIDTH);
-        int blockHeight = (int) Math.sqrt(this.HEIGHT);
-
-        for (int i = startBlock; i < startBlock + blockHeight * this.WIDTH; i += this.WIDTH) {
-            for (int j = startBlock; j < startBlock + blockWidth; j++) {
-                this.cells[i * this.WIDTH + j].removeNote(valeur);
+        // Check if the cell is on the main diagonal
+        if (x == y) {
+            for (int i = 0; i < Math.min(this.WIDTH, this.HEIGHT); i++) {
+                this.cells[i * this.WIDTH + i].removeNote(valeur);
             }
         }
-	}
+
+        // Check if the cell is on the anti-diagonal
+        if (x + y == this.WIDTH - 1) {
+            for (int i = 0; i < Math.min(this.WIDTH, this.HEIGHT); i++) {
+                this.cells[i * this.WIDTH + (this.WIDTH - 1 - i)].removeNote(valeur);
+            }
+        }
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -208,7 +245,8 @@ public class Grid {
             if (this.cells[i].getValue() != otherGrid.cells[i].getValue()) {
                 return false;
             }
-            for (int j = 0; j < Math.max(this.WIDTH, this.HEIGHT); j++) {
+            int max = Math.max(this.WIDTH, this.HEIGHT);
+            for (int j = 0; j < max; j++) {
                 if (this.cells[i].getNote(j) != otherGrid.cells[i].getNote(j)) {
                     return false;
                 }
@@ -217,16 +255,6 @@ public class Grid {
 
         return true;
     }
-
-	/**
-	 *
-	 * @param x
-	 * @param y
-	 */
-	public void diagonalUpdate(int x, int y) {
-		// TODO - implement Grid.diagonalUpdate
-		throw new UnsupportedOperationException();
-	}
 
 	/**
 	 * Converts 2D coordinates (x, y) into a 1D array index.
@@ -288,24 +316,22 @@ public class Grid {
 	 * @param value
 	 *
 	 */
-	public boolean checkBlock(int pos, int value) {
-		int startBlock = getBlockIndex(pos);
-		int startX = getColumnIndex(startBlock);
-		int startY = getRowIndex(startBlock);
+    public boolean checkBlock(int pos, int value) {
+        int startBlock = getBlockIndex(pos);
 
-		for (int r = startY; r < startY + this.BLOCK_HEIGHT; r++) {
-			for (int c = startX; c < startX + this.BLOCK_WIDTH; c++) {
-				int index = cellToIndex(c, r);
+        for (int r = 0; r < this.BLOCK_HEIGHT; r++) {
+            for (int c = 0; c < this.BLOCK_WIDTH; c++) {
+                int index = startBlock + r * this.WIDTH + c;
 
-				if (index != pos) {
-					Cell cell = cells[index];
-					if (cell != null && cell.getValue() == value) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
+                if (index != pos) {
+                    Cell cell = cells[index];
+                    if (cell != null && cell.getValue() == value) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 
 }
