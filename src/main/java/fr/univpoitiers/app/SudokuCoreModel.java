@@ -31,7 +31,7 @@ public class SudokuCoreModel {
 	 * @param y
 	 */
 	public boolean input(int value, int x, int y) {
-		return requireGrid().addNumber(x, y, value);
+		return requireGrid().addNumber(x, value);
 	}
 
 	public int[] checkEntries() {
@@ -54,7 +54,7 @@ public class SudokuCoreModel {
 	}
 
 	public int getNumber(int x, int y) {
-		return requireGrid().getNumber(x, y);
+		return requireGrid().getNumber(x);
 	}
 
 	public void lockFilledCells() {
@@ -63,16 +63,12 @@ public class SudokuCoreModel {
 	}
 
 	public void unlockGrid() {
-		requireGrid().unlockCells();
+		requireGrid().lockFilledCells();
 		gridLocked = false;
 	}
 
 	public boolean isGridLocked() {
 		return gridLocked;
-	}
-
-	public boolean isCellLocked(int x, int y) {
-		return requireGrid().isCellLocked(x, y);
 	}
 
 	private Grid requireGrid() {
