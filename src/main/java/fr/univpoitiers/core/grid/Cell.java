@@ -6,8 +6,8 @@ public class Cell {
 	private boolean locked;
 	private int value;
 
-    public Cell(int nb_variables) {
-        this.note = new byte[nb_variables];
+    public Cell(int nbVariables) {
+        this.note = new byte[nbVariables];
         this.locked = false;
         this.value = 0;
     }
@@ -72,5 +72,24 @@ public class Cell {
 	public void setValue(int value) {
 		this.value = value;
 	}
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Cell other = (Cell) obj;
+        if ((this.value != other.value) || (this.locked != other.locked) || (this.note == null || other.note == null)) return false;
+        for (int i = 0; i < this.note.length; i++) {
+            if (this.note[i] != other.note[i]) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Integer.hashCode(this.value);
+        result = 31 * result + java.util.Arrays.hashCode(this.note);
+        return result;
+    }
 
 }
