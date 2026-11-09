@@ -210,12 +210,123 @@ public interface RuleApplier {
 	}
 
 	/**
-	 * 
-	 * @param grid
-	 */
-	static boolean YWing(Grid grid){
-		return true;
-	}
+     * Applies the Y-Wing (XY-Wing) deductive rule to eliminate candidates.
+     *
+     * @param grid the Sudoku grid to process
+     * @return true if at least one candidate note was removed, false otherwise
+     */
+    static boolean YWing(Grid grid) {
+        int n = grid.getWidth();
+        int nbRows = grid.getHeight();
+        int totalCells = n * nbRows;
+        int nbValues = Math.max(n, nbRows);
+        List<Integer> bivalueCells = new ArrayList<>();
+        for (int pos = 0; pos < totalCells; pos++) {
+            if (grid.getNumber(pos) == 0 && countCandidates(grid, pos, nbValues) == 2) {
+                bivalueCells.add(pos);
+            }
+        }
+        for (int i = 0; i < bivalueCells.size(); i++) {
+            int pivot = bivalueCells.get(i);
+            List<Integer> pivotNotes = getCandidates(grid, pivot, nbValues);
+            int candA = pivotNotes.get(0);
+            int candB = pivotNotes.get(1);
+            for (int j = 0; j < bivalueCells.size(); j++) {
+                if (i == j) continue;
+                int wing1 = bivalueCells.get(j);
+                if (!cellsSeeEachOther(grid, pivot, wing1)) continue;
+                List<Integer> notes1 = getCandidates(grid, wing1, nbValues);
+                int sharedWithPivot;
+                int candC;
+                if (notes1.contains(candA) && !notes1.contains(candB)) {
+                    sharedWithPivot = candA;
+                    candC = (notes1.get(0) == candA) ? notes1.get(1) : notes1.get(0);
+                } else if (notes1.contains(candB) && !notes1.contains(candA)) {
+                    sharedWithPivot = candB;
+                    candC = (notes1.get(0) == candB) ? notes1.get(1) : notes1.get(0);
+                } else {
+                    continue;
+                }
+                int requiredForWing2 = (sharedWithPivot == candA) ? candB : candA;
+                for (int k = j + 1; k < bivalueCells.size(); k++) {
+                    if (k == i) continue;
+                    int wing2 = bivalueCells.get(k);
+                    if (!cellsSeeEachOther(grid, pivot, wing2)) continue;
+                    List<Integer> notes2 = getCandidates(grid, wing2, nbValues);
+                    if (notes2.contains(requiredForWing2) && notes2.contains(candC)) {
+                        boolean modified = false;
+                        for (int target = 0; target < totalCells; target++) {
+                            if (target != pivot && target != wing1 && target != wing2) {
+                                if (grid.getNumber(target) == 0 && grid.isCellContaining(target, candC)) {
+                                    if (cellsSeeEachOther(grid, target, wing1) && cellsSeeEachOther(grid, target, wing2)) {
+                                        grid.removeNote(target, candC);
+                                        modified = true;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (modified) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if two cells see each other (same row, same column, or same block).
+     *
+     * @param grid the Sudoku grid
+     * @param pos1 the position of the first cell
+     * @param pos2 the position of the second cell
+     * @return true if the two cells share a line, column or block, false otherwise
+     */
+    private static boolean cellsSeeEachOther(Grid grid, int pos1, int pos2) {
+        if (pos1 == pos2) return false;
+        boolean sameRow = grid.getRowIndex(pos1) == grid.getRowIndex(pos2);
+        boolean sameCol = grid.getColumnIndex(pos1) == grid.getColumnIndex(pos2);
+        boolean sameBlock = grid.getBlockIndex(pos1) == grid.getBlockIndex(pos2);
+        return sameRow || sameCol || sameBlock;
+    }
+
+    /**
+     * Counts how many candidates are present in the notes of a cell.
+     *
+     * @param grid the Sudoku grid
+     * @param pos the cell position
+     * @param nbValues the maximum number of values
+     * @return the number of active notes in the cell
+     */
+    private static int countCandidates(Grid grid, int pos, int nbValues) {
+        int count = 0;
+        for (int note = 0; note < nbValues; note++) {
+            if (grid.isCellContaining(pos, note)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Retrieves the list of candidate note indices present in a cell.
+     *
+     * @param grid the Sudoku grid
+     * @param pos the cell position
+     * @param nbValues the maximum number of values
+     * @return the list of note indices
+     */
+    private static List<Integer> getCandidates(Grid grid, int pos, int nbValues) {
+        List<Integer> candidates = new ArrayList<>();
+        for (int note = 0; note < nbValues; note++) {
+            if (grid.isCellContaining(pos, note)) {
+                candidates.add(note);
+            }
+        }
+        return candidates;
+    }
 
 	/**
      * Applies the X-Wing deductive rule on both rows and columns.
