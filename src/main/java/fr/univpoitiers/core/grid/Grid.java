@@ -100,7 +100,7 @@ public class Grid {
 		return this.availableCells.getFirst();
 	}
 
-    public void insertSorted(ArrayList<Integer> list, int value) {
+    private void insertSorted(ArrayList<Integer> list, int value) {
         int index = Collections.binarySearch(list, value);
 
         // Si l'élément n'est pas déjà présent, binarySearch renvoie (-point_insertion - 1)
@@ -147,18 +147,17 @@ public class Grid {
     public void clearEntries() {
         for (int i = 0; i < this.cells.length; i++) {
             if (!this.cells[i].isLocked()) {
-                this.cells[i].setValue(0);
-                if (!this.availableCells.contains(i)) {
-                    this.availableCells.add(i);
-                }
+                this.removeNumber(i);
             }
         }
     }
 
     public void resetGrid() {
+        int max = Math.max(this.WIDTH, this.HEIGHT);
+        this.cells = new Cell[this.WIDTH * this.HEIGHT];
         this.availableCells.clear();
         for (int i = 0; i < this.cells.length; i++) {
-            this.cells[i].setValue(0);
+            this.cells[i] = new Cell(max);
             this.availableCells.add(i);
         }
     }
@@ -254,6 +253,14 @@ public class Grid {
         }
 
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = java.util.Arrays.hashCode(this.cells);
+        result = 31 * result + Integer.hashCode(this.WIDTH);
+        result = 31 * result + Integer.hashCode(this.HEIGHT);
+        return result;
     }
 
 	/**
