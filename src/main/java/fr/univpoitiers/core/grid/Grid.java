@@ -125,6 +125,7 @@ public class Grid {
 	 */
 	public void removeNumber(int pos) {
 		this.cells[pos].setValue(0);
+        this.availableCells.add(pos);
 	}
 
 	public void lockFilledCells() {
