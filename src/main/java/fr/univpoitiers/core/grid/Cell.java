@@ -6,6 +6,19 @@ public class Cell {
 	private boolean locked;
 	private int value;
 
+    public Cell(int nb_variables) {
+        this.note = new byte[nb_variables];
+        this.locked = false;
+        this.value = 0;
+    }
+
+    public Cell(Cell other) {
+        this.note = new byte[other.note.length];
+        System.arraycopy(other.note, 0, this.note, 0, other.note.length);
+        this.locked = other.locked;
+        this.value = other.value;
+    }
+
 	/**
 	 * 
 	 * @param value
@@ -13,6 +26,24 @@ public class Cell {
 	public void setNote(int value) {
 		this.note[value] = 1;
 	}
+
+    public int count(){
+        int count = 0;
+        for (int i = 0; i < this.note.length; i++) {
+            if (this.note[i] == 1) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     *
+     * @param value
+     */
+    public int getNote(int value) {
+        return this.note[value];
+    }
 
 	/**
 	 * 
