@@ -205,4 +205,261 @@ class RuleApplierTest {
             assertTrue(has(0, 3, note), "une case hors du bloc ne doit pas être touchée");
         }
     }
+
+    @Nested
+    @DisplayName("X-Wing")
+    class XWingTests {
+
+        @Test
+        @DisplayName("X-Wing sur lignes : retire la note du reste des deux colonnes")
+        void xWing_onRows_removesNoteInColumns() {
+            int note = 3;
+            // Lignes 1 et 4 : la note n'est présente que dans les colonnes 2 et 5
+            addNote(note, new int[]{1, 2}, new int[]{1, 5});
+            addNote(note, new int[]{4, 2}, new int[]{4, 5});
+
+            // Autres occurrences sur ces colonnes (à retirer) et une hors colonnes (à garder)
+            addNote(note, new int[]{7, 2}, new int[]{8, 5}, new int[]{7, 0});
+
+            assertTrue(RuleApplier.XWing(grid));
+            assertTrue(has(1, 2, note));
+            assertTrue(has(1, 5, note));
+            assertTrue(has(4, 2, note));
+            assertTrue(has(4, 5, note));
+            assertFalse(has(7, 2, note));
+            assertFalse(has(8, 5, note));
+            assertTrue(has(7, 0, note), "une case hors des colonnes cibles ne doit pas être touchée");
+        }
+
+        @Test
+        @DisplayName("X-Wing sur colonnes : retire la note du reste des deux lignes")
+        void xWing_onColumns_removesNoteInRows() {
+            int note = 6;
+            // Colonnes 1 et 6 : la note n'est présente que dans les lignes 2 et 7
+            addNote(note, new int[]{2, 1}, new int[]{7, 1});
+            addNote(note, new int[]{2, 6}, new int[]{7, 6});
+
+            // Autres occurrences sur ces lignes (à retirer) et une hors lignes (à garder)
+            addNote(note, new int[]{2, 3}, new int[]{7, 8}, new int[]{0, 3});
+
+            assertTrue(RuleApplier.XWing(grid));
+            assertTrue(has(2, 1, note));
+            assertTrue(has(7, 1, note));
+            assertTrue(has(2, 6, note));
+            assertTrue(has(7, 6, note));
+            assertFalse(has(2, 3, note));
+            assertFalse(has(7, 8, note));
+            assertTrue(has(0, 3, note), "une case hors des lignes cibles ne doit pas être touchée");
+        }
+
+        @Test
+        @DisplayName("X-Wing : renvoie false s'il n'y a rien à retirer")
+        void xWing_whenNothingToRemove_returnsFalse() {
+            int note = 2;
+            addNote(note, new int[]{1, 2}, new int[]{1, 5});
+            addNote(note, new int[]{4, 2}, new int[]{4, 5});
+
+            Grid before = new Grid(grid);
+            assertFalse(RuleApplier.XWing(grid));
+            assertEquals(before, grid);
+        }
+
+        @Test
+        @DisplayName("X-Wing : ignore les cases déjà remplies")
+        void xWing_ignoresFilledCells() {
+            int note = 3;
+            addNote(note, new int[]{1, 2}, new int[]{1, 5});
+            addNote(note, new int[]{4, 2}, new int[]{4, 5});
+            addNote(note, new int[]{7, 2});
+
+            // (7,2) est remplie : sa note ne doit pas être touchée
+            grid.addNumber(pos(7, 2), 4);
+
+            assertFalse(RuleApplier.XWing(grid));
+            assertTrue(has(7, 2, note));
+        }
+    }
+
+    @Nested
+    @DisplayName("Y-Wing")
+    class YWingTests {
+
+        @Test
+        @DisplayName("Y-Wing classique : retire le candidat des cases voyant les deux pinces")
+        void yWing_removesTargetCandidate() {
+            int candA = 0;
+            int candB = 1;
+            int candC = 2;
+
+            // Pivot en (0,0) avec {A, B}
+            addNote(candA, new int[]{0, 0});
+            addNote(candB, new int[]{0, 0});
+
+            // Pince 1 en (0,5) avec {A, C} (voit le pivot par la ligne 0)
+            addNote(candA, new int[]{0, 5});
+            addNote(candC, new int[]{0, 5});
+
+            // Pince 2 en (5,0) avec {B, C} (voit le pivot par la colonne 0)
+            addNote(candB, new int[]{5, 0});
+            addNote(candC, new int[]{5, 0});
+
+            // Case (5,5) : voit Pince 1 (colonne 5) et Pince 2 (ligne 5) -> C à retirer
+            addNote(candC, new int[]{5, 5});
+            addNote(candA, new int[]{5, 5});
+
+            // Case témoin (7,5) voyant seulement Pince 1
+            addNote(candC, new int[]{7, 5});
+
+            assertTrue(RuleApplier.YWing(grid));
+            assertTrue(has(0, 0, candA));
+            assertTrue(has(0, 5, candC));
+            assertTrue(has(5, 0, candC));
+            assertFalse(has(5, 5, candC));
+            assertTrue(has(5, 5, candA));
+            assertTrue(has(7, 5, candC), "une case ne voyant qu'une seule pince ne doit pas être touchée");
+        }
+
+        @Test
+        @DisplayName("Y-Wing : renvoie false si le pivot a plus de 2 candidats")
+        void yWing_whenPivotNotBivalue_returnsFalse() {
+            int candA = 0;
+            int candB = 1;
+            int candC = 2;
+
+            // Pivot à 3 candidats
+            addNote(candA, new int[]{0, 0});
+            addNote(candB, new int[]{0, 0});
+            addNote(candC, new int[]{0, 0});
+
+            addNote(candA, new int[]{0, 5});
+            addNote(candC, new int[]{0, 5});
+            addNote(candB, new int[]{5, 0});
+            addNote(candC, new int[]{5, 0});
+            addNote(candC, new int[]{5, 5});
+
+            Grid before = new Grid(grid);
+            assertFalse(RuleApplier.YWing(grid));
+            assertEquals(before, grid);
+        }
+
+        @Test
+        @DisplayName("Y-Wing : renvoie false si les pinces ne voient pas le pivot")
+        void yWing_whenWingsDoNotSeePivot_returnsFalse() {
+            int candA = 0;
+            int candB = 1;
+            int candC = 2;
+
+            addNote(candA, new int[]{0, 0});
+            addNote(candB, new int[]{0, 0});
+
+            // Pince 1 voit le pivot
+            addNote(candA, new int[]{0, 5});
+            addNote(candC, new int[]{0, 5});
+
+            // Pince 2 en (7,8) ne partage ni ligne, ni colonne, ni bloc avec (0,0)
+            addNote(candB, new int[]{7, 8});
+            addNote(candC, new int[]{7, 8});
+            addNote(candC, new int[]{7, 5});
+
+            Grid before = new Grid(grid);
+            assertFalse(RuleApplier.YWing(grid));
+            assertEquals(before, grid);
+        }
+
+        @Test
+        @DisplayName("Y-Wing : renvoie false s'il n'y a rien à retirer")
+        void yWing_whenNothingToRemove_returnsFalse() {
+            int candA = 0;
+            int candB = 1;
+            int candC = 2;
+
+            addNote(candA, new int[]{0, 0});
+            addNote(candB, new int[]{0, 0});
+            addNote(candA, new int[]{0, 5});
+            addNote(candC, new int[]{0, 5});
+            addNote(candB, new int[]{5, 0});
+            addNote(candC, new int[]{5, 0});
+
+            Grid before = new Grid(grid);
+            assertFalse(RuleApplier.YWing(grid));
+            assertEquals(before, grid);
+        }
+    }
+
+    @Nested
+    @DisplayName("Swordfish")
+    class SwordfishTests {
+
+        @Test
+        @DisplayName("Swordfish sur lignes : retire la note du reste des 3 colonnes")
+        void swordfish_onRows_removesNoteInColumns() {
+            int note = 5;
+
+            // 3 lignes (0, 3, 6) restreintes à 3 colonnes (1, 4, 7)
+            addNote(note, new int[]{0, 1}, new int[]{0, 4});
+            addNote(note, new int[]{3, 4}, new int[]{3, 7});
+            addNote(note, new int[]{6, 1}, new int[]{6, 7});
+
+            // Occurrences à retirer sur les colonnes 1, 4, 7 hors de ces 3 lignes
+            addNote(note, new int[]{1, 1}, new int[]{8, 4}, new int[]{5, 7});
+
+            // Case témoin sur la colonne 0 (à garder)
+            addNote(note, new int[]{1, 0});
+
+            assertTrue(RuleApplier.Swordfish(grid));
+            assertTrue(has(0, 1, note));
+            assertTrue(has(0, 4, note));
+            assertTrue(has(3, 4, note));
+            assertTrue(has(3, 7, note));
+            assertTrue(has(6, 1, note));
+            assertTrue(has(6, 7, note));
+
+            assertFalse(has(1, 1, note));
+            assertFalse(has(8, 4, note));
+            assertFalse(has(5, 7, note));
+            assertTrue(has(1, 0, note), "une case hors des colonnes cibles ne doit pas être touchée");
+        }
+
+        @Test
+        @DisplayName("Swordfish sur colonnes : retire la note du reste des 3 lignes")
+        void swordfish_onColumns_removesNoteInRows() {
+            int note = 1;
+
+            // 3 colonnes (0, 4, 8) restreintes à 3 lignes (1, 2, 7)
+            addNote(note, new int[]{1, 0}, new int[]{2, 0});
+            addNote(note, new int[]{2, 4}, new int[]{7, 4});
+            addNote(note, new int[]{1, 8}, new int[]{7, 8});
+
+            // Occurrences à retirer sur les lignes 1, 2, 7 hors de ces 3 colonnes
+            addNote(note, new int[]{1, 3}, new int[]{7, 5});
+
+            // Case témoin
+            addNote(note, new int[]{5, 3});
+
+            assertTrue(RuleApplier.Swordfish(grid));
+            assertTrue(has(1, 0, note));
+            assertTrue(has(2, 0, note));
+            assertTrue(has(2, 4, note));
+            assertTrue(has(7, 4, note));
+            assertTrue(has(1, 8, note));
+            assertTrue(has(7, 8, note));
+
+            assertFalse(has(1, 3, note));
+            assertFalse(has(7, 5, note));
+            assertTrue(has(5, 3, note), "une case hors des lignes cibles ne doit pas être touchée");
+        }
+
+        @Test
+        @DisplayName("Swordfish : renvoie false s'il n'y a rien à retirer")
+        void swordfish_whenNothingToRemove_returnsFalse() {
+            int note = 4;
+            addNote(note, new int[]{0, 1}, new int[]{0, 4});
+            addNote(note, new int[]{3, 4}, new int[]{3, 7});
+            addNote(note, new int[]{6, 1}, new int[]{6, 7});
+
+            Grid before = new Grid(grid);
+            assertFalse(RuleApplier.Swordfish(grid));
+            assertEquals(before, grid);
+        }
+    }
 }
