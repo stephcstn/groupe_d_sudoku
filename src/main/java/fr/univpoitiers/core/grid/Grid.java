@@ -69,14 +69,19 @@ public class Grid {
     }
 
 	/**
-	 * 
-	 * @param x0
-	 * @param y0
-	 * @param x1
-	 * @param y1
+	 * Vérifie que la valeur peut être placée à cette position :
+	 * elle ne doit pas déjà être présente sur la ligne, la colonne ou le bloc.
+	 *
+	 * @param pos position de la case (index 1D)
+	 * @param value valeur à placer (de 1 au nombre de valeurs possibles)
+	 * @return true si la valeur respecte les trois contraintes, false sinon
+	 *         (y compris si la valeur est hors bornes, par exemple 0 = case vide)
 	 */
-	public boolean checkValidValues(int x0, int y0, int x1, int y1) {
-		throw new UnsupportedOperationException();
+	public boolean checkValidValues(int pos, int value) {
+		if (value < 1 || value > Math.max(this.WIDTH, this.HEIGHT)) {
+			return false;
+		}
+		return checkBlock(pos, value) && checkColumn(pos, value) && checkRow(pos, value);
 	}
 
 	/**
@@ -161,7 +166,7 @@ public class Grid {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param y
      * @param valeur
 	 */
@@ -186,12 +191,10 @@ public class Grid {
 
         int startBlock = getBlockIndex(pos);
 
-        int blockWidth = (int) Math.sqrt(this.WIDTH);
-        int blockHeight = (int) Math.sqrt(this.HEIGHT);
-
-        for (int i = startBlock; i < startBlock + blockHeight * this.WIDTH; i += this.WIDTH) {
-            for (int j = startBlock; j < startBlock + blockWidth; j++) {
-                this.cells[i * this.WIDTH + j].removeNote(valeur);
+        // rowStart = première case de chaque ligne du bloc
+        for (int rowStart = startBlock; rowStart < startBlock + this.BLOCK_HEIGHT * this.WIDTH; rowStart += this.WIDTH) {
+            for (int i = rowStart; i < rowStart + this.BLOCK_WIDTH; i++) {
+                this.cells[i].removeNote(valeur);
             }
         }
 	}
@@ -223,7 +226,87 @@ public class Grid {
 	 * @param pos
 	 */
 	public void diagonalUpdate(int pos) {
+		// TODO - implement Grid.diagonalUpdate
+	}
 
+	/**
+	 * Converts 2D coordinates (x, y) into a 1D array index.
+	 *
+	 * @param x
+	 * @param y
+	 * @return the corresponding 1D index
+	 */
+	public int cellToIndex(int x, int y) {
+		return y * WIDTH + x;
+	}
+
+	/**
+	 * Vérifie que la valeur n'est pas déjà présente sur la ligne.
+	 *
+	 * @param pos position de la case (index 1D)
+	 * @param value valeur à vérifier
+	 * @return true si aucune autre case de la ligne ne contient cette valeur
+	 */
+	public boolean checkRow(int pos, int value) {
+		int y = getRowIndex(pos);
+		for (int c = 0; c < this.WIDTH; c++) {
+			int index = cellToIndex(c, y);
+
+			if (index != pos) {
+				if (cells[index].getValue() == value) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Vérifie que la valeur n'est pas déjà présente sur la colonne.
+	 *
+	 * @param pos position de la case (index 1D)
+	 * @param value valeur à vérifier
+	 * @return true si aucune autre case de la colonne ne contient cette valeur
+	 */
+	public boolean checkColumn(int pos, int value) {
+		int x = getColumnIndex(pos);
+		for (int r = 0; r < this.HEIGHT; r++) {
+			int index = cellToIndex(x, r);
+
+			if (index != pos) {
+				if (cells[index].getValue() == value) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Vérifie que la valeur n'est pas déjà présente dans le bloc de la case
+	 * (taille BLOCK_WIDTH x BLOCK_HEIGHT).
+	 *
+	 * @param pos position de la case (index 1D)
+	 * @param value valeur à vérifier
+	 * @return true si aucune autre case du bloc ne contient cette valeur
+	 */
+	public boolean checkBlock(int pos, int value) {
+		int startBlock = getBlockIndex(pos);
+		int startX = getColumnIndex(startBlock);
+		int startY = getRowIndex(startBlock);
+
+		for (int r = startY; r < startY + this.BLOCK_HEIGHT; r++) {
+			for (int c = startX; c < startX + this.BLOCK_WIDTH; c++) {
+				int index = cellToIndex(c, r);
+
+				if (index != pos) {
+					if (cells[index].getValue() == value) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 }
