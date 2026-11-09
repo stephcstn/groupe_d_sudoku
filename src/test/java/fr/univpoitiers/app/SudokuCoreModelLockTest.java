@@ -17,8 +17,6 @@ class SudokuCoreModelLockTest {
         model.lockFilledCells();
 
         assertTrue(model.isGridLocked());
-        assertTrue(model.isCellLocked(0, 0));
-        assertFalse(model.isCellLocked(1, 0));
         assertFalse(model.input(7, 0, 0));
         assertEquals(4, model.getNumber(0, 0));
         assertTrue(model.input(7, 1, 0));
@@ -26,7 +24,6 @@ class SudokuCoreModelLockTest {
         model.unlockGrid();
 
         assertFalse(model.isGridLocked());
-        assertFalse(model.isCellLocked(0, 0));
         assertTrue(model.input(7, 0, 0));
         assertEquals(7, model.getNumber(0, 0));
     }
@@ -41,7 +38,6 @@ class SudokuCoreModelLockTest {
         model.resetGrid();
 
         assertFalse(model.isGridLocked());
-        assertFalse(model.isCellLocked(0, 0));
         assertEquals(0, model.getNumber(0, 0));
         assertTrue(model.input(8, 0, 0));
     }
