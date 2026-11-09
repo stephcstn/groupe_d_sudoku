@@ -186,11 +186,61 @@ class GridTest {
         }
 
         @Test
-        @DisplayName("checkValidValues: valide le respect conjoint ligne, colonne et bloc")
-        void checkValidValues_respectsAllConstraints() {
-            assertFalse(grid.checkValidValues(2, 7)); // conflit ligne
-            assertFalse(grid.checkValidValues(2, 8)); // conflit colonne
-            assertTrue(grid.checkValidValues(2, 1));  // coup valide
+        @DisplayName("checkValidValues: faux si seule la ligne est en conflit")
+        void checkValidValues_whenOnlyRowViolated_shouldReturnFalse() {
+            // Case 2 : 7 est sur la ligne 0, mais ni dans la colonne 2 ni dans le bloc
+            assertFalse(grid.checkValidValues(2, 7));
+        }
+
+        @Test
+        @DisplayName("checkValidValues: faux si seule la colonne est en conflit")
+        void checkValidValues_whenOnlyColumnViolated_shouldReturnFalse() {
+            // Case 22 = (x=4, y=2) : 2 est dans la colonne 4, mais ni sur la ligne 2 ni dans le bloc
+            assertTrue(grid.checkBlock(22, 2));
+            assertTrue(grid.checkRow(22, 2));
+            assertFalse(grid.checkValidValues(22, 2));
+        }
+
+        @Test
+        @DisplayName("checkValidValues: faux si le bloc est en conflit")
+        void checkValidValues_whenBlockViolated_shouldReturnFalse() {
+            // Case 2 : 8 est dans le bloc (et dans la colonne 2)
+            assertFalse(grid.checkValidValues(2, 8));
+        }
+
+        @Test
+        @DisplayName("checkValidValues: vrai si ligne, colonne et bloc sont respectés")
+        void checkValidValues_whenAllConstraintsSatisfied_shouldReturnTrue() {
+            assertTrue(grid.checkValidValues(2, 1));
+        }
+
+        @Test
+        @DisplayName("checkValidValues: faux pour une valeur hors bornes (0 = case vide, > 9)")
+        void checkValidValues_whenValueOutOfRange_shouldReturnFalse() {
+            assertFalse(grid.checkValidValues(2, 0));
+            assertFalse(grid.checkValidValues(2, 10));
+            assertFalse(grid.checkValidValues(2, -1));
+        }
+
+        @Test
+        @DisplayName("checkValidValues: une case remplie n'entre pas en conflit avec elle-même")
+        void checkValidValues_whenCheckingOwnValue_shouldIgnoreTheCellItself() {
+            // Case 0 contient 5, absent du reste de la ligne 0, de la colonne 0 et du bloc
+            assertTrue(grid.checkValidValues(0, 5));
+        }
+
+        @Test
+        @DisplayName("checkValidValues: fonctionne sur une grille 4x4 à blocs 2x2")
+        void checkValidValues_onSmallGrid_shouldUseGridAndBlockSize() {
+            Grid small = new Grid(4, 4);
+            small.addNumber(0, 1);
+
+            assertFalse(small.checkValidValues(5, 1), "même bloc 2x2");
+            assertFalse(small.checkValidValues(3, 1), "même ligne");
+            assertFalse(small.checkValidValues(12, 1), "même colonne");
+            assertTrue(small.checkValidValues(10, 1), "autre ligne, colonne et bloc");
+            assertFalse(small.checkValidValues(10, 5), "5 est hors bornes en 4x4");
+            assertTrue(small.checkValidValues(10, 4), "4 est la valeur max en 4x4");
         }
     }
 
@@ -264,6 +314,24 @@ class GridTest {
             assertFalse(grid9x9.isCellContaining(0, 5));
             assertFalse(grid9x9.isCellContaining(1, 5));
             assertFalse(grid9x9.isCellContaining(10, 5));
+        }
+
+        @Test
+        @DisplayName("blockUpdate sur le bloc central retire la note seulement dans ce bloc")
+        void testBlockUpdateOnCenterBlock() throws Exception {
+            // Toutes les cases reçoivent la note 4 (champ privé : accès par réflexion)
+            java.lang.reflect.Field f = Grid.class.getDeclaredField("cells");
+            f.setAccessible(true);
+            for (Cell c : (Cell[]) f.get(grid9x9)) {
+                c.setNote(4);
+            }
+
+            grid9x9.blockUpdate(40, 4); // (x=4, y=4) : bloc central
+
+            for (int pos = 0; pos < 81; pos++) {
+                boolean inCenterBlock = grid9x9.getBlockIndex(pos) == 30;
+                assertEquals(!inCenterBlock, grid9x9.isCellContaining(pos, 4), "pos " + pos);
+            }
         }
 
         @Test

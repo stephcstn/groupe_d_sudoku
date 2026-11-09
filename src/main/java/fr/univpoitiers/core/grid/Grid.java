@@ -68,13 +68,19 @@ public class Grid {
     }
 
     /**
+     * Vérifie que la valeur peut être placée à cette position :
+     * elle ne doit pas déjà être présente sur la ligne, la colonne ou le bloc.
      *
-     * @param pos
-     * @param value
-     *
+     * @param pos position de la case (index 1D)
+     * @param value valeur à placer (de 1 au nombre de valeurs possibles)
+     * @return true si la valeur respecte les trois contraintes, false sinon
+     *         (y compris si la valeur est hors bornes, par exemple 0 = case vide)
      */
     public boolean checkValidValues(int pos, int value) {
-        return checkBlock(pos,value) && checkColumn(pos,value) && checkRow(pos, value);
+        if (value < 1 || value > Math.max(this.WIDTH, this.HEIGHT)) {
+            return false;
+        }
+        return checkBlock(pos, value) && checkColumn(pos, value) && checkRow(pos, value);
     }
 
     /**
