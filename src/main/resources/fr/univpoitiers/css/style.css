@@ -62,7 +62,6 @@
 /* Style lorsque la souris survole la cellule */
 .cell-view:hover {
     -fx-background-color: #e8ded2;
-    -fx-cursor: hand;
 }
 
 .cell-view.highlighted {
