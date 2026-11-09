@@ -70,13 +70,12 @@ public class Grid {
 
 	/**
 	 * 
-	 * @param x0
-	 * @param y0
-	 * @param x1
-	 * @param y1
+	 * @param pos
+	 * @param value
+	 *
 	 */
-	public boolean checkValidValues(int x0, int y0, int x1, int y1) {
-		throw new UnsupportedOperationException();
+	public boolean checkValidValues(int pos, int value) {
+		return checkBlock(pos,value) && checkColumn(pos,value) && checkRow(pos, value);
 	}
 
 	/**
@@ -162,7 +161,7 @@ public class Grid {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param y
      * @param valeur
 	 */
@@ -221,10 +220,92 @@ public class Grid {
 
 	/**
 	 *
-	 * @param pos
+	 * @param x
+	 * @param y
 	 */
-	public void diagonalUpdate(int pos) {
+	public void diagonalUpdate(int x, int y) {
+		// TODO - implement Grid.diagonalUpdate
+		throw new UnsupportedOperationException();
+	}
 
+	/**
+	 * Converts 2D coordinates (x, y) into a 1D array index.
+	 *
+	 * @param x
+	 * @param y
+	 * @return the corresponding 1D index
+	 */
+	public int cellToIndex(int x, int y) {
+		return y * WIDTH + x;
+	}
+
+	/**
+	 * Vérifie que la valeur n'est pas déjà présente sur la ligne.
+	 *
+	 * @param pos
+	 * @param value
+	 *
+	 */
+	public boolean checkRow(int pos, int value) {
+		int y = getRowIndex(pos);
+		for (int c = 0; c < this.WIDTH; c++) {
+			int index = cellToIndex(c, y);
+
+			if (index != pos) {
+				Cell cell = cells[index];
+				if (cell != null && cell.getValue() == value) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Vérifie que la valeur n'est pas déjà présente sur la colonne.
+	 * @param pos
+	 * @param value
+	 *
+	 */
+	public boolean checkColumn(int pos, int value) {
+		int x = getColumnIndex(pos);
+		for (int r = 0; r < this.HEIGHT; r++) {
+			int index = cellToIndex(x, r);
+
+			if (index != pos) {
+				Cell cell = cells[index];
+				if (cell != null && cell.getValue() == value) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Vérifie que la valeur n'est pas déjà présente dans le sous-bloc 3x3.
+	 * @param pos
+	 * @param value
+	 *
+	 */
+	public boolean checkBlock(int pos, int value) {
+		int startBlock = getBlockIndex(pos);
+		int startX = getColumnIndex(startBlock);
+		int startY = getRowIndex(startBlock);
+
+		for (int r = startY; r < startY + this.BLOCK_HEIGHT; r++) {
+			for (int c = startX; c < startX + this.BLOCK_WIDTH; c++) {
+				int index = cellToIndex(c, r);
+
+				if (index != pos) {
+					Cell cell = cells[index];
+					if (cell != null && cell.getValue() == value) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 }
