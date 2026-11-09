@@ -4,16 +4,47 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class GridTest {
 
     private Grid grid9x9;
+    private Grid grid;
+
+    /**
+     * Helper method to populate a grid from a 1D array representation.
+     * 0 represents an empty cell.
+     */
+    private void populateGrid(Grid targetGrid, int[] values) {
+        int width = targetGrid.getWidth();
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] != 0) {
+                targetGrid.addNumber(i, values[i]);
+            }
+        }
+    }
 
     @BeforeEach
     void setUp() {
         grid9x9 = new Grid(9, 9);
+
+        // Standard 9x9 reference grid (0 = empty cell)
+        int[] initialGrid = {
+                5, 3, 0,  0, 7, 0,  0, 0, 0,
+                6, 0, 0,  1, 9, 5,  0, 0, 0,
+                0, 9, 8,  0, 0, 0,  0, 6, 0,
+
+                8, 0, 0,  0, 6, 0,  0, 0, 3,
+                4, 0, 0,  8, 0, 3,  0, 0, 1,
+                7, 0, 0,  0, 2, 0,  0, 0, 6,
+
+                0, 6, 0,  0, 0, 0,  2, 8, 0,
+                0, 0, 0,  4, 1, 9,  0, 0, 5,
+                0, 0, 0,  0, 8, 0,  0, 7, 9
+        };
+
+        grid = new Grid(9, 9);
+        populateGrid(grid, initialGrid);
     }
 
     @Nested
@@ -95,10 +126,86 @@ class GridTest {
             assertNotEquals(first, grid9x9.nextAvailableCell());
 
             grid9x9.backCellAvailable(first);
-            // Vérifie que la cellule a été réinsérée
-            // (elle est ajoutée à la fin de la liste)
             grid9x9.removeNumber(first);
             assertEquals(0, grid9x9.getNumber(first));
+        }
+    }
+
+    @Nested
+    @DisplayName("Validation des contraintes de placement")
+    class ValidationConstraintsTests {
+
+        // --- Contrainte de Ligne ---
+
+        @Test
+        @DisplayName("checkRow: faux si la valeur est déjà présente sur la ligne")
+        void checkRow_whenValueExistsInRow_shouldReturnFalse() {
+            // Pos 2 = ligne 0. Présents : 5, 3, 7
+            assertFalse(grid.checkRow(2, 5));
+            assertFalse(grid.checkRow(2, 3));
+            assertFalse(grid.checkRow(2, 7));
+        }
+
+        @Test
+        @DisplayName("checkRow: vrai si la valeur est absente de la ligne")
+        void checkRow_whenValueDoesNotExistInRow_shouldReturnTrue() {
+            // Le chiffre 1 n'est pas présent sur la ligne 0
+            assertTrue(grid.checkRow(2, 1));
+        }
+
+        // --- Contrainte de Colonne ---
+
+        @Test
+        @DisplayName("checkColumn: faux si la valeur est déjà présente sur la colonne")
+        void checkColumn_whenValueExistsInColumn_shouldReturnFalse() {
+            // Pos 2 = colonne 2. Le chiffre 8 est présent à la pos 20 (row 2, col 2)
+            assertFalse(grid.checkColumn(2, 8));
+        }
+
+        @Test
+        @DisplayName("checkColumn: vrai si la valeur est absente de la colonne")
+        void checkColumn_whenValueDoesNotExistInColumn_shouldReturnTrue() {
+            // Le chiffre 4 est absent de la colonne 2
+            assertTrue(grid.checkColumn(2, 4));
+        }
+
+        // --- Contrainte de Bloc 3x3 ---
+
+        @Test
+        @DisplayName("checkBlock: faux si la valeur est déjà présente dans le bloc 3x3")
+        void checkBlock_whenValueExistsInBlock_shouldReturnFalse() {
+            // Pos 2 appartient au bloc 0 (haut-gauche). 6 est présent à pos 9 (row 1, col 0)
+            assertFalse(grid.checkBlock(2, 6));
+        }
+
+        @Test
+        @DisplayName("checkBlock: vrai si la valeur est dans un autre bloc mais pas celui-ci")
+        void checkBlock_whenValueExistsInAdjacentBlock_shouldReturnTrue() {
+            // 7 est présent ligne 0 pos 4 (bloc centre-haut), mais absent du bloc 0
+            assertTrue(grid.checkBlock(2, 7));
+        }
+
+        // --- Règle composite (Ligne + Colonne + Bloc) ---
+
+        @Test
+        @DisplayName("checkValidValues: faux si la contrainte de ligne échoue")
+        void checkValidValues_whenRowViolated_shouldReturnFalse() {
+            // 7 est valide pour la colonne 2 et le bloc 0, mais déjà présent sur la ligne 0
+            assertFalse(grid.checkValidValues(2, 7));
+        }
+
+        @Test
+        @DisplayName("checkValidValues: faux si la contrainte de colonne échoue")
+        void checkValidValues_whenColumnViolated_shouldReturnFalse() {
+            // 8 est absent de la ligne 0, mais présent en colonne 2
+            assertFalse(grid.checkValidValues(2, 8));
+        }
+
+        @Test
+        @DisplayName("checkValidValues: vrai quand toutes les contraintes sont respectées")
+        void checkValidValues_whenAllConstraintsValid_shouldReturnTrue() {
+            // 1 est absent de la ligne 0, de la colonne 2 et du bloc 0
+            assertTrue(grid.checkValidValues(2, 1));
         }
     }
 
