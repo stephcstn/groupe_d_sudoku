@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 public class Grid {
 
-	private Cell[] cells;
+	private final Cell[] cells;
 	private final int width;
 	private final int height;
-	private ArrayList<Integer> availableCells;
+	private final ArrayList<Integer> availableCells;
     private final int blockWidth;
     private final int blockHeight;
 
@@ -42,6 +42,22 @@ public class Grid {
         }
     }
 
+    /**
+     * Convertit des coordonnées 2D en index 1D de la grille (inverse de
+     * {@link #getColumnIndex(int)} et {@link #getRowIndex(int)}).
+     *
+     * @param x colonne, de 0 à {@code width - 1}
+     * @param y ligne, de 0 à {@code height - 1}
+     * @return l'index 1D, {@code y * width + x}
+     * @throws IllegalArgumentException si les coordonnées sont hors de la grille
+     */
+    public int getPosition(int x, int y) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+            throw new IllegalArgumentException("Coordonnées hors de la grille : (" + x + ", " + y + ").");
+        }
+        return y * this.width + x;
+    }
+
     public int getRowIndex(int pos) {
         return pos / this.width;
     }
@@ -74,6 +90,7 @@ public class Grid {
 	 * @param y1
 	 */
 	public boolean checkValidValues(int x0, int y0, int x1, int y1) {
+		// TODO - implement Grid.checkValidValues
 		throw new UnsupportedOperationException();
 	}
 
@@ -106,6 +123,16 @@ public class Grid {
 	 */
 	public void backCellAvailable(int pos) {
 		this.availableCells.add(pos);
+	}
+
+	/**
+	 * Ajoute une note (candidat) à la cellule indiquée.
+	 *
+	 * @param pos  index 1D de la cellule
+	 * @param note note à ajouter
+	 */
+	public void addNote(int pos, int note) {
+		this.cells[pos].setNote(note);
 	}
 
 	/**
@@ -185,9 +212,11 @@ public class Grid {
 
         int startBlock = getBlockIndex(pos);
 
-        for (int i = startBlock; i < startBlock + this.blockHeight * this.width; i += this.width) {
-            for (int j = startBlock; j < startBlock + this.blockWidth; j++) {
-                this.cells[i * this.width + j].removeNote(valeur);
+        // startBlock est l'index 1D de la case en haut à gauche du bloc :
+        // on avance d'une colonne avec +1 et d'une ligne avec +width.
+        for (int blockRow = 0; blockRow < this.blockHeight; blockRow++) {
+            for (int blockColumn = 0; blockColumn < this.blockWidth; blockColumn++) {
+                this.cells[startBlock + blockRow * this.width + blockColumn].removeNote(valeur);
             }
         }
 	}
@@ -219,7 +248,8 @@ public class Grid {
 	 * @param pos
 	 */
 	public void diagonalUpdate(int pos) {
-
+		// TODO - implement Grid.diagonalUpdate
+		throw new UnsupportedOperationException("diagonalUpdate n'est pas encore implémenté.");
 	}
 
 }

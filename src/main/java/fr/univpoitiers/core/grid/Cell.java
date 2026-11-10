@@ -2,12 +2,12 @@ package fr.univpoitiers.core.grid;
 
 public class Cell {
 
-	private byte[] note;
+	private final byte[] note;
 	private boolean locked;
 	private int value;
 
-    public Cell(int nb_variables) {
-        this.note = new byte[nb_variables];
+    public Cell(int nbVariables) {
+        this.note = new byte[nbVariables];
         this.locked = false;
         this.value = 0;
     }

@@ -20,7 +20,8 @@ public class ExecutionStack {
 	 * @param rule
 	 */
 	public void stack(Grid grid, Integer rule) {
-
+		// TODO - implement ExecutionStack.stack
+		throw new UnsupportedOperationException("stack n'est pas encore implémenté.");
 	}
 
 	/**

@@ -8,7 +8,8 @@ public interface RuleApplier {
 	 * 
 	 * @param grid
 	 */
-	static boolean KObvious(Grid grid){
+	static boolean kObvious(Grid grid){
+		// TODO - implement RuleApplier.kObvious
 		return true;
 	}
 
@@ -16,7 +17,8 @@ public interface RuleApplier {
 	 * 
 	 * @param grid
 	 */
-	static boolean KHidden(Grid grid){
+	static boolean kHidden(Grid grid){
+		// TODO - implement RuleApplier.kHidden
 		return true;
 	}
 
@@ -24,7 +26,8 @@ public interface RuleApplier {
 	 * 
 	 * @param grid
 	 */
-	static boolean PointingPair(Grid grid){
+	static boolean pointingPair(Grid grid){
+		// TODO - implement RuleApplier.pointingPair
 		return true;
 	}
 
@@ -32,7 +35,8 @@ public interface RuleApplier {
 	 * 
 	 * @param grid
 	 */
-	static boolean PointingTriple(Grid grid){
+	static boolean pointingTriple(Grid grid){
+		// TODO - implement RuleApplier.pointingTriple
 		return true;
 	}
 
@@ -40,7 +44,8 @@ public interface RuleApplier {
 	 * 
 	 * @param grid
 	 */
-	static boolean YWing(Grid grid){
+	static boolean yWing(Grid grid){
+		// TODO - implement RuleApplier.yWing
 		return true;
 	}
 
@@ -48,7 +53,8 @@ public interface RuleApplier {
 	 * 
 	 * @param grid
 	 */
-	static boolean XWing(Grid grid){
+	static boolean xWing(Grid grid){
+		// TODO - implement RuleApplier.xWing
 		return true;
 	}
 
@@ -56,7 +62,8 @@ public interface RuleApplier {
 	 * 
 	 * @param grid
 	 */
-	static boolean SwordFish(Grid grid){
+	static boolean swordFish(Grid grid){
+		// TODO - implement RuleApplier.swordFish
 		return true;
 	}
 
@@ -64,7 +71,8 @@ public interface RuleApplier {
 	 * 
 	 * @param grid
 	 */
-	static boolean FirstNaive(Grid grid){
+	static boolean firstNaive(Grid grid){
+		// TODO - implement RuleApplier.firstNaive
 		return true;
 	}
 

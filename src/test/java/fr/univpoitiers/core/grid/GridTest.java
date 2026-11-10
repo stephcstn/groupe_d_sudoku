@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,19 +48,51 @@ class GridTest {
     @DisplayName("Tests de conversion de coordonnées (Row, Col, Block)")
     class CoordinateTests {
 
+        @ParameterizedTest(name = "pos {0} -> ligne {1}")
+        @CsvSource({"0, 0", "8, 0", "9, 1", "40, 4", "80, 8"})
         @DisplayName("Calcul de l'index de ligne")
         void testGetRowIndex(int pos, int expectedRow) {
             assertEquals(expectedRow, grid9x9.getRowIndex(pos));
         }
 
+        @ParameterizedTest(name = "pos {0} -> colonne {1}")
+        @CsvSource({"0, 0", "8, 8", "9, 0", "40, 4", "80, 8"})
         @DisplayName("Calcul de l'index de colonne")
         void testGetColumnIndex(int pos, int expectedCol) {
             assertEquals(expectedCol, grid9x9.getColumnIndex(pos));
         }
 
+        @ParameterizedTest(name = "pos {0} -> début de bloc {1}")
+        @CsvSource({"0, 0", "10, 0", "20, 0", "3, 3", "40, 30", "80, 60", "62, 60"})
         @DisplayName("Calcul de l'index de départ du sous-bloc (9x9)")
         void testGetBlockIndex(int pos, int expectedBlockStart) {
             assertEquals(expectedBlockStart, grid9x9.getBlockIndex(pos));
+        }
+
+        @Test
+        @DisplayName("row * width + column (conversion du contrôleur) est l'inverse de getRowIndex/getColumnIndex")
+        void testControllerConversionRoundTrip() {
+            Grid rectangular = new Grid(5, 4);
+            for (int row = 0; row < rectangular.getHeight(); row++) {
+                for (int column = 0; column < rectangular.getWidth(); column++) {
+                    int pos = row * rectangular.getWidth() + column;
+                    assertEquals(row, rectangular.getRowIndex(pos));
+                    assertEquals(column, rectangular.getColumnIndex(pos));
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("getPosition(x, y) est l'inverse de getColumnIndex/getRowIndex")
+        void testGetPosition() {
+            Grid rectangular = new Grid(5, 4);
+            for (int pos = 0; pos < 5 * 4; pos++) {
+                int x = rectangular.getColumnIndex(pos);
+                int y = rectangular.getRowIndex(pos);
+                assertEquals(pos, rectangular.getPosition(x, y));
+            }
+            assertThrows(IllegalArgumentException.class, () -> rectangular.getPosition(5, 0));
+            assertThrows(IllegalArgumentException.class, () -> rectangular.getPosition(0, 4));
         }
     }
 
@@ -176,6 +210,24 @@ class GridTest {
             for (int ligne = 0; ligne < grid9x9.getHeight(); ligne++) {
                 int pos = ligne * grid9x9.getWidth() + colonne;
                 assertFalse(grid9x9.isCellContaining(pos, noteASupprimer));
+            }
+        }
+
+        @Test
+        @DisplayName("blockUpdate supprime la note dans tout le bloc, et seulement dans le bloc")
+        void testBlockUpdate() {
+            int note = 4;
+            for (int pos = 0; pos < 81; pos++) {
+                grid9x9.addNote(pos, note);
+            }
+
+            grid9x9.blockUpdate(40, note); // case centrale : bloc des lignes 3-5, colonnes 3-5
+
+            for (int pos = 0; pos < 81; pos++) {
+                int row = grid9x9.getRowIndex(pos);
+                int column = grid9x9.getColumnIndex(pos);
+                boolean inCentralBlock = row / 3 == 1 && column / 3 == 1;
+                assertEquals(!inCentralBlock, grid9x9.isCellContaining(pos, note), "pos " + pos);
             }
         }
 
