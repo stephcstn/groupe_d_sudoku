@@ -7,6 +7,9 @@ import java.util.Set;
 
 import fr.univpoitiers.core.grid.Grid;
 
+
+
+
 /**
  * Utility interface providing static methods to apply heuristic deduction rules
  * on a Sudoku grid (Pointing Pairs/Triples, Box-Line Reductions, X-Wing, Y-Wing, Swordfish).
