@@ -177,8 +177,8 @@ public class Solver implements RuleApplier {
 	 * @param grid
 	 */
 	public int[] checkEntries(Grid grid) {
+		// TODO - implement Solver.checkEntries
 		return null;
-
 	}
 
 	/**
@@ -186,7 +186,8 @@ public class Solver implements RuleApplier {
 	 * @param grid
 	 */
 	public void generate(Grid grid) {
-
+		// TODO - implement Solver.generate
+		throw new UnsupportedOperationException("generate n'est pas encore implémenté.");
 	}
 
 	/**
@@ -195,7 +196,8 @@ public class Solver implements RuleApplier {
 	 * @param countNumberLasting
 	 */
 	private void reduce(Grid grid, int countNumberLasting) {
-
+		// TODO - implement Solver.reduce
+		throw new UnsupportedOperationException("reduce n'est pas encore implémenté.");
 	}
 
 }

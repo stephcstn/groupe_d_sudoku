@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -103,6 +105,32 @@ class GridTest {
             assertEquals(0, grid9x9.getBlockIndex(20));
             assertEquals(30, grid9x9.getBlockIndex(40));
             assertEquals(60, grid9x9.getBlockIndex(80));
+        }
+
+        @Test
+        @DisplayName("row * width + column (conversion du contrôleur) est l'inverse de getRowIndex/getColumnIndex")
+        void testControllerConversionRoundTrip() {
+            Grid rectangular = new Grid(5, 4);
+            for (int row = 0; row < rectangular.getHeight(); row++) {
+                for (int column = 0; column < rectangular.getWidth(); column++) {
+                    int pos = row * rectangular.getWidth() + column;
+                    assertEquals(row, rectangular.getRowIndex(pos));
+                    assertEquals(column, rectangular.getColumnIndex(pos));
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("cellToIndex(x, y) est l'inverse de getColumnIndex/getRowIndex")
+        void testGetPosition() {
+            Grid rectangular = new Grid(5, 4);
+            for (int pos = 0; pos < 5 * 4; pos++) {
+                int x = rectangular.getColumnIndex(pos);
+                int y = rectangular.getRowIndex(pos);
+                assertEquals(pos, rectangular.cellToIndex(x, y));
+            }
+            assertThrows(IllegalArgumentException.class, () -> rectangular.cellToIndex(5, 0));
+            assertThrows(IllegalArgumentException.class, () -> rectangular.cellToIndex(0, 4));
         }
     }
 

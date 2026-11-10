@@ -1,14 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox xmlns="http://javafx.com/javafx" 
-      xmlns:fx="http://javafx.com/fxml" 
-      alignment="CENTER" 
-      prefHeight="400.0" 
-      prefWidth="600.0">
-    <children>
-        <Label text="Hello World !" />
-    </children>
-</VBox>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="689.0" prefWidth="878.0" styleClass="app-root" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.univpoitiers.app.SudokuAppController">
+   <right>
+      <BorderPane fx:id="rightPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <top>
+            <CheckBox fx:id="notesMode" mnemonicParsing="false" text="NOTES" BorderPane.alignment="CENTER" />
+         </top>
+         <center>
+            <VBox fx:id="padControls" alignment="CENTER" spacing="14.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Button fx:id="clearButton" mnemonicParsing="false" onAction="#clearSelectedCell" text="CLEAR" />
+               </children>
+               <padding>
+                  <Insets bottom="12.0" left="8.0" right="8.0" top="12.0" />
+               </padding>
+            </VBox>
+         </center>
+         <bottom>
+            <HBox alignment="CENTER_RIGHT" BorderPane.alignment="CENTER_RIGHT">
+               <children>
+                  <Button fx:id="resetGridButton" mnemonicParsing="false" onAction="#resetGrid" text="RESET GRID" />
+               </children>
+               <padding>
+                  <Insets bottom="12.0" left="8.0" right="12.0" top="12.0" />
+               </padding>
+            </HBox>
+         </bottom></BorderPane>
+   </right>
+   <left>
+      <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <center>
+            <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="5.0" BorderPane.alignment="CENTER">
+               <children>
+                  <CheckBox fx:id="checkAllRules" mnemonicParsing="false" selected="true" text="ALL RULES" />
+                  <CheckBox fx:id="checkLastFreeCell" mnemonicParsing="false" text="Last Free Cell" />
+                  <CheckBox fx:id="checkLastRemainingCell" mnemonicParsing="false" text="Last Remaining Cell" />
+                  <CheckBox fx:id="checkLastPossibleNumber" mnemonicParsing="false" text="Last Possible Number" />
+                  <CheckBox fx:id="checkNakedSingles" mnemonicParsing="false" text="Naked Singles" />
+                  <CheckBox fx:id="checkNakedPairs" mnemonicParsing="false" text="Naked Pairs" />
+                  <CheckBox fx:id="checkNakedTriples" mnemonicParsing="false" text="Naked Triples" />
+                  <CheckBox fx:id="checkNakedTuples" mnemonicParsing="false" text="Naked Tuples" />
+                  <CheckBox fx:id="checkHiddenSingles" mnemonicParsing="false" text="Hidden Singles" />
+                  <CheckBox fx:id="checkHiddenPairs" mnemonicParsing="false" text="Hidden Pairs" />
+                  <CheckBox fx:id="checkHiddenTriples" mnemonicParsing="false" text="Hidden Triples" />
+                  <CheckBox fx:id="checkHiddenTuples" mnemonicParsing="false" text="Hidden Tuples" />
+                  <CheckBox fx:id="checkPointingPairs" mnemonicParsing="false" text="Pointing Pairs" />
+                  <CheckBox fx:id="checkPointingTriples" mnemonicParsing="false" text="Pointing Triples" />
+                  <CheckBox fx:id="checkBoxReduction" mnemonicParsing="false" text="Box reduction" />
+                  <CheckBox fx:id="checkXWing" mnemonicParsing="false" text="X-wing" />
+                  <CheckBox fx:id="checkYWing" mnemonicParsing="false" text="Y-wing" />
+                  <CheckBox fx:id="checkSwordFish" mnemonicParsing="false" text="Sword-fish" />
+                  <Button fx:id="runAutoResolution" mnemonicParsing="false" text="RUN AUTO RESOLUTION">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Button>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets bottom="30.0" left="30.0" top="30.0" />
+               </padding>
+            </VBox>
+         </center></BorderPane>
+   </left>
+   <top>
+      <BorderPane prefHeight="91.0" prefWidth="878.0" BorderPane.alignment="CENTER">
+         <center>
+             <Label prefHeight="67.0" prefWidth="331.0" styleClass="app-title" text="SUDOKU" BorderPane.alignment="CENTER">
+               <font>
+                  <Font name="System Bold Italic" size="84.0" />
+               </font>
+            </Label>
+         </center></BorderPane>
+   </top>
+   <bottom>
+      <BorderPane prefHeight="57.0" prefWidth="878.0" BorderPane.alignment="CENTER" />
+   </bottom>
+   <center>
+       <BorderPane fx:id="centerPane" prefHeight="358.0" prefWidth="549.0" BorderPane.alignment="CENTER">
+          <top>
+             <HBox alignment="CENTER_LEFT" BorderPane.alignment="CENTER_LEFT">
+                <children>
+                   <ImageView fx:id="lockIcon" fitHeight="36.0" fitWidth="36.0" preserveRatio="true">
+                      <image>
+                         <Image url="@../images/Cadenas-ouvert-vert.png" />
+                      </image>
+                   </ImageView>
+                </children>
+                <padding>
+                   <Insets bottom="6.0" left="8.0" right="8.0" top="6.0" />
+                </padding>
+             </HBox>
+          </top>
+          <bottom>
+             <HBox alignment="CENTER_RIGHT" BorderPane.alignment="CENTER_RIGHT">
+                <children>
+                   <Button fx:id="lockGridButton" mnemonicParsing="false" onAction="#toggleGridLock" text="UNLOCK" />
+                </children>
+                <padding>
+                   <Insets bottom="8.0" left="8.0" right="8.0" top="6.0" />
+                </padding>
+             </HBox>
+          </bottom>
+       </BorderPane>
+   </center>
+</BorderPane>

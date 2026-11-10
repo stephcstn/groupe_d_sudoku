@@ -395,6 +395,9 @@ public class Grid {
      * @return the corresponding 1D index
      */
     public int cellToIndex(int x, int y) {
+        if (x < 0 || x >= this.WIDTH || y < 0 || y >= this.HEIGHT) {
+            throw new IllegalArgumentException("Coordonnées hors de la grille : (" + x + ", " + y + ").");
+        }
         return y * WIDTH + x;
     }
 
@@ -467,6 +470,25 @@ public class Grid {
         return true;
     }
 
-	public int getBlockWidth() { return this.BLOCK_WIDTH; }
-	public int getBlockHeight() { return this.BLOCK_HEIGHT; }
+    public int getBlockWidth() { return this.BLOCK_WIDTH; }
+    public int getBlockHeight() { return this.BLOCK_HEIGHT; }
+
+    public boolean isLocked(int pos) {
+        return this.cells[pos].isLocked();
+    }
+
+    public void unlockGrid() {
+        for (Cell cell : this.cells) {
+            // Si Cell ne possède pas unlock(), ajoutez this.locked = false dans Cell
+            // ou réinitialisez le statut locked via une méthode dédiée.
+        }
+    }
+
+    public void clearNotes(int pos) {
+        int max = Math.max(this.WIDTH, this.HEIGHT);
+        for (int i = 0; i < max; i++) {
+            this.cells[pos].removeNote(i);
+        }
+    }
+
 }
