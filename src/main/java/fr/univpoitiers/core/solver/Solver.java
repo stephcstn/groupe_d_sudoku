@@ -78,7 +78,7 @@ public class Solver implements RuleApplier {
 					}
 					break;
 				case 5:
-					if (RuleApplier.SwordFish(grid)) {
+					if (RuleApplier.Swordfish(grid)) {
 						executionStack.stack(clonedGridToStack, ruleApplierIndex);
 						ruleApplierIndex = 0;
 					} else {

@@ -147,15 +147,6 @@ public class Grid {
         return checkBlock(pos, value) && checkColumn(pos, value) && checkRow(pos, value);
     }
 
-    /**
-     * Ajoute une note (candidat) dans une case.
-     *
-     * @param pos position de la case (index 1D)
-     * @param note index de la note (valeur - 1)
-     */
-    public void setNote(int pos, int note) {
-        this.cells[pos].setNote(note);
-    }
 
     /**
      * Places a value in the cell at the given position and updates the list of available cells.
