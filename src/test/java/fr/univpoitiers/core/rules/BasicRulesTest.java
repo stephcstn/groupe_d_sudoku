@@ -203,7 +203,7 @@ public class BasicRulesTest {
             grid.backCellAvailable(76);
 
             Assertions.assertTrue(RuleApplier.lastPossibleCell(grid));
-            Assertions.assertEquals(9, RuleApplier.lastPossibleCell(grid));
+            Assertions.assertEquals(9, grid.getNumber(22));
         }
     }
 }

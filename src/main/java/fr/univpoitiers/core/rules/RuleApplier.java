@@ -46,7 +46,7 @@ public interface RuleApplier {
 	 * @param cellIndex cell belonging to the row processing
 	 */
 	private static void listOfValuesRow(Grid grid, ArrayList<Integer> listOfValues, int cellIndex) {
-		int startRowIndex = grid.getRowIndex(cellIndex);
+		int startRowIndex = grid.getStartRowIndex(cellIndex);
 		for (int i = startRowIndex; i < startRowIndex + grid.getWidth(); i++) {
 			int cellValue = grid.getNumber(i);
 			if (cellValue != 0) {

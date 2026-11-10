@@ -43,7 +43,7 @@ public class SolverTest {
             solver.annotate(grid);
             for (int i = 0; i < grid.getWidth() * (grid.getWidth() - 1); i++) {
                 for (int j = i; j < j + grid.getWidth(); j++) {
-                    Assertions.assertTrue(grid.getNotes(j).length == 0);
+                    Assertions.assertTrue(grid.getNotes(j).isEmpty());
                 }
             }
         }
@@ -56,7 +56,7 @@ public class SolverTest {
             solver.annotate(grid);
 
             for (int i = 0; i < grid.getWidth(); i++) {
-                Assertions.assertTrue(grid.getNotes(i).length == 1);
+                Assertions.assertTrue(grid.getNotes(i).size() == 1);
             }
             Assertions.assertTrue(grid.isCellContaining(0, 4));
             Assertions.assertTrue(grid.isCellContaining(1, 9));
@@ -78,7 +78,7 @@ public class SolverTest {
             solver.annotate(grid);
 
             for (int i = 0; i < grid.getWidth() * (grid.getWidth() - 1); i += grid.getWidth()) {
-                Assertions.assertTrue(grid.isCellContaining(i).length == 1);
+                Assertions.assertTrue(grid.getNotes(i).size() == 1);
             }
             Assertions.assertTrue(grid.isCellContaining(0, 4));
             Assertions.assertTrue(grid.isCellContaining(9, 8));
@@ -103,7 +103,7 @@ public class SolverTest {
 
             for (int i = 0; i <= grid.getWidth() * 2; i += grid.getWidth()) {
                 for (int j = i; j < i + 3; j++) {
-                    Assertions.assertTrue(grid.getNotes(i).length == 1);
+                    Assertions.assertTrue(grid.getNotes(i).size() == 1);
                 }
             }
             Assertions.assertTrue(grid.isCellContaining(0, 4));

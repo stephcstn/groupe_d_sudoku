@@ -134,7 +134,7 @@ public class Solver implements RuleApplier {
 
 	private void restrictFromLine(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
 		int value;
-		int startIndex = grid.getRowIndex(currentPos);
+		int startIndex = grid.getStartRowIndex(currentPos);
 		for (int i = startIndex; i < startIndex + 9; i++) {
 			value = grid.getNumber(i);
 			if (value != 0 && notesToAdd.contains(value)) {
@@ -154,7 +154,7 @@ public class Solver implements RuleApplier {
 		}
 	}
 
-	private void annotate(Grid grid) {
+	public void annotate(Grid grid) {
 		ArrayList<Integer> notesToAdd = new ArrayList<>();
 
 		for (int pos = 0; pos < grid.getWidth(); pos++) {
