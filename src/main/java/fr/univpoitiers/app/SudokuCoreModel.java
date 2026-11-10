@@ -150,5 +150,30 @@ public class SudokuCoreModel {
         return currentGrid;
     }
 
+    public boolean isCellLocked(int x, int y) {
+        Grid grid = requireGrid();
+        return grid.isLocked(grid.cellToIndex(x, y));
+    }
+
+    public boolean getNote(int noteValue, int x, int y) {
+        Grid grid = requireGrid();
+        return grid.isCellContaining(grid.cellToIndex(x, y), noteValue - 1);
+    }
+
+    public void toggleNote(int noteValue, int x, int y) {
+        Grid grid = requireGrid();
+        int pos = grid.cellToIndex(x, y);
+        if (grid.isCellContaining(pos, noteValue - 1)) {
+            grid.removeNote(pos, noteValue);
+        } else {
+            grid.setNote(pos, noteValue);
+        }
+    }
+
+    public void clearCellNotes(int x, int y) {
+        Grid grid = requireGrid();
+        grid.clearNotes(grid.cellToIndex(x, y));
+    }
+
 
 }

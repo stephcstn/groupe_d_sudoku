@@ -6,7 +6,6 @@ import fr.univpoitiers.app.view.grid.GridView;
 import fr.univpoitiers.app.view.pad.PadView;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -23,349 +22,220 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-/**
- * Contrôleur principal de l'application : relie la vue FXML ({@link GridView}, {@link PadView})
- * au modèle ({@link SudokuCoreModel}).
- *
- * <p><b>Coordonnées.</b> La vue est un {@code GridPane} 2D adressé par {@code (row, column)}.
- * Le modèle prend des coordonnées {@code (x, y)} = {@code (column, row)} et se charge lui-même
- * de la conversion vers son stockage 1D. Le passage de {@code (row, column)} à {@code (x, y)}
- * est isolé dans {@link #modelInput(int, int, int)} et {@link #modelValue(int, int)}.</p>
- *
- * <p><b>Verrouillage.</b> Le modèle ne permet ni de savoir si une case est verrouillée, ni de la
- * protéger, ni de la déverrouiller. Le contrôleur mémorise donc lui-même les cases verrouillées
- * ({@link #lockedCells}) et refuse de les modifier.</p>
- *
- * <p><b>Threading :</b> toutes les méthodes s'exécutent sur le thread JavaFX.</p>
- */
 public class SudokuAppController {
 
-	private static final Logger LOGGER = Logger.getLogger(SudokuAppController.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SudokuAppController.class.getName());
 
-	private static final int GRID_WIDTH = 9;
-	private static final int GRID_HEIGHT = 9;
-	private static final int MAX_DIGIT = Math.max(GRID_WIDTH, GRID_HEIGHT);
+    private static final int GRID_WIDTH = 9;
+    private static final int GRID_HEIGHT = 9;
+    private static final int MAX_DIGIT = Math.max(GRID_WIDTH, GRID_HEIGHT);
 
-	// Ressources relatives au package de {@link App} (fr/univpoitiers).
-	private static final String CSS_PATH = "css/style.css";
-	private static final String LOCKED_ICON_PATH = "images/Cadenas-ferme-rouge.png";
-	private static final String UNLOCKED_ICON_PATH = "images/Cadenas-ouvert-vert.png";
+    private static final String CSS_PATH = "css/style.css";
+    private static final String LOCKED_ICON_PATH = "images/Cadenas-ferme-rouge.png";
+    private static final String UNLOCKED_ICON_PATH = "images/Cadenas-ouvert-vert.png";
 
-	// Règles de résolution
-	@FXML private CheckBox checkAllRules;
-	@FXML private CheckBox checkLastFreeCell;
-	@FXML private CheckBox checkLastRemainingCell;
-	@FXML private CheckBox checkLastPossibleNumber;
-	@FXML private CheckBox checkNakedSingles;
-	@FXML private CheckBox checkNakedPairs;
-	@FXML private CheckBox checkNakedTriples;
-	@FXML private CheckBox checkNakedTuples;
-	@FXML private CheckBox checkHiddenSingles;
-	@FXML private CheckBox checkHiddenPairs;
-	@FXML private CheckBox checkHiddenTriples;
-	@FXML private CheckBox checkHiddenTuples;
-	@FXML private CheckBox checkPointingPairs;
-	@FXML private CheckBox checkPointingTriples;
-	@FXML private CheckBox checkBoxReduction;
-	@FXML private CheckBox checkYWing;
-	@FXML private CheckBox checkXWing;
-	@FXML private CheckBox checkSwordFish;
+    @FXML private CheckBox checkAllRules;
+    @FXML private CheckBox checkLastFreeCell;
+    @FXML private CheckBox checkLastRemainingCell;
+    @FXML private CheckBox checkLastPossibleNumber;
+    @FXML private CheckBox checkNakedSingles;
+    @FXML private CheckBox checkNakedPairs;
+    @FXML private CheckBox checkNakedTriples;
+    @FXML private CheckBox checkNakedTuples;
+    @FXML private CheckBox checkHiddenSingles;
+    @FXML private CheckBox checkHiddenPairs;
+    @FXML private CheckBox checkHiddenTriples;
+    @FXML private CheckBox checkHiddenTuples;
+    @FXML private CheckBox checkPointingPairs;
+    @FXML private CheckBox checkPointingTriples;
+    @FXML private CheckBox checkBoxReduction;
+    @FXML private CheckBox checkYWing;
+    @FXML private CheckBox checkXWing;
+    @FXML private CheckBox checkSwordFish;
 
-	@FXML private Button runAutoResolution;
-	@FXML private CheckBox notesMode;
-	@FXML private VBox padControls;
-	@FXML private Button lockGridButton;
-	@FXML private ImageView lockIcon;
-	@FXML private BorderPane centerPane;
+    @FXML private Button runAutoResolution;
+    @FXML private CheckBox notesMode;
+    @FXML private VBox padControls;
+    @FXML private Button lockGridButton;
+    @FXML private ImageView lockIcon;
+    @FXML private BorderPane centerPane;
 
-	private SudokuCoreModel coreModel;
-	private GridView gridView;
-	private Image lockedIcon;
-	private Image unlockedIcon;
+    private SudokuCoreModel coreModel;
+    private GridView gridView;
+    private Image lockedIcon;
+    private Image unlockedIcon;
 
-	/**
-	 * Notes candidates saisies par l'utilisateur, indexées {@code [row][column][digit]}
-	 * avec {@code digit} de 1 à {@link #MAX_DIGIT} (l'indice 0 est inutilisé).
-	 */
-	//private final boolean[][][] notes = new boolean[GRID_HEIGHT][GRID_WIDTH][MAX_DIGIT + 1];
+    private int selectedRow = -1;
+    private int selectedColumn = -1;
 
-	/** Cases verrouillées, indexées {@code [row][column]}. */
-	//private final boolean[][] lockedCells = new boolean[GRID_HEIGHT][GRID_WIDTH];
+    private boolean isUpdating = false;
 
-	private int selectedRow = -1;
-	private int selectedColumn = -1;
+    @FXML
+    public void initialize() {
+        coreModel = new SudokuCoreModel();
+        coreModel.createGrid(GRID_WIDTH, GRID_HEIGHT);
 
-	/** Évite une boucle d'événements lors des mises à jour automatiques des cases à cocher. */
-	private boolean isUpdating = false;
+        URL cssUrl = Objects.requireNonNull(App.class.getResource(CSS_PATH),
+                "Feuille de style introuvable : " + CSS_PATH);
+        gridView = new GridView(GRID_WIDTH, GRID_HEIGHT, cssUrl.toExternalForm(), this::selectCell);
+        centerPane.setCenter(gridView);
 
-	/**
-	 * Initialise le modèle, la grille, le pavé numérique, les règles et l'icône de verrouillage.
-	 * Appelée automatiquement par le {@code FXMLLoader} après l'injection des champs.
-	 *
-	 * @throws NullPointerException si la feuille de style est introuvable
-	 */
-	@FXML
-	public void initialize() {
-		coreModel = new SudokuCoreModel();
-		coreModel.createGrid(GRID_WIDTH, GRID_HEIGHT);
+        padControls.getChildren().add(0, new PadView(MAX_DIGIT, this::handleDigit));
 
-		URL cssUrl = Objects.requireNonNull(App.class.getResource(CSS_PATH),
-				"Feuille de style introuvable : " + CSS_PATH);
-		gridView = new GridView(GRID_WIDTH, GRID_HEIGHT, cssUrl.toExternalForm(), this::selectCell);
-		centerPane.setCenter(gridView);
+        lockedIcon = loadIcon(LOCKED_ICON_PATH);
+        unlockedIcon = loadIcon(UNLOCKED_ICON_PATH);
 
-		padControls.getChildren().add(0, new PadView(MAX_DIGIT, this::handleDigit));
+        setupRuleSelection();
+        updateLockDisplay();
+    }
 
-		lockedIcon = loadIcon(LOCKED_ICON_PATH);
-		unlockedIcon = loadIcon(UNLOCKED_ICON_PATH);
+    // ------------------------------------------------------------------------------------------
+    // Interactions
+    // ------------------------------------------------------------------------------------------
 
-		setupRuleSelection();
-		updateLockDisplay();
-	}
+    private void selectCell(int row, int column) {
+        selectedRow = row;
+        selectedColumn = column;
+    }
 
-	// ------------------------------------------------------------------------------------------
-	// Adaptation au modèle : (row, column) de la vue -> (x, y) = (column, row) du modèle
-	// ------------------------------------------------------------------------------------------
+    private void handleDigit(int digit) {
+        if (!hasSelection() || coreModel.isCellLocked(selectedColumn, selectedRow)) {
+            return;
+        }
 
-	/**
-	 * Saisit une valeur dans le modèle.
-	 *
-	 * @param value  valeur à saisir, 0 pour vider la case
-	 * @param row    ligne de la cellule
-	 * @param column colonne de la cellule
-	 * @return le résultat de {@link SudokuCoreModel#input(int, int, int)}
-	 */
-	private boolean modelInput(int value, int row, int column) {
-		return coreModel.input(value, column, row);
-	}
+        if (notesMode.isSelected()) {
+            if (coreModel.getNumber(selectedColumn, selectedRow) != 0) {
+                return;
+            }
+            coreModel.toggleNote(digit, selectedColumn, selectedRow);
+        } else {
+            if (!coreModel.input(digit, selectedColumn, selectedRow)) {
+                return;
+            }
+            coreModel.clearCellNotes(selectedColumn, selectedRow);
+        }
+        refreshCell(selectedRow, selectedColumn);
+    }
 
-	/**
-	 * Lit la valeur d'une cellule dans le modèle.
-	 *
-	 * @param row    ligne de la cellule
-	 * @param column colonne de la cellule
-	 * @return la valeur, ou 0 si la cellule est vide
-	 */
-	private int modelValue(int row, int column) {
-		return coreModel.getNumber(column, row);
-	}
+    @FXML
+    private void clearSelectedCell() {
+        if (!hasSelection() || coreModel.isCellLocked(selectedColumn, selectedRow)) {
+            return;
+        }
+        if (!coreModel.input(0, selectedColumn, selectedRow)) {
+            return;
+        }
+        coreModel.clearCellNotes(selectedColumn, selectedRow);
+        refreshCell(selectedRow, selectedColumn);
+    }
 
-	// ------------------------------------------------------------------------------------------
-	// Interactions
-	// ------------------------------------------------------------------------------------------
+    @FXML
+    private void resetGrid() {
+        coreModel.resetGrid();
+        for (int row = 0; row < GRID_HEIGHT; row++) {
+            for (int column = 0; column < GRID_WIDTH; column++) {
+                refreshCell(row, column);
+            }
+        }
+        updateLockDisplay();
+    }
 
-	/**
-	 * Mémorise la cellule sélectionnée dans la vue.
-	 *
-	 * @param row    ligne de la cellule
-	 * @param column colonne de la cellule
-	 */
-	private void selectCell(int row, int column) {
-		selectedRow = row;
-		selectedColumn = column;
-	}
+    @FXML
+    private void toggleGridLock() {
+        if (coreModel.isGridLocked()) {
+            coreModel.unlockGrid();
+        } else {
+            coreModel.lockFilledCells();
+        }
+        updateLockDisplay();
+    }
 
-	/**
-	 * Applique un chiffre du pavé à la cellule sélectionnée : bascule la note en mode notes,
-	 * sinon saisit la valeur. Ignoré si aucune cellule n'est sélectionnée, si elle est verrouillée,
-	 * ou (en mode notes) si elle contient déjà une valeur.
-	 *
-	 * @param digit chiffre choisi, de 1 à {@link #MAX_DIGIT}
-	 */
-	private void handleDigit(int digit) {
-		if (!hasSelection() || lockedCells[selectedRow][selectedColumn]) {
-			return;
-		}
+    // ------------------------------------------------------------------------------------------
+    // Affichage
+    // ------------------------------------------------------------------------------------------
 
-		if (notesMode.isSelected()) {
-			if (modelValue(selectedRow, selectedColumn) != 0) {
-				return;
-			}
-			notes[selectedRow][selectedColumn][digit] = !notes[selectedRow][selectedColumn][digit];
-		} else {
-			if (!modelInput(digit, selectedRow, selectedColumn)) {
-				return;
-			}
-			Arrays.fill(notes[selectedRow][selectedColumn], false);
-		}
-		refreshCell(selectedRow, selectedColumn);
-	}
+    private void updateLockDisplay() {
+        boolean locked = coreModel.isGridLocked();
+        lockGridButton.setText(locked ? "LOCK" : "UNLOCK");
+        Image icon = locked ? lockedIcon : unlockedIcon;
+        if (icon != null) {
+            lockIcon.setImage(icon);
+        }
+    }
 
-	/**
-	 * Vide la valeur et les notes de la cellule sélectionnée, sauf si elle est verrouillée.
-	 */
-	@FXML
-	private void clearSelectedCell() {
-		if (!hasSelection() || lockedCells[selectedRow][selectedColumn]) {
-			return;
-		}
-		if (!modelInput(0, selectedRow, selectedColumn)) {
-			return;
-		}
-		Arrays.fill(notes[selectedRow][selectedColumn], false);
-		refreshCell(selectedRow, selectedColumn);
-	}
+    private Image loadIcon(String path) {
+        URL url = App.class.getResource(path);
+        if (url == null) {
+            LOGGER.log(Level.WARNING, "Icône introuvable : {0}", path);
+            return null;
+        }
+        return new Image(url.toExternalForm());
+    }
 
-	/**
-	 * Remet toute la grille à zéro (valeurs, notes et verrouillage) et rafraîchit la vue.
-	 */
-	@FXML
-	private void resetGrid() {
-		coreModel.resetGrid();
-		for (int row = 0; row < GRID_HEIGHT; row++) {
-			Arrays.fill(lockedCells[row], false);
-			for (int column = 0; column < GRID_WIDTH; column++) {
-				Arrays.fill(notes[row][column], false);
-				refreshCell(row, column);
-			}
-		}
-		updateLockDisplay();
-	}
+    private boolean hasSelection() {
+        return selectedRow >= 0 && selectedColumn >= 0;
+    }
 
-	/**
-	 * Verrouille les cases remplies si la grille est déverrouillée, et inversement.
-	 */
-	@FXML
-	private void toggleGridLock() {
-		if (coreModel.isGridLocked()) {
-			coreModel.unlockGrid();
-			for (boolean[] row : lockedCells) {
-				Arrays.fill(row, false);
-			}
-		} else {
-			coreModel.lockFilledCells();
-			for (int row = 0; row < GRID_HEIGHT; row++) {
-				for (int column = 0; column < GRID_WIDTH; column++) {
-					lockedCells[row][column] = modelValue(row, column) != 0;
-				}
-			}
-		}
-		updateLockDisplay();
-	}
+    private void refreshCell(int row, int column) {
+        CellView cellView = gridView.getCellAt(row, column);
+        cellView.setValue(coreModel.getNumber(column, row));
+        cellView.setNotes(visibleNotes(row, column));
+    }
 
-	// ------------------------------------------------------------------------------------------
-	// Affichage
-	// ------------------------------------------------------------------------------------------
+    private Set<Integer> visibleNotes(int row, int column) {
+        Set<Integer> visible = new HashSet<>();
+        for (int digit = 1; digit <= MAX_DIGIT; digit++) {
+            if (coreModel.getNote(digit, column, row)) {
+                visible.add(digit);
+            }
+        }
+        return visible;
+    }
 
-	/**
-	 * Met à jour le libellé du bouton et l'icône selon l'état de verrouillage du modèle.
-	 * Si une icône est introuvable, l'image précédente est conservée.
-	 */
-	private void updateLockDisplay() {
-		boolean locked = coreModel.isGridLocked();
-		lockGridButton.setText(locked ? "LOCK" : "UNLOCK");
-		Image icon = locked ? lockedIcon : unlockedIcon;
-		if (icon != null) {
-			lockIcon.setImage(icon);
-		}
-	}
+    // ------------------------------------------------------------------------------------------
+    // Règles de résolution
+    // ------------------------------------------------------------------------------------------
 
-	/**
-	 * Charge une icône depuis le classpath.
-	 *
-	 * @param path chemin de la ressource
-	 * @return l'image, ou {@code null} (avec un avertissement) si la ressource est introuvable
-	 */
-	private Image loadIcon(String path) {
-		URL url = App.class.getResource(path);
-		if (url == null) {
-			LOGGER.log(Level.WARNING, "Icône introuvable : {0}", path);
-			return null;
-		}
-		return new Image(url.toExternalForm());
-	}
+    private List<CheckBox> individualRules() {
+        return List.of(
+                checkLastFreeCell, checkLastRemainingCell, checkLastPossibleNumber,
+                checkNakedSingles, checkNakedPairs, checkNakedTriples, checkNakedTuples,
+                checkHiddenSingles, checkHiddenPairs, checkHiddenTriples, checkHiddenTuples,
+                checkPointingPairs, checkPointingTriples, checkBoxReduction,
+                checkXWing, checkYWing, checkSwordFish
+        );
+    }
 
-	/**
-	 * Indique si une cellule est actuellement sélectionnée.
-	 *
-	 * @return vrai si une cellule a été sélectionnée
-	 */
-	private boolean hasSelection() {
-		return selectedRow >= 0 && selectedColumn >= 0;
-	}
+    private void setupRuleSelection() {
+        List<CheckBox> rules = individualRules();
 
-	/**
-	 * Synchronise l'affichage d'une cellule (valeur du modèle et notes du contrôleur).
-	 *
-	 * @param row    ligne de la cellule
-	 * @param column colonne de la cellule
-	 */
-	private void refreshCell(int row, int column) {
-		CellView cellView = gridView.getCellAt(row, column);
-		cellView.setValue(modelValue(row, column));
-		cellView.setNotes(visibleNotes(row, column));
-	}
+        checkAllRules.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (isUpdating || !Boolean.TRUE.equals(newValue)) {
+                return;
+            }
+            isUpdating = true;
+            rules.forEach(rule -> rule.setSelected(false));
+            isUpdating = false;
+        });
 
-	/**
-	 * Retourne l'ensemble des notes actives d'une cellule.
-	 *
-	 * @param row    ligne de la cellule
-	 * @param column colonne de la cellule
-	 * @return les chiffres de 1 à {@link #MAX_DIGIT} dont la note est active
-	 */
-	private Set<Integer> visibleNotes(int row, int column) {
-		Set<Integer> visible = new HashSet<>();
-		for (int digit = 1; digit <= MAX_DIGIT; digit++) {
-			if (notes[row][column][digit]) {
-				visible.add(digit);
-			}
-		}
-		return visible;
-	}
+        for (CheckBox rule : rules) {
+            rule.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                if (isUpdating || !Boolean.TRUE.equals(newValue)) {
+                    return;
+                }
+                isUpdating = true;
+                checkAllRules.setSelected(false);
+                isUpdating = false;
+            });
+        }
 
-	// ------------------------------------------------------------------------------------------
-	// Règles de résolution
-	// ------------------------------------------------------------------------------------------
-
-	/**
-	 * Regroupe les cases à cocher de règles individuelles.
-	 *
-	 * @return la liste des règles, sans la case « ALL RULES »
-	 */
-	private List<CheckBox> individualRules() {
-		return List.of(
-				checkLastFreeCell, checkLastRemainingCell, checkLastPossibleNumber,
-				checkNakedSingles, checkNakedPairs, checkNakedTriples, checkNakedTuples,
-				checkHiddenSingles, checkHiddenPairs, checkHiddenTriples, checkHiddenTuples,
-				checkPointingPairs, checkPointingTriples, checkBoxReduction,
-				checkXWing, checkYWing, checkSwordFish
-		);
-	}
-
-	/**
-	 * Configure l'exclusion mutuelle entre « ALL RULES » et les règles individuelles, puis lie
-	 * l'état du bouton de résolution automatique : il est désactivé si aucune case n'est cochée.
-	 */
-	private void setupRuleSelection() {
-		List<CheckBox> rules = individualRules();
-
-		checkAllRules.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			if (isUpdating || !Boolean.TRUE.equals(newValue)) {
-				return;
-			}
-			isUpdating = true;
-			rules.forEach(rule -> rule.setSelected(false));
-			isUpdating = false;
-		});
-
-		for (CheckBox rule : rules) {
-			rule.selectedProperty().addListener((observable, oldValue, newValue) -> {
-				if (isUpdating || !Boolean.TRUE.equals(newValue)) {
-					return;
-				}
-				isUpdating = true;
-				checkAllRules.setSelected(false);
-				isUpdating = false;
-			});
-		}
-
-		List<CheckBox> allCheckBoxes = new ArrayList<>(rules);
-		allCheckBoxes.add(checkAllRules);
-		Observable[] dependencies = allCheckBoxes.stream()
-				.map(CheckBox::selectedProperty)
-				.toArray(Observable[]::new);
-		runAutoResolution.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> allCheckBoxes.stream().noneMatch(CheckBox::isSelected),
-				dependencies));
-	}
+        List<CheckBox> allCheckBoxes = new ArrayList<>(rules);
+        allCheckBoxes.add(checkAllRules);
+        Observable[] dependencies = allCheckBoxes.stream()
+                .map(CheckBox::selectedProperty)
+                .toArray(Observable[]::new);
+        runAutoResolution.disableProperty().bind(Bindings.createBooleanBinding(
+                () -> allCheckBoxes.stream().noneMatch(CheckBox::isSelected),
+                dependencies));
+    }
 }

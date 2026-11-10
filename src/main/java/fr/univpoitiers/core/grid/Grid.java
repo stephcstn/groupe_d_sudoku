@@ -424,4 +424,30 @@ public class Grid {
         return true;
     }
 
+    public boolean isLocked(int pos) {
+        return this.cells[pos].isLocked();
+    }
+
+    public void unlockGrid() {
+        for (Cell cell : this.cells) {
+            // Si Cell ne possède pas unlock(), ajoutez this.locked = false dans Cell
+            // ou réinitialisez le statut locked via une méthode dédiée.
+        }
+    }
+
+    public void setNote(int pos, int noteValue) {
+        this.cells[pos].setNote(noteValue - 1);
+    }
+
+    public void removeNote(int pos, int noteValue) {
+        this.cells[pos].removeNote(noteValue - 1);
+    }
+
+    public void clearNotes(int pos) {
+        int max = Math.max(this.width, this.height);
+        for (int i = 0; i < max; i++) {
+            this.cells[pos].removeNote(i);
+        }
+    }
+
 }
