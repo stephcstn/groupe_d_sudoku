@@ -64,6 +64,32 @@ public class Grid {
     }
 
     /**
+     * Returns the cell index at the start of the row from a position
+     * @param pos 1D position of the cell
+     * @return cell index at the start of the row
+     */
+    public int getStartRowIndex(int pos) {
+        return (pos / this.WIDTH) * 9;
+    }
+
+    /**
+     * Returns cell notes wanted
+     * @param pos
+     * @return byte[] of 0 or 1 (true/false) value where index refers to note value
+     */
+    public ArrayList<Integer> getNotes(int pos) {
+        ArrayList<Integer> res = new ArrayList<>();
+        if (0 <= pos && pos < this.cells.length) {
+            for (int i = 0; i < WIDTH; i++) {
+                if (this.cells[pos].getNote(i) == 1) {
+                    res.add(i);
+                }
+            }
+        }
+        return res;
+    }
+
+    /**
      * Calculates the zero-based column index for a given 1D cell position.
      *
      * @param pos the 1D position of the cell
@@ -119,6 +145,16 @@ public class Grid {
             return false;
         }
         return checkBlock(pos, value) && checkColumn(pos, value) && checkRow(pos, value);
+    }
+
+    /**
+     * Ajoute une note (candidat) dans une case.
+     *
+     * @param pos position de la case (index 1D)
+     * @param note index de la note (valeur - 1)
+     */
+    public void setNote(int pos, int note) {
+        this.cells[pos].setNote(note);
     }
 
     /**
