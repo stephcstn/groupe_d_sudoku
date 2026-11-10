@@ -3,6 +3,10 @@ package fr.univpoitiers.core.grid;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * Represents the Sudoku game board, handling cells, board dimensions,
+ * constraint verification (rows, columns, sub-blocks), and candidate note updates.
+ */
 public class Grid {
 
     private Cell[] cells;
@@ -13,9 +17,10 @@ public class Grid {
     private final int blockHeight;
 
     /**
+     * Constructs a new Grid with the specified dimensions and initializes empty cells and available positions.
      *
-     * @param width
-     * @param height
+     * @param width the width of the grid (number of columns)
+     * @param height the height of the grid (number of rows)
      */
     public Grid(int width, int height) {
         int max = Math.max(width, height);
@@ -31,6 +36,11 @@ public class Grid {
         }
     }
 
+    /**
+     * Constructs a new Grid by creating a deep copy of another Grid instance.
+     *
+     * @param other the Grid instance to copy
+     */
     public Grid(Grid other) {
         this.width = other.width;
         this.height = other.height;
@@ -44,29 +54,31 @@ public class Grid {
     }
 
     /**
-     * Convertit des coordonnées 2D en index 1D de la grille (inverse de
-     * {@link #getColumnIndex(int)} et {@link #getRowIndex(int)}).
+     * Calculates the zero-based row index for a given 1D cell position.
      *
-     * @param x colonne, de 0 à {@code width - 1}
-     * @param y ligne, de 0 à {@code height - 1}
-     * @return l'index 1D, {@code y * width + x}
-     * @throws IllegalArgumentException si les coordonnées sont hors de la grille
+     * @param pos the 1D position of the cell
+     * @return the row index (from 0 to HEIGHT - 1)
      */
-    public int getPosition(int x, int y) {
-        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
-            throw new IllegalArgumentException("Coordonnées hors de la grille : (" + x + ", " + y + ").");
-        }
-        return y * this.width + x;
-    }
-
     public int getRowIndex(int pos) {
         return pos / this.width;
     }
 
+    /**
+     * Calculates the zero-based column index for a given 1D cell position.
+     *
+     * @param pos the 1D position of the cell
+     * @return the column index (from 0 to WIDTH - 1)
+     */
     public int getColumnIndex(int pos) {
         return pos % this.width;
     }
 
+    /**
+     * Calculates the 1D index of the top-left cell of the sub-block containing the given position.
+     *
+     * @param pos the 1D position of the cell
+     * @return the 1D index of the top-left cell of the corresponding sub-block
+     */
     public int getBlockIndex(int pos) {
         int x = getColumnIndex(pos);
         int y = getRowIndex(pos);
@@ -75,28 +87,46 @@ public class Grid {
         return startY * this.width + startX;
     }
 
+    /**
+     * Gets the width of the grid (number of columns).
+     *
+     * @return the grid width
+     */
     public int getWidth() {
         return this.width;
     }
 
+    /**
+     * Gets the height of the grid (number of rows).
+     *
+     * @return the grid height
+     */
     public int getHeight() {
         return this.height;
     }
 
     /**
+     * Checks whether a value can be placed at the given position:
+     * it must not already be present in the same row, column, or sub-block.
      *
-     * @param pos
-     * @param value
-     *
+     * @param pos the cell position (1D index)
+     * @param value the value to place (from 1 up to the maximum number of possible values)
+     * @return true if the value satisfies all three constraints, false otherwise
+     *         (including if the value is out of bounds, e.g., 0 for an empty cell)
      */
     public boolean checkValidValues(int pos, int value) {
-        return checkBlock(pos,value) && checkColumn(pos,value) && checkRow(pos, value);
+        if (value < 1 || value > Math.max(this.WIDTH, this.HEIGHT)) {
+            return false;
+        }
+        return checkBlock(pos, value) && checkColumn(pos, value) && checkRow(pos, value);
     }
 
     /**
+     * Places a value in the cell at the given position and updates the list of available cells.
      *
-     * @param pos
-     * @param value
+     * @param pos the 1D index of the target cell
+     * @param value the numeric value to set
+     * @return true if the operation succeeded
      */
     public boolean addNumber(int pos, int value) {
         this.cells[pos].setValue(value);
@@ -105,21 +135,34 @@ public class Grid {
     }
 
     /**
+     * Gets the number (value) stored in the cell at the given 1D position.
      *
-     * @param pos
+     * @param pos the 1D position of the cell
+     * @return the value of the cell (0 if empty)
      */
     public int getNumber(int pos) {
         return this.cells[pos].getValue();
     }
 
+    /**
+     * Retrieves the index of the first available (empty) cell in the grid.
+     *
+     * @return the 1D index of the next available cell
+     */
     public int nextAvailableCell() {
         return this.availableCells.getFirst();
     }
 
+    /**
+     * Inserts a value into a sorted ArrayList using binary search, ensuring no duplicate values are added.
+     *
+     * @param list the target sorted list of integers
+     * @param value the integer value to insert
+     */
     private void insertSorted(ArrayList<Integer> list, int value) {
         int index = Collections.binarySearch(list, value);
 
-        // Si l'élément n'est pas déjà présent, binarySearch renvoie (-point_insertion - 1)
+        // If the element is not already present, binarySearch returns (-insertion_point - 1)
         if (index < 0) {
             int insertIndex = -(index + 1);
             list.add(insertIndex, value);
@@ -127,31 +170,38 @@ public class Grid {
     }
 
     /**
+     * Restores a cell index to the list of available cells in sorted order.
      *
-     * @param pos
+     * @param pos the 1D index of the cell to make available again
      */
     public void backCellAvailable(int pos) {
         this.insertSorted(this.availableCells, pos);
     }
 
     /**
+     * Checks whether a specific note (candidate value) is active for the cell at the given position.
      *
-     * @param pos
-     * @param note
+     * @param pos the 1D position of the cell
+     * @param note the note (candidate value) to check
+     * @return true if the note is present (set to 1), false otherwise
      */
     public boolean isCellContaining(int pos, int note) {
         return this.cells[pos].getNote(note) == 1;
     }
 
     /**
+     * Removes the number from the cell at the given position (resets to 0) and marks it as available.
      *
-     * @param pos
+     * @param pos the 1D position of the cell to clear
      */
     public void removeNumber(int pos) {
         this.cells[pos].setValue(0);
         backCellAvailable(pos);
     }
 
+    /**
+     * Locks all non-empty cells on the board to prevent them from being cleared during reset or edition.
+     */
     public void lockFilledCells() {
         for (Cell cell : this.cells) {
             if (cell.getValue() != 0) {
@@ -160,6 +210,9 @@ public class Grid {
         }
     }
 
+    /**
+     * Clears all player entries from the grid, leaving initial locked clues intact.
+     */
     public void clearEntries() {
         for (int i = 0; i < this.cells.length; i++) {
             if (!this.cells[i].isLocked()) {
@@ -168,6 +221,9 @@ public class Grid {
         }
     }
 
+    /**
+     * Resets the entire grid by re-initializing all cells and marking every position as available.
+     */
     public void resetGrid() {
         int max = Math.max(this.width, this.height);
         this.cells = new Cell[this.width * this.height];
@@ -179,9 +235,10 @@ public class Grid {
     }
 
     /**
+     * Removes a candidate note value from all cells on a specified row.
      *
-     * @param x
-     * @param valeur
+     * @param x the zero-based index of the row to update
+     * @param valeur the note value to remove from the row
      */
     public void lineUpdate(int x, int valeur) {
         for (int i = x * this.width; i < (x + 1) * this.width; i++) {
@@ -190,20 +247,23 @@ public class Grid {
     }
 
     /**
+     * Removes a candidate note value from all cells on a specified column.
      *
-     * @param y
-     * @param valeur
+     * @param y the zero-based index of the column to update
+     * @param valeur the note value to remove from the column
      */
     public void columnUpdate(int y, int valeur) {
-        for (int i = y; i < this.cells.length; i+=this.width) {
+        for (int i = y; i < this.cells.length; i += this.WIDTH) {
             this.cells[i].removeNote(valeur);
         }
     }
 
     /**
+     * Removes a candidate note value from all cells within the sub-block (BLOCK_WIDTH x BLOCK_HEIGHT) containing the given position.
      *
-     * @param pos
-     * @param valeur
+     * @param pos the 1D position specifying the sub-block
+     * @param valeur the note value to remove from the sub-block
+     * @throws IllegalArgumentException if pos is out of grid bounds
      */
     public void blockUpdate(int pos, int valeur) {
         if (pos < 0 || pos >= this.cells.length) {
@@ -221,9 +281,11 @@ public class Grid {
     }
 
     /**
+     * Removes a candidate note value along the main diagonal or anti-diagonal if the position belongs to them.
      *
-     * @param pos
-     * @param valeur
+     * @param pos the 1D position to check for diagonal membership
+     * @param valeur the note value to remove along the diagonal(s)
+     * @throws IllegalArgumentException if calculated coordinates are out of grid bounds
      */
     public void diagonalUpdate(int pos, int valeur) {
         int x = getColumnIndex(pos);
@@ -291,11 +353,11 @@ public class Grid {
     }
 
     /**
-     * Vérifie que la valeur n'est pas déjà présente sur la ligne.
+     * Checks if the value is not already present in the row.
      *
-     * @param pos
-     * @param value
-     *
+     * @param pos the cell 1D position
+     * @param value the candidate value to test
+     * @return true if the value can be placed in the row, false otherwise
      */
     public boolean checkRow(int pos, int value) {
         int y = getRowIndex(pos);
@@ -313,10 +375,11 @@ public class Grid {
     }
 
     /**
-     * Vérifie que la valeur n'est pas déjà présente sur la colonne.
-     * @param pos
-     * @param value
+     * Checks if the value is not already present in the column.
      *
+     * @param pos the cell 1D position
+     * @param value the candidate value to test
+     * @return true if the value can be placed in the column, false otherwise
      */
     public boolean checkColumn(int pos, int value) {
         int x = getColumnIndex(pos);
@@ -334,10 +397,11 @@ public class Grid {
     }
 
     /**
-     * Vérifie que la valeur n'est pas déjà présente dans le sous-bloc 3x3.
-     * @param pos
-     * @param value
+     * Checks if the value is not already present in the sub-block (BLOCK_WIDTH x BLOCK_HEIGHT) of the cell.
      *
+     * @param pos the cell 1D position
+     * @param value the candidate value to test
+     * @return true if the value can be placed in the sub-block, false otherwise
      */
     public boolean checkBlock(int pos, int value) {
         int startBlock = getBlockIndex(pos);
