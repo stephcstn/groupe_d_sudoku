@@ -60,7 +60,7 @@
                   <CheckBox fx:id="checkBoxReduction" mnemonicParsing="false" text="Box reduction" />
                   <CheckBox fx:id="checkXWing" mnemonicParsing="false" text="X-wing" />
                   <CheckBox fx:id="checkYWing" mnemonicParsing="false" text="Y-wing" />
-                  <CheckBox fx:id="checkSword_fish" mnemonicParsing="false" text="Sword-fish" />
+                  <CheckBox fx:id="checkSwordFish" mnemonicParsing="false" text="Sword-fish" />
                   <Button fx:id="runAutoResolution" mnemonicParsing="false" text="RUN AUTO RESOLUTION">
                      <VBox.margin>
                         <Insets top="10.0" />

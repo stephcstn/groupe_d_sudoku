@@ -5,11 +5,11 @@ import java.util.ArrayList;
 public class Grid {
 
 	private Cell[] cells;
-	private final int WIDTH;
-	private final int HEIGHT;
+	private final int width;
+	private final int height;
 	private ArrayList<Integer> availableCells;
-    private final int BLOCK_WIDTH;
-    private final int BLOCK_HEIGHT;
+    private final int blockWidth;
+    private final int blockHeight;
 
 	/**
 	 *
@@ -18,12 +18,12 @@ public class Grid {
 	 */
 	public Grid(int width, int height) {
         int max = Math.max(width, height);
-		this.WIDTH = width;
-		this.HEIGHT = height;
+		this.width = width;
+		this.height = height;
 		this.cells = new Cell[width*height];
 		this.availableCells = new ArrayList<>();
-		this.BLOCK_WIDTH = (int) Math.sqrt(width);
-		this.BLOCK_HEIGHT = (int) Math.sqrt(height);
+		this.blockWidth = (int) Math.sqrt(width);
+		this.blockHeight = (int) Math.sqrt(height);
         for (int i = 0; i < this.cells.length; i++) {
             this.cells[i] = new Cell(max);
             this.availableCells.add(i); // a modifier
@@ -31,41 +31,39 @@ public class Grid {
 	}
 
     public Grid(Grid other) {
-        this.WIDTH = other.WIDTH;
-        this.HEIGHT = other.HEIGHT;
+        this.width = other.width;
+        this.height = other.height;
         this.cells = new Cell[other.cells.length];
         this.availableCells = new ArrayList<>(other.availableCells);
-        this.BLOCK_WIDTH = other.BLOCK_WIDTH;
-        this.BLOCK_HEIGHT = other.BLOCK_HEIGHT;
+        this.blockWidth = other.blockWidth;
+        this.blockHeight = other.blockHeight;
         for (int i = 0; i < other.cells.length; i++) {
             this.cells[i] = new Cell(other.cells[i]);
         }
     }
 
     public int getRowIndex(int pos) {
-        return pos / this.WIDTH;
+        return pos / this.width;
     }
 
     public int getColumnIndex(int pos) {
-        return pos % this.WIDTH;
+        return pos % this.width;
     }
 
     public int getBlockIndex(int pos) {
-        int blockWidth = (int) Math.sqrt(this.WIDTH);
-        int blockHeight = (int) Math.sqrt(this.HEIGHT);
         int x = getColumnIndex(pos);
         int y = getRowIndex(pos);
-        int startX = x - (x % blockWidth);
-        int startY = y - (y % blockHeight);
-        return startY * this.WIDTH + startX;
+        int startX = x - (x % this.blockWidth);
+        int startY = y - (y % this.blockHeight);
+        return startY * this.width + startX;
     }
 
     public int getWidth() {
-        return this.WIDTH;
+        return this.width;
     }
 
     public int getHeight() {
-        return this.HEIGHT;
+        return this.height;
     }
 
 	/**
@@ -156,7 +154,7 @@ public class Grid {
      * @param valeur
 	 */
 	public void lineUpdate(int x, int valeur) {
-        for (int i = x * this.WIDTH; i < (x + 1) * this.WIDTH; i++) {
+        for (int i = x * this.width; i < (x + 1) * this.width; i++) {
             this.cells[i].removeNote(valeur);
         }
 	}
@@ -167,7 +165,7 @@ public class Grid {
      * @param valeur
 	 */
 	public void columnUpdate(int y, int valeur) {
-        for (int i = y; i < this.cells.length; i+=this.WIDTH) {
+        for (int i = y; i < this.cells.length; i+=this.width) {
                 this.cells[i].removeNote(valeur);
         }
 	}
@@ -181,18 +179,15 @@ public class Grid {
         int x = getColumnIndex(pos);
         int y = getRowIndex(pos);
 
-        if (x < 0 || x >= this.WIDTH || y < 0 || y >= this.HEIGHT) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
             throw new IllegalArgumentException("x and y must be within the grid bounds.");
         }
 
         int startBlock = getBlockIndex(pos);
 
-        int blockWidth = (int) Math.sqrt(this.WIDTH);
-        int blockHeight = (int) Math.sqrt(this.HEIGHT);
-
-        for (int i = startBlock; i < startBlock + blockHeight * this.WIDTH; i += this.WIDTH) {
-            for (int j = startBlock; j < startBlock + blockWidth; j++) {
-                this.cells[i * this.WIDTH + j].removeNote(valeur);
+        for (int i = startBlock; i < startBlock + this.blockHeight * this.width; i += this.width) {
+            for (int j = startBlock; j < startBlock + this.blockWidth; j++) {
+                this.cells[i * this.width + j].removeNote(valeur);
             }
         }
 	}
@@ -203,13 +198,13 @@ public class Grid {
 
         Grid otherGrid = (Grid) obj;
 
-        if (this.WIDTH != otherGrid.WIDTH || this.HEIGHT != otherGrid.HEIGHT) return false;
+        if (this.width != otherGrid.width || this.height != otherGrid.height) return false;
 
         for (int i = 0; i < this.cells.length; i++) {
             if (this.cells[i].getValue() != otherGrid.cells[i].getValue()) {
                 return false;
             }
-            for (int j = 0; j < Math.max(this.WIDTH, this.HEIGHT); j++) {
+            for (int j = 0; j < Math.max(this.width, this.height); j++) {
                 if (this.cells[i].getNote(j) != otherGrid.cells[i].getNote(j)) {
                     return false;
                 }

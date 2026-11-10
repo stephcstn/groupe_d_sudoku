@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import fr.univpoitiers.App;
 import fr.univpoitiers.app.view.pad.PadView;
 import java.util.Set;
 import java.util.concurrent.FutureTask;
@@ -32,8 +33,8 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 @EnabledIfEnvironmentVariable(named = "DISPLAY", matches = ".+")
 class CellViewTest {
 
-    private static final String CSS = CellViewTest.class
-            .getResource("/fr/univpoitiers/css/style.css").toExternalForm();
+    private static final String CSS = App.class
+            .getResource("css/style.css").toExternalForm();
 
     @BeforeAll
     static void startJavaFx() {
@@ -168,7 +169,7 @@ class CellViewTest {
     @Test
     void fxmlConnectsNotesModeDigitPadAndClearAction() throws Exception {
         runOnJavaFxThread(() -> {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/univpoitiers/views/vue.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("views/vue.fxml"));
             Parent root = loader.load();
             new Scene(root);
             GridView grid = (GridView) ((BorderPane) root.lookup("#centerPane")).getCenter();
@@ -262,7 +263,7 @@ class CellViewTest {
     @Test
     void fxmlLockButtonUsesModelAndUpdatesItsIcon() throws Exception {
         runOnJavaFxThread(() -> {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fr/univpoitiers/views/vue.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("views/vue.fxml"));
             Parent root = loader.load();
             GridView grid = (GridView) ((BorderPane) root.lookup("#centerPane")).getCenter();
             Button lockButton = (Button) root.lookup("#lockGridButton");
