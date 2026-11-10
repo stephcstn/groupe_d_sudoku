@@ -140,13 +140,70 @@ public class BasicRulesTest {
         @Test
         @DisplayName("The cell unassigned is at the edge of the block except corners")
         void lastRemainingCell_atEdge() {
+            grid.removeNumber(9);
+            grid.removeNumber(10);
+            grid.removeNumber(18);
+            grid.removeNumber(19);
+            grid.removeNumber(20);
+            grid.backCellAvailable(9);
+            grid.backCellAvailable(10);
+            grid.backCellAvailable(18);
+            grid.backCellAvailable(19);
+            grid.backCellAvailable(20);
 
+            Assertions.assertTrue(RuleApplier.lastRemainingCell(grid));
+            Assertions.assertEquals(8, grid.getNumber(9));
         }
 
         @Test
         @DisplayName("The cell unassigned is at the middle of the block")
         void lastRemainingCell_atMiddle() {
+            grid.removeNumber(10);
+            grid.removeNumber(11);
+            grid.removeNumber(18);
+            grid.removeNumber(19);
+            grid.backCellAvailable(10);
+            grid.backCellAvailable(11);
+            grid.backCellAvailable(18);
+            grid.backCellAvailable(19);
 
+            Assertions.assertTrue(RuleApplier.lastRemainingCell(grid));
+            Assertions.assertEquals(1, grid.getNumber(10));
+        }
+    }
+
+    @Nested
+    @DisplayName("lastPossibleCell: 2 situations possible incorrect/correct domain value the cell belongs")
+    class LastPossibleCell {
+        @Test
+        @DisplayName("Intersection of row, column and block domain value returns more than 1 value")
+        void lastPossibleCell_tooMuchValuesPossible() {
+            grid.removeNumber(22);
+            grid.removeNumber(23);
+            grid.removeNumber(67);
+            grid.backCellAvailable(22);
+            grid.backCellAvailable(23);
+            grid.backCellAvailable(67);
+
+            Assertions.assertFalse(RuleApplier.lastPossibleCell(grid));
+        }
+
+        @Test
+        @DisplayName("Intersection of row, column and block domain value returns only 1 value")
+        void lastPossibleCell_1valuePossible() {
+            grid.removeNumber(22);
+            grid.removeNumber(25);
+            grid.removeNumber(26);
+            grid.removeNumber(67);
+            grid.removeNumber(76);
+            grid.backCellAvailable(22);
+            grid.backCellAvailable(25);
+            grid.backCellAvailable(26);
+            grid.backCellAvailable(67);
+            grid.backCellAvailable(76);
+
+            Assertions.assertTrue(RuleApplier.lastPossibleCell(grid));
+            Assertions.assertEquals(9, RuleApplier.lastPossibleCell(grid));
         }
     }
 }

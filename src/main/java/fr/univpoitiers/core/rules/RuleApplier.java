@@ -129,21 +129,22 @@ public interface RuleApplier {
 		int blockPosX = cellIndex % 3;
 		int blockPosY = (cellIndex / 9) % 3;
 		int startBlock = grid.getBlockIndex(cellIndex);
-		for (int j = startBlock; j < startBlock + grid.getHeight() * 2; j += grid.getHeight()) {
-			for (int i = j; i < j + 3; j++) {
-				if (i % 3 != blockPosX
-						&& (i / 9) % 3 != blockPosY
-						&& grid.getNumber(i) != 0
-						&& listOfValues.contains(grid.getNumber(i))) {
-					listOfValues.remove((Integer) grid.getNumber(i));
+		for (int j = startBlock; j <= startBlock + grid.getHeight() * 2; j += grid.getHeight()) {
+			for (int i = j; i < j + 3; i++) {
+				if (i != cellIndex && grid.getNumber(i) == 0) {
+					int k = 0;
+					while (k < listOfValues.size()) {
+						if (grid.checkRow(i, listOfValues.get(k)) && grid.checkColumn(i, listOfValues.get(k))) {
+							listOfValues.remove(k);
+						} else {
+							k++;
+						}
+					}
 				}
 			}
 		}
 		if (listOfValues.size() == 1) {
-			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
-				grid.removeAvailableCell(cellIndex);
-				return true;
-			}
+			return grid.addNumber(cellIndex, listOfValues.getFirst());
 		}
 
 		return false;
@@ -159,21 +160,10 @@ public interface RuleApplier {
 		int cellIndex = grid.nextAvailableCell();
 		ArrayList<Integer> listOfValues = new ArrayList<>();
 		fillValues(listOfValues, grid.getWidth());
+
 		listOfValuesBlock(grid, listOfValues, cellIndex);
-		// Remove all values present in rows and columns in the block that doesn't include this cell
-		int blockPosX = cellIndex % 3;
-		int blockPosY = (cellIndex / 9) % 3;
-		int startBlock = grid.getBlockIndex(cellIndex);
-		for (int j = startBlock; j < startBlock + grid.getHeight() * 2; j += grid.getHeight()) {
-			for (int i = j; i < j + 3; j++) {
-				if (i % 3 == blockPosX
-						&& (i / 9) % 3 == blockPosY
-						&& grid.getNumber(i) != 0
-						&& listOfValues.contains(grid.getNumber(i))) {
-					listOfValues.remove((Integer) grid.getNumber(i));
-				}
-			}
-		}
+		listOfValuesColumn(grid, listOfValues, cellIndex);
+		listOfValuesRow(grid, listOfValues, cellIndex);
 		if (listOfValues.size() == 1) {
 			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
 				grid.removeAvailableCell(cellIndex);
