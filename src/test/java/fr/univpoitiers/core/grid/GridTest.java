@@ -121,16 +121,16 @@ class GridTest {
         }
 
         @Test
-        @DisplayName("getPosition(x, y) est l'inverse de getColumnIndex/getRowIndex")
+        @DisplayName("cellToIndex(x, y) est l'inverse de getColumnIndex/getRowIndex")
         void testGetPosition() {
             Grid rectangular = new Grid(5, 4);
             for (int pos = 0; pos < 5 * 4; pos++) {
                 int x = rectangular.getColumnIndex(pos);
                 int y = rectangular.getRowIndex(pos);
-                assertEquals(pos, rectangular.getPosition(x, y));
+                assertEquals(pos, rectangular.cellToIndex(x, y));
             }
-            assertThrows(IllegalArgumentException.class, () -> rectangular.getPosition(5, 0));
-            assertThrows(IllegalArgumentException.class, () -> rectangular.getPosition(0, 4));
+            assertThrows(IllegalArgumentException.class, () -> rectangular.cellToIndex(5, 0));
+            assertThrows(IllegalArgumentException.class, () -> rectangular.cellToIndex(0, 4));
         }
     }
 

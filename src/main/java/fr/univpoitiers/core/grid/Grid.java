@@ -43,22 +43,6 @@ public class Grid {
         }
     }
 
-    /**
-     * Convertit des coordonnées 2D en index 1D de la grille (inverse de
-     * {@link #getColumnIndex(int)} et {@link #getRowIndex(int)}).
-     *
-     * @param x colonne, de 0 à {@code width - 1}
-     * @param y ligne, de 0 à {@code height - 1}
-     * @return l'index 1D, {@code y * width + x}
-     * @throws IllegalArgumentException si les coordonnées sont hors de la grille
-     */
-    public int getPosition(int x, int y) {
-        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
-            throw new IllegalArgumentException("Coordonnées hors de la grille : (" + x + ", " + y + ").");
-        }
-        return y * this.width + x;
-    }
-
     public int getRowIndex(int pos) {
         return pos / this.width;
     }
@@ -280,14 +264,19 @@ public class Grid {
     }
 
     /**
-     * Converts 2D coordinates (x, y) into a 1D array index.
+     * Convertit des coordonnées 2D en index 1D de la grille (inverse de
+     * {@link #getColumnIndex(int)} et {@link #getRowIndex(int)}).
      *
-     * @param x
-     * @param y
-     * @return the corresponding 1D index
+     * @param x colonne, de 0 à {@code width - 1}
+     * @param y ligne, de 0 à {@code height - 1}
+     * @return l'index 1D, {@code y * width + x}
+     * @throws IllegalArgumentException si les coordonnées sont hors de la grille
      */
     public int cellToIndex(int x, int y) {
-        return y * width + x;
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+            throw new IllegalArgumentException("Coordonnées hors de la grille : (" + x + ", " + y + ").");
+        }
+        return y * this.width + x;
     }
 
     /**
