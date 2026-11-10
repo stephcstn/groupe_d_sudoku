@@ -485,7 +485,7 @@ public class Grid {
     }
 
     public void clearNotes(int pos) {
-        int max = Math.max(this.width, this.height);
+        int max = Math.max(this.WIDTH, this.HEIGHT);
         for (int i = 0; i < max; i++) {
             this.cells[pos].removeNote(i);
         }
