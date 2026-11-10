@@ -58,15 +58,15 @@ public class SolverTest {
             for (int i = 0; i < grid.getWidth(); i++) {
                 Assertions.assertTrue(grid.getNotes(i).length == 1);
             }
-            Assertions.assertEquals(4, grid.getNotes(0)[0]);
-            Assertions.assertEquals(9, grid.getNotes(1)[0]);
-            Assertions.assertEquals(6, grid.getNotes(2)[0]);
-            Assertions.assertEquals(8, grid.getNotes(3)[0]);
-            Assertions.assertEquals(3, grid.getNotes(4)[0]);
-            Assertions.assertEquals(2, grid.getNotes(5)[0]);
-            Assertions.assertEquals(5, grid.getNotes(6)[0]);
-            Assertions.assertEquals(1, grid.getNotes(7)[0]);
-            Assertions.assertEquals(7, grid.getNotes(8)[0]);
+            Assertions.assertTrue(grid.isCellContaining(0, 4));
+            Assertions.assertTrue(grid.isCellContaining(1, 9));
+            Assertions.assertTrue(grid.isCellContaining(2, 6));
+            Assertions.assertTrue(grid.isCellContaining(3, 8));
+            Assertions.assertTrue(grid.isCellContaining(4, 3));
+            Assertions.assertTrue(grid.isCellContaining(5, 2));
+            Assertions.assertTrue(grid.isCellContaining(6, 5));
+            Assertions.assertTrue(grid.isCellContaining(7, 1));
+            Assertions.assertTrue(grid.isCellContaining(8, 7));
         }
 
         @Test
@@ -78,17 +78,17 @@ public class SolverTest {
             solver.annotate(grid);
 
             for (int i = 0; i < grid.getWidth() * (grid.getWidth() - 1); i += grid.getWidth()) {
-                Assertions.assertTrue(grid.getNotes(i).length == 1);
+                Assertions.assertTrue(grid.isCellContaining(i).length == 1);
             }
-            Assertions.assertEquals(4, grid.getNotes(0)[0]);
-            Assertions.assertEquals(8, grid.getNotes(9)[0]);
-            Assertions.assertEquals(2, grid.getNotes(18)[0]);
-            Assertions.assertEquals(6, grid.getNotes(27)[0]);
-            Assertions.assertEquals(7, grid.getNotes(36)[0]);
-            Assertions.assertEquals(9, grid.getNotes(45)[0]);
-            Assertions.assertEquals(5, grid.getNotes(54)[0]);
-            Assertions.assertEquals(3, grid.getNotes(63)[0]);
-            Assertions.assertEquals(1, grid.getNotes(72)[0]);
+            Assertions.assertTrue(grid.isCellContaining(0, 4));
+            Assertions.assertTrue(grid.isCellContaining(9, 8));
+            Assertions.assertTrue(grid.isCellContaining(18, 2));
+            Assertions.assertTrue(grid.isCellContaining(27, 6));
+            Assertions.assertTrue(grid.isCellContaining(36, 7));
+            Assertions.assertTrue(grid.isCellContaining(45, 9));
+            Assertions.assertTrue( grid.isCellContaining(54, 5));
+            Assertions.assertTrue( grid.isCellContaining(63, 3));
+            Assertions.assertTrue(grid.isCellContaining(72, 1));
         }
 
         @Test
@@ -106,15 +106,15 @@ public class SolverTest {
                     Assertions.assertTrue(grid.getNotes(i).length == 1);
                 }
             }
-            Assertions.assertEquals(4, grid.getNotes(0)[0]);
-            Assertions.assertEquals(9, grid.getNotes(27)[0]);
-            Assertions.assertEquals(6, grid.getNotes(36)[0]);
-            Assertions.assertEquals(8, grid.getNotes(9)[0]);
-            Assertions.assertEquals(1, grid.getNotes(45)[0]);
-            Assertions.assertEquals(3, grid.getNotes(54)[0]);
-            Assertions.assertEquals(2, grid.getNotes(18)[0]);
-            Assertions.assertEquals(7, grid.getNotes(63)[0]);
-            Assertions.assertEquals(5, grid.getNotes(72)[0]);
+            Assertions.assertTrue(grid.isCellContaining(0, 4));
+            Assertions.assertTrue(grid.isCellContaining(27, 9));
+            Assertions.assertTrue(grid.isCellContaining(36, 6));
+            Assertions.assertTrue(grid.isCellContaining(9, 8));
+            Assertions.assertTrue(grid.isCellContaining(45, 1));
+            Assertions.assertTrue(grid.isCellContaining(54, 3));
+            Assertions.assertTrue(grid.isCellContaining(18, 2));
+            Assertions.assertTrue(grid.isCellContaining(63, 7));
+            Assertions.assertTrue(grid.isCellContaining(72, 5));
         }
     }
 }
