@@ -6,11 +6,11 @@ import java.util.Collections;
 public class Grid {
 
     private Cell[] cells;
-    private final int WIDTH;
-    private final int HEIGHT;
+    private final int width;
+    private final int height;
     private ArrayList<Integer> availableCells;
-    private final int BLOCK_WIDTH;
-    private final int BLOCK_HEIGHT;
+    private final int blockWidth;
+    private final int blockHeight;
 
     /**
      *
@@ -19,12 +19,12 @@ public class Grid {
      */
     public Grid(int width, int height) {
         int max = Math.max(width, height);
-        this.WIDTH = width;
-        this.HEIGHT = height;
+        this.width = width;
+        this.height = height;
         this.cells = new Cell[width*height];
         this.availableCells = new ArrayList<>();
-        this.BLOCK_WIDTH = (int) Math.sqrt(width);
-        this.BLOCK_HEIGHT = (int) Math.sqrt(height);
+        this.blockWidth = (int) Math.sqrt(width);
+        this.blockHeight = (int) Math.sqrt(height);
         for (int i = 0; i < this.cells.length; i++) {
             this.cells[i] = new Cell(max);
             this.availableCells.add(i); // a modifier
@@ -32,39 +32,55 @@ public class Grid {
     }
 
     public Grid(Grid other) {
-        this.WIDTH = other.WIDTH;
-        this.HEIGHT = other.HEIGHT;
+        this.width = other.width;
+        this.height = other.height;
         this.cells = new Cell[other.cells.length];
         this.availableCells = new ArrayList<>(other.availableCells);
-        this.BLOCK_WIDTH = other.BLOCK_WIDTH;
-        this.BLOCK_HEIGHT = other.BLOCK_HEIGHT;
+        this.blockWidth = other.blockWidth;
+        this.blockHeight = other.blockHeight;
         for (int i = 0; i < other.cells.length; i++) {
             this.cells[i] = new Cell(other.cells[i]);
         }
     }
 
+    /**
+     * Convertit des coordonnées 2D en index 1D de la grille (inverse de
+     * {@link #getColumnIndex(int)} et {@link #getRowIndex(int)}).
+     *
+     * @param x colonne, de 0 à {@code width - 1}
+     * @param y ligne, de 0 à {@code height - 1}
+     * @return l'index 1D, {@code y * width + x}
+     * @throws IllegalArgumentException si les coordonnées sont hors de la grille
+     */
+    public int getPosition(int x, int y) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+            throw new IllegalArgumentException("Coordonnées hors de la grille : (" + x + ", " + y + ").");
+        }
+        return y * this.width + x;
+    }
+
     public int getRowIndex(int pos) {
-        return pos / this.WIDTH;
+        return pos / this.width;
     }
 
     public int getColumnIndex(int pos) {
-        return pos % this.WIDTH;
+        return pos % this.width;
     }
 
     public int getBlockIndex(int pos) {
         int x = getColumnIndex(pos);
         int y = getRowIndex(pos);
-        int startX = x - (x % this.BLOCK_WIDTH);
-        int startY = y - (y % this.BLOCK_HEIGHT);
-        return startY * this.WIDTH + startX;
+        int startX = x - (x % this.blockWidth);
+        int startY = y - (y % this.blockHeight);
+        return startY * this.width + startX;
     }
 
     public int getWidth() {
-        return this.WIDTH;
+        return this.width;
     }
 
     public int getHeight() {
-        return this.HEIGHT;
+        return this.height;
     }
 
     /**
@@ -153,8 +169,8 @@ public class Grid {
     }
 
     public void resetGrid() {
-        int max = Math.max(this.WIDTH, this.HEIGHT);
-        this.cells = new Cell[this.WIDTH * this.HEIGHT];
+        int max = Math.max(this.width, this.height);
+        this.cells = new Cell[this.width * this.height];
         this.availableCells.clear();
         for (int i = 0; i < this.cells.length; i++) {
             this.cells[i] = new Cell(max);
@@ -168,7 +184,7 @@ public class Grid {
      * @param valeur
      */
     public void lineUpdate(int x, int valeur) {
-        for (int i = x * this.WIDTH; i < (x + 1) * this.WIDTH; i++) {
+        for (int i = x * this.width; i < (x + 1) * this.width; i++) {
             this.cells[i].removeNote(valeur);
         }
     }
@@ -179,7 +195,7 @@ public class Grid {
      * @param valeur
      */
     public void columnUpdate(int y, int valeur) {
-        for (int i = y; i < this.cells.length; i+=this.WIDTH) {
+        for (int i = y; i < this.cells.length; i+=this.width) {
             this.cells[i].removeNote(valeur);
         }
     }
@@ -196,9 +212,9 @@ public class Grid {
 
         int startBlock = getBlockIndex(pos);
 
-        for (int r = 0; r < this.BLOCK_HEIGHT; r++) {
-            for (int c = 0; c < this.BLOCK_WIDTH; c++) {
-                int index = startBlock + r * this.WIDTH + c;
+        for (int r = 0; r < this.blockHeight; r++) {
+            for (int c = 0; c < this.blockWidth; c++) {
+                int index = startBlock + r * this.width + c;
                 this.cells[index].removeNote(valeur);
             }
         }
@@ -213,21 +229,21 @@ public class Grid {
         int x = getColumnIndex(pos);
         int y = getRowIndex(pos);
 
-        if (x < 0 || x >= this.WIDTH || y < 0 || y >= this.HEIGHT) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
             throw new IllegalArgumentException("x and y must be within the grid bounds.");
         }
 
         // Check if the cell is on the main diagonal
         if (x == y) {
-            for (int i = 0; i < Math.min(this.WIDTH, this.HEIGHT); i++) {
-                this.cells[i * this.WIDTH + i].removeNote(valeur);
+            for (int i = 0; i < Math.min(this.width, this.height); i++) {
+                this.cells[i * this.width + i].removeNote(valeur);
             }
         }
 
         // Check if the cell is on the anti-diagonal
-        if (x + y == this.WIDTH - 1) {
-            for (int i = 0; i < Math.min(this.WIDTH, this.HEIGHT); i++) {
-                this.cells[i * this.WIDTH + (this.WIDTH - 1 - i)].removeNote(valeur);
+        if (x + y == this.width - 1) {
+            for (int i = 0; i < Math.min(this.width, this.height); i++) {
+                this.cells[i * this.width + (this.width - 1 - i)].removeNote(valeur);
             }
         }
     }
@@ -238,13 +254,13 @@ public class Grid {
 
         Grid otherGrid = (Grid) obj;
 
-        if (this.WIDTH != otherGrid.WIDTH || this.HEIGHT != otherGrid.HEIGHT) return false;
+        if (this.width != otherGrid.width || this.height != otherGrid.height) return false;
 
         for (int i = 0; i < this.cells.length; i++) {
             if (this.cells[i].getValue() != otherGrid.cells[i].getValue()) {
                 return false;
             }
-            int max = Math.max(this.WIDTH, this.HEIGHT);
+            int max = Math.max(this.width, this.height);
             for (int j = 0; j < max; j++) {
                 if (this.cells[i].getNote(j) != otherGrid.cells[i].getNote(j)) {
                     return false;
@@ -258,8 +274,8 @@ public class Grid {
     @Override
     public int hashCode() {
         int result = java.util.Arrays.hashCode(this.cells);
-        result = 31 * result + Integer.hashCode(this.WIDTH);
-        result = 31 * result + Integer.hashCode(this.HEIGHT);
+        result = 31 * result + Integer.hashCode(this.width);
+        result = 31 * result + Integer.hashCode(this.height);
         return result;
     }
 
@@ -271,7 +287,7 @@ public class Grid {
      * @return the corresponding 1D index
      */
     public int cellToIndex(int x, int y) {
-        return y * WIDTH + x;
+        return y * width + x;
     }
 
     /**
@@ -283,7 +299,7 @@ public class Grid {
      */
     public boolean checkRow(int pos, int value) {
         int y = getRowIndex(pos);
-        for (int c = 0; c < this.WIDTH; c++) {
+        for (int c = 0; c < this.width; c++) {
             int index = cellToIndex(c, y);
 
             if (index != pos) {
@@ -304,7 +320,7 @@ public class Grid {
      */
     public boolean checkColumn(int pos, int value) {
         int x = getColumnIndex(pos);
-        for (int r = 0; r < this.HEIGHT; r++) {
+        for (int r = 0; r < this.height; r++) {
             int index = cellToIndex(x, r);
 
             if (index != pos) {
@@ -326,9 +342,9 @@ public class Grid {
     public boolean checkBlock(int pos, int value) {
         int startBlock = getBlockIndex(pos);
 
-        for (int r = 0; r < this.BLOCK_HEIGHT; r++) {
-            for (int c = 0; c < this.BLOCK_WIDTH; c++) {
-                int index = startBlock + r * this.WIDTH + c;
+        for (int r = 0; r < this.blockHeight; r++) {
+            for (int c = 0; c < this.blockWidth; c++) {
+                int index = startBlock + r * this.width + c;
 
                 if (index != pos) {
                     Cell cell = cells[index];
