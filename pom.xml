@@ -17,11 +17,7 @@
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
 
-    <!-- Les feuilles de style sont du CSS JavaFX : les pseudo-classes JavaFX (:focused, :selected…)
-         ne sont pas des pseudo-classes W3C, la règle css:S4659 ne s'y applique donc pas. -->
-    <sonar.issue.ignore.multicriteria>javafxPseudoClasses</sonar.issue.ignore.multicriteria>
-    <sonar.issue.ignore.multicriteria.javafxPseudoClasses.ruleKey>css:S4659</sonar.issue.ignore.multicriteria.javafxPseudoClasses.ruleKey>
-    <sonar.issue.ignore.multicriteria.javafxPseudoClasses.resourceKey>**/*.css</sonar.issue.ignore.multicriteria.javafxPseudoClasses.resourceKey>
+
   </properties>
 
   <dependencies>
