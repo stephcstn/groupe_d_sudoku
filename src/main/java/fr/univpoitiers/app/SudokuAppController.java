@@ -1,5 +1,6 @@
 package fr.univpoitiers.app;
 
+import fr.univpoitiers.App;
 import fr.univpoitiers.app.view.grid.CellView;
 import fr.univpoitiers.app.view.grid.GridView;
 import fr.univpoitiers.app.view.pad.PadView;
@@ -10,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -46,9 +48,10 @@ public class SudokuAppController {
 	private static final int GRID_HEIGHT = 9;
 	private static final int MAX_DIGIT = Math.max(GRID_WIDTH, GRID_HEIGHT);
 
-	private static final String CSS_PATH = "/fr/univpoitiers/css/style.css";
-	private static final String LOCKED_ICON_PATH = "/fr/univpoitiers/images/Cadenas-ferme-rouge.png";
-	private static final String UNLOCKED_ICON_PATH = "/fr/univpoitiers/images/Cadenas-ouvert-vert.png";
+	// Ressources relatives au package de {@link App} (fr/univpoitiers).
+	private static final String CSS_PATH = "css/style.css";
+	private static final String LOCKED_ICON_PATH = "images/Cadenas-ferme-rouge.png";
+	private static final String UNLOCKED_ICON_PATH = "images/Cadenas-ouvert-vert.png";
 
 	// Règles de résolution
 	@FXML private CheckBox checkAllRules;
@@ -68,7 +71,7 @@ public class SudokuAppController {
 	@FXML private CheckBox checkBoxReduction;
 	@FXML private CheckBox checkYWing;
 	@FXML private CheckBox checkXWing;
-	@FXML private CheckBox checkSword_fish;
+	@FXML private CheckBox checkSwordFish;
 
 	@FXML private Button runAutoResolution;
 	@FXML private CheckBox notesMode;
@@ -108,7 +111,7 @@ public class SudokuAppController {
 		coreModel = new SudokuCoreModel();
 		coreModel.createGrid(GRID_WIDTH, GRID_HEIGHT);
 
-		URL cssUrl = Objects.requireNonNull(getClass().getResource(CSS_PATH),
+		URL cssUrl = Objects.requireNonNull(App.class.getResource(CSS_PATH),
 				"Feuille de style introuvable : " + CSS_PATH);
 		gridView = new GridView(GRID_WIDTH, GRID_HEIGHT, cssUrl.toExternalForm(), this::selectCell);
 		centerPane.setCenter(gridView);
@@ -278,9 +281,9 @@ public class SudokuAppController {
 	 * @return l'image, ou {@code null} (avec un avertissement) si la ressource est introuvable
 	 */
 	private Image loadIcon(String path) {
-		URL url = getClass().getResource(path);
+		URL url = App.class.getResource(path);
 		if (url == null) {
-			LOGGER.warning("Icône introuvable : " + path);
+			LOGGER.log(Level.WARNING, "Icône introuvable : {0}", path);
 			return null;
 		}
 		return new Image(url.toExternalForm());
@@ -339,7 +342,7 @@ public class SudokuAppController {
 				checkNakedSingles, checkNakedPairs, checkNakedTriples, checkNakedTuples,
 				checkHiddenSingles, checkHiddenPairs, checkHiddenTriples, checkHiddenTuples,
 				checkPointingPairs, checkPointingTriples, checkBoxReduction,
-				checkXWing, checkYWing, checkSword_fish
+				checkXWing, checkYWing, checkSwordFish
 		);
 	}
 
@@ -351,7 +354,7 @@ public class SudokuAppController {
 		List<CheckBox> rules = individualRules();
 
 		checkAllRules.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			if (isUpdating || !newValue) {
+			if (isUpdating || !Boolean.TRUE.equals(newValue)) {
 				return;
 			}
 			isUpdating = true;
@@ -361,7 +364,7 @@ public class SudokuAppController {
 
 		for (CheckBox rule : rules) {
 			rule.selectedProperty().addListener((observable, oldValue, newValue) -> {
-				if (isUpdating || !newValue) {
+				if (isUpdating || !Boolean.TRUE.equals(newValue)) {
 					return;
 				}
 				isUpdating = true;
