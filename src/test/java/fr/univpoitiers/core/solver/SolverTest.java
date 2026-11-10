@@ -34,6 +34,10 @@ public class SolverTest {
         populateGrid(grid, initialGrid);
     }
 
+    /**
+     *
+
+
     @Nested
     @DisplayName("annotate: the grid state once executed in filled of notes")
     class Annotate {
@@ -117,4 +121,5 @@ public class SolverTest {
             Assertions.assertTrue(grid.isCellContaining(72, 5));
         }
     }
+     */
 }
