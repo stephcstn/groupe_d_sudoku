@@ -128,20 +128,21 @@ public class Grid {
 	}
 
     /**
-	 *
-	 * @param pos
-	 * @param note
-	 */
+     * Removes a specific candidate note (pencil mark) for the cell at the given position.
+     *
+     * @param pos the 1D position index of the target cell
+     * @param note the zero-based index of the candidate note to remove (ranging from 0 to max values - 1)
+     */
     public void removeNote(int pos, int note) {
         this.cells[pos].removeNote(note);
     }
 
-	/**
-	 * Ajoute une note (candidat) dans une case.
-	 *
-	 * @param pos position de la case (index 1D)
-	 * @param note index de la note (valeur - 1)
-	 */
+    /**
+     * Enables a specific candidate note (pencil mark) for the cell at the given position.
+     *
+     * @param pos the 1D position index of the target cell
+     * @param note the zero-based index of the candidate note to set (ranging from 0 to max values - 1)
+     */
 	public void setNote(int pos, int note) {
 		this.cells[pos].setNote(note);
 	}

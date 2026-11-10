@@ -9,9 +9,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests des règles Pointing (Pair / Triple) et Box/Line Reduction (Pair / Triple).
- * Chaque test part d'une grille 9x9 vide sans aucune note, puis place à la main
- * les notes nécessaires au scénario.
+ * Unit tests for deduction rules.
+ *
+ * Includes tests for Pointing (Pair / Triple), Box/Line Reduction (Pair / Triple),
+ * X-Wing, Y-Wing, and Swordfish rules.
+ *
+ * Each test starts from an empty 9x9 grid without any notes, then manually places
+ * the necessary notes for the scenario.
  */
 class RuleApplierTest {
 
@@ -22,18 +26,19 @@ class RuleApplierTest {
         grid = new Grid(9, 9);
     }
 
-    /** Convertit (ligne, colonne) en index 1D. */
+    /** Converts (row, column) coordinates into a 1D index. */
     private static int pos(int row, int col) {
         return row * 9 + col;
     }
 
-    /** Ajoute la note dans chaque case donnée sous forme {ligne, colonne}. */
+    /** Adds the given note to each specified cell provided as {row, column}. */
     private void addNote(int note, int[]... cells) {
         for (int[] rc : cells) {
             grid.setNote(pos(rc[0], rc[1]), note);
         }
     }
 
+    /** Helper method checking if a cell contains a specific candidate note. */
     private boolean has(int row, int col, int note) {
         return grid.isCellContaining(pos(row, col), note);
     }
@@ -43,12 +48,12 @@ class RuleApplierTest {
     class PointingTests {
 
         @Test
-        @DisplayName("Pair sur une ligne : retire la note du reste de la ligne, hors du bloc")
+        @DisplayName("Pair on a row: removes note from the rest of the row outside the block")
         void pointingPair_onRow_removesNoteOutsideBlock() {
             int note = 4;
-            // Bloc 0 : la note n'est que dans (0,0) et (0,1), alignées sur la ligne 0
+            // Block 0: note is present only in (0,0) and (0,1), aligned on row 0
             addNote(note, new int[]{0, 0}, new int[]{0, 1});
-            // Autres occurrences : sur la ligne 0 (à retirer) et sur la ligne 1 (à garder)
+            // Other occurrences: on row 0 (to be removed) and on row 1 (to be kept)
             addNote(note, new int[]{0, 5}, new int[]{0, 8}, new int[]{1, 5});
 
             assertTrue(RuleApplier.PointingPair(grid));
@@ -57,14 +62,14 @@ class RuleApplierTest {
             assertTrue(has(0, 1, note));
             assertFalse(has(0, 5, note));
             assertFalse(has(0, 8, note));
-            assertTrue(has(1, 5, note), "une case hors de la ligne ne doit pas être touchée");
+            assertTrue(has(1, 5, note), "a cell outside the row should not be modified");
         }
 
         @Test
-        @DisplayName("Pair sur une colonne : retire la note du reste de la colonne, hors du bloc")
+        @DisplayName("Pair on a column: removes note from the rest of the column outside the block")
         void pointingPair_onColumn_removesNoteOutsideBlock() {
             int note = 2;
-            // Bloc 0 : la note n'est que dans (0,0) et (2,0), alignées sur la colonne 0
+            // Block 0: note is present only in (0,0) and (2,0), aligned on column 0
             addNote(note, new int[]{0, 0}, new int[]{2, 0});
             addNote(note, new int[]{5, 0}, new int[]{8, 0}, new int[]{5, 1});
 
@@ -74,11 +79,11 @@ class RuleApplierTest {
             assertTrue(has(2, 0, note));
             assertFalse(has(5, 0, note));
             assertFalse(has(8, 0, note));
-            assertTrue(has(5, 1, note), "une case hors de la colonne ne doit pas être touchée");
+            assertTrue(has(5, 1, note), "a cell outside the column should not be modified");
         }
 
         @Test
-        @DisplayName("Pair : renvoie false si les 2 cases du bloc ne sont pas alignées")
+        @DisplayName("Pair: returns false if the 2 cells in the block are not aligned")
         void pointingPair_whenNotAligned_returnsFalse() {
             int note = 4;
             addNote(note, new int[]{0, 0}, new int[]{1, 1}, new int[]{0, 5});
@@ -89,7 +94,7 @@ class RuleApplierTest {
         }
 
         @Test
-        @DisplayName("Pair : renvoie false s'il n'y a rien à retirer hors du bloc")
+        @DisplayName("Pair: returns false when there is nothing to remove outside the block")
         void pointingPair_whenNothingToRemove_returnsFalse() {
             addNote(4, new int[]{0, 0}, new int[]{0, 1});
             Grid before = new Grid(grid);
@@ -99,11 +104,11 @@ class RuleApplierTest {
         }
 
         @Test
-        @DisplayName("Pair : ignore les cases déjà remplies")
+        @DisplayName("Pair: ignores already filled cells")
         void pointingPair_ignoresFilledCells() {
             int note = 4;
             addNote(note, new int[]{0, 0}, new int[]{0, 1}, new int[]{0, 5});
-            // (0,5) est remplie : sa note ne doit pas être modifiée
+            // Cell (0,5) is filled: its note should not be modified
             grid.addNumber(pos(0, 5), 7);
 
             assertFalse(RuleApplier.PointingPair(grid));
@@ -111,13 +116,13 @@ class RuleApplierTest {
         }
 
         @Test
-        @DisplayName("Triple : seul PointingTriple s'applique à 3 cases alignées")
+        @DisplayName("Triple: only PointingTriple applies to 3 aligned cells")
         void pointingTriple_onRow_removesNoteOutsideBlock() {
             int note = 6;
             addNote(note, new int[]{0, 0}, new int[]{0, 1}, new int[]{0, 2});
             addNote(note, new int[]{0, 5});
 
-            assertFalse(RuleApplier.PointingPair(grid), "Pair ne doit pas traiter 3 cases");
+            assertFalse(RuleApplier.PointingPair(grid), "Pair should not process 3 cells");
             assertTrue(RuleApplier.PointingTriple(grid));
 
             assertTrue(has(0, 0, note));
@@ -132,12 +137,12 @@ class RuleApplierTest {
     class BoxLineReductionTests {
 
         @Test
-        @DisplayName("Pair sur une ligne : retire la note du reste du bloc")
+        @DisplayName("Pair on a row: removes note from the rest of the block")
         void boxLinePair_onRow_removesNoteInRestOfBlock() {
             int note = 2;
-            // Ligne 4 : la note n'est que dans (4,3) et (4,4), toutes deux dans le bloc central
+            // Row 4: note is present only in (4,3) and (4,4), both in the central block
             addNote(note, new int[]{4, 3}, new int[]{4, 4});
-            // Autres cases du bloc central (à retirer)
+            // Other cells in the central block (to be removed)
             addNote(note, new int[]{3, 3}, new int[]{5, 5});
 
             assertTrue(RuleApplier.boxLineReductionPair(grid));
@@ -149,12 +154,12 @@ class RuleApplierTest {
         }
 
         @Test
-        @DisplayName("Pair sur une colonne : retire la note du reste du bloc")
+        @DisplayName("Pair on a column: removes note from the rest of the block")
         void boxLinePair_onColumn_removesNoteInRestOfBlock() {
             int note = 6;
-            // Colonne 4 : la note n'est que dans (3,4) et (5,4), toutes deux dans le bloc central
+            // Column 4: note is present only in (3,4) and (5,4), both in the central block
             addNote(note, new int[]{3, 4}, new int[]{5, 4});
-            // Autres cases du bloc central (à retirer) + une case hors du bloc (à garder)
+            // Other cells in central block (to be removed) + one cell outside block (to be kept)
             addNote(note, new int[]{4, 3}, new int[]{4, 5}, new int[]{4, 0});
 
             assertTrue(RuleApplier.boxLineReductionPair(grid));
@@ -163,11 +168,11 @@ class RuleApplierTest {
             assertTrue(has(5, 4, note));
             assertFalse(has(4, 3, note));
             assertFalse(has(4, 5, note));
-            assertTrue(has(4, 0, note), "une case hors du bloc ne doit pas être touchée");
+            assertTrue(has(4, 0, note), "a cell outside the block should not be modified");
         }
 
         @Test
-        @DisplayName("Pair : renvoie false si les 2 cases de la ligne sont dans des blocs différents")
+        @DisplayName("Pair: returns false if the 2 cells on the row are in different blocks")
         void boxLinePair_whenDifferentBlocks_returnsFalse() {
             addNote(1, new int[]{0, 0}, new int[]{0, 5}, new int[]{1, 1});
             Grid before = new Grid(grid);
@@ -177,7 +182,7 @@ class RuleApplierTest {
         }
 
         @Test
-        @DisplayName("Pair : renvoie false s'il n'y a rien à retirer dans le bloc")
+        @DisplayName("Pair: returns false when there is nothing to remove in the block")
         void boxLinePair_whenNothingToRemove_returnsFalse() {
             addNote(2, new int[]{4, 3}, new int[]{4, 4});
             Grid before = new Grid(grid);
@@ -187,22 +192,22 @@ class RuleApplierTest {
         }
 
         @Test
-        @DisplayName("Triple : seul boxLineReductionTriple s'applique à 3 cases d'une ligne")
+        @DisplayName("Triple: only boxLineReductionTriple applies to 3 cells on a row")
         void boxLineTriple_onRow_removesNoteInRestOfBlock() {
             int note = 8;
-            // Ligne 4 : la note n'est que dans (4,3), (4,4), (4,5), toutes dans le bloc central
+            // Row 4: note is present only in (4,3), (4,4), (4,5), all in the central block
             addNote(note, new int[]{4, 3}, new int[]{4, 4}, new int[]{4, 5});
-            // (3,3) dans le bloc (à retirer), (0,3) hors du bloc (à garder)
+            // (3,3) in the block (to be removed), (0,3) outside the block (to be kept)
             addNote(note, new int[]{3, 3}, new int[]{0, 3});
 
-            assertFalse(RuleApplier.boxLineReductionPair(grid), "Pair ne doit pas traiter 3 cases");
+            assertFalse(RuleApplier.boxLineReductionPair(grid), "Pair should not process 3 cells");
             assertTrue(RuleApplier.boxLineReductionTriple(grid));
 
             assertTrue(has(4, 3, note));
             assertTrue(has(4, 4, note));
             assertTrue(has(4, 5, note));
             assertFalse(has(3, 3, note));
-            assertTrue(has(0, 3, note), "une case hors du bloc ne doit pas être touchée");
+            assertTrue(has(0, 3, note), "a cell outside the block should not be modified");
         }
     }
 
@@ -211,14 +216,14 @@ class RuleApplierTest {
     class XWingTests {
 
         @Test
-        @DisplayName("X-Wing sur lignes : retire la note du reste des deux colonnes")
+        @DisplayName("X-Wing on rows: removes candidate from the rest of the two columns")
         void xWing_onRows_removesNoteInColumns() {
             int note = 3;
-            // Lignes 1 et 4 : la note n'est présente que dans les colonnes 2 et 5
+            // Rows 1 and 4: candidate is only present in columns 2 and 5
             addNote(note, new int[]{1, 2}, new int[]{1, 5});
             addNote(note, new int[]{4, 2}, new int[]{4, 5});
 
-            // Autres occurrences sur ces colonnes (à retirer) et une hors colonnes (à garder)
+            // Other occurrences in these columns (to be removed) and one outside columns (to be kept)
             addNote(note, new int[]{7, 2}, new int[]{8, 5}, new int[]{7, 0});
 
             assertTrue(RuleApplier.XWing(grid));
@@ -228,18 +233,18 @@ class RuleApplierTest {
             assertTrue(has(4, 5, note));
             assertFalse(has(7, 2, note));
             assertFalse(has(8, 5, note));
-            assertTrue(has(7, 0, note), "une case hors des colonnes cibles ne doit pas être touchée");
+            assertTrue(has(7, 0, note), "a cell outside the target columns should not be modified");
         }
 
         @Test
-        @DisplayName("X-Wing sur colonnes : retire la note du reste des deux lignes")
+        @DisplayName("X-Wing on columns: removes candidate from the rest of the two rows")
         void xWing_onColumns_removesNoteInRows() {
             int note = 6;
-            // Colonnes 1 et 6 : la note n'est présente que dans les lignes 2 et 7
+            // Columns 1 and 6: candidate is only present in rows 2 and 7
             addNote(note, new int[]{2, 1}, new int[]{7, 1});
             addNote(note, new int[]{2, 6}, new int[]{7, 6});
 
-            // Autres occurrences sur ces lignes (à retirer) et une hors lignes (à garder)
+            // Other occurrences in these rows (to be removed) and one outside rows (to be kept)
             addNote(note, new int[]{2, 3}, new int[]{7, 8}, new int[]{0, 3});
 
             assertTrue(RuleApplier.XWing(grid));
@@ -249,11 +254,11 @@ class RuleApplierTest {
             assertTrue(has(7, 6, note));
             assertFalse(has(2, 3, note));
             assertFalse(has(7, 8, note));
-            assertTrue(has(0, 3, note), "une case hors des lignes cibles ne doit pas être touchée");
+            assertTrue(has(0, 3, note), "a cell outside the target rows should not be modified");
         }
 
         @Test
-        @DisplayName("X-Wing : renvoie false s'il n'y a rien à retirer")
+        @DisplayName("X-Wing: returns false when there is nothing to remove")
         void xWing_whenNothingToRemove_returnsFalse() {
             int note = 2;
             addNote(note, new int[]{1, 2}, new int[]{1, 5});
@@ -265,14 +270,14 @@ class RuleApplierTest {
         }
 
         @Test
-        @DisplayName("X-Wing : ignore les cases déjà remplies")
+        @DisplayName("X-Wing: ignores already filled cells")
         void xWing_ignoresFilledCells() {
             int note = 3;
             addNote(note, new int[]{1, 2}, new int[]{1, 5});
             addNote(note, new int[]{4, 2}, new int[]{4, 5});
             addNote(note, new int[]{7, 2});
 
-            // (7,2) est remplie : sa note ne doit pas être touchée
+            // Cell (7,2) is filled: its candidate should not be modified
             grid.addNumber(pos(7, 2), 4);
 
             assertFalse(RuleApplier.XWing(grid));
@@ -285,29 +290,29 @@ class RuleApplierTest {
     class YWingTests {
 
         @Test
-        @DisplayName("Y-Wing classique : retire le candidat des cases voyant les deux pinces")
+        @DisplayName("Classic Y-Wing: removes target candidate seeing both pincers")
         void yWing_removesTargetCandidate() {
             int candA = 0;
             int candB = 1;
             int candC = 2;
 
-            // Pivot en (0,0) avec {A, B}
+            // Pivot at (0,0) with {A, B}
             addNote(candA, new int[]{0, 0});
             addNote(candB, new int[]{0, 0});
 
-            // Pince 1 en (0,5) avec {A, C} (voit le pivot par la ligne 0)
+            // Pincer 1 at (0,5) with {A, C} (sees pivot via row 0)
             addNote(candA, new int[]{0, 5});
             addNote(candC, new int[]{0, 5});
 
-            // Pince 2 en (5,0) avec {B, C} (voit le pivot par la colonne 0)
+            // Pincer 2 at (5,0) with {B, C} (sees pivot via column 0)
             addNote(candB, new int[]{5, 0});
             addNote(candC, new int[]{5, 0});
 
-            // Case (5,5) : voit Pince 1 (colonne 5) et Pince 2 (ligne 5) -> C à retirer
+            // Cell (5,5): sees Pincer 1 (col 5) and Pincer 2 (row 5) -> C should be removed
             addNote(candC, new int[]{5, 5});
             addNote(candA, new int[]{5, 5});
 
-            // Case témoin (7,5) voyant seulement Pince 1
+            // Control cell (7,5) seeing only Pincer 1
             addNote(candC, new int[]{7, 5});
 
             assertTrue(RuleApplier.YWing(grid));
@@ -316,17 +321,17 @@ class RuleApplierTest {
             assertTrue(has(5, 0, candC));
             assertFalse(has(5, 5, candC));
             assertTrue(has(5, 5, candA));
-            assertTrue(has(7, 5, candC), "une case ne voyant qu'une seule pince ne doit pas être touchée");
+            assertTrue(has(7, 5, candC), "a cell seeing only one pincer should not be modified");
         }
 
         @Test
-        @DisplayName("Y-Wing : renvoie false si le pivot a plus de 2 candidats")
+        @DisplayName("Y-Wing: returns false if pivot has more than 2 candidates")
         void yWing_whenPivotNotBivalue_returnsFalse() {
             int candA = 0;
             int candB = 1;
             int candC = 2;
 
-            // Pivot à 3 candidats
+            // Pivot with 3 candidates
             addNote(candA, new int[]{0, 0});
             addNote(candB, new int[]{0, 0});
             addNote(candC, new int[]{0, 0});
@@ -343,7 +348,7 @@ class RuleApplierTest {
         }
 
         @Test
-        @DisplayName("Y-Wing : renvoie false si les pinces ne voient pas le pivot")
+        @DisplayName("Y-Wing: returns false if pincers do not see the pivot")
         void yWing_whenWingsDoNotSeePivot_returnsFalse() {
             int candA = 0;
             int candB = 1;
@@ -352,11 +357,11 @@ class RuleApplierTest {
             addNote(candA, new int[]{0, 0});
             addNote(candB, new int[]{0, 0});
 
-            // Pince 1 voit le pivot
+            // Pincer 1 sees the pivot
             addNote(candA, new int[]{0, 5});
             addNote(candC, new int[]{0, 5});
 
-            // Pince 2 en (7,8) ne partage ni ligne, ni colonne, ni bloc avec (0,0)
+            // Pincer 2 at (7,8) shares no row, column, or block with (0,0)
             addNote(candB, new int[]{7, 8});
             addNote(candC, new int[]{7, 8});
             addNote(candC, new int[]{7, 5});
@@ -367,7 +372,7 @@ class RuleApplierTest {
         }
 
         @Test
-        @DisplayName("Y-Wing : renvoie false s'il n'y a rien à retirer")
+        @DisplayName("Y-Wing: returns false when there is nothing to remove")
         void yWing_whenNothingToRemove_returnsFalse() {
             int candA = 0;
             int candB = 1;
@@ -391,19 +396,19 @@ class RuleApplierTest {
     class SwordfishTests {
 
         @Test
-        @DisplayName("Swordfish sur lignes : retire la note du reste des 3 colonnes")
+        @DisplayName("Swordfish on rows: removes candidate from the rest of the 3 columns")
         void swordfish_onRows_removesNoteInColumns() {
             int note = 5;
 
-            // 3 lignes (0, 3, 6) restreintes à 3 colonnes (1, 4, 7)
+            // 3 rows (0, 3, 6) restricted to 3 columns (1, 4, 7)
             addNote(note, new int[]{0, 1}, new int[]{0, 4});
             addNote(note, new int[]{3, 4}, new int[]{3, 7});
             addNote(note, new int[]{6, 1}, new int[]{6, 7});
 
-            // Occurrences à retirer sur les colonnes 1, 4, 7 hors de ces 3 lignes
+            // Occurrences to remove in columns 1, 4, 7 outside these 3 rows
             addNote(note, new int[]{1, 1}, new int[]{8, 4}, new int[]{5, 7});
 
-            // Case témoin sur la colonne 0 (à garder)
+            // Control cell on column 0 (to be kept)
             addNote(note, new int[]{1, 0});
 
             assertTrue(RuleApplier.Swordfish(grid));
@@ -417,23 +422,23 @@ class RuleApplierTest {
             assertFalse(has(1, 1, note));
             assertFalse(has(8, 4, note));
             assertFalse(has(5, 7, note));
-            assertTrue(has(1, 0, note), "une case hors des colonnes cibles ne doit pas être touchée");
+            assertTrue(has(1, 0, note), "a cell outside the target columns should not be modified");
         }
 
         @Test
-        @DisplayName("Swordfish sur colonnes : retire la note du reste des 3 lignes")
+        @DisplayName("Swordfish on columns: removes candidate from the rest of the 3 rows")
         void swordfish_onColumns_removesNoteInRows() {
             int note = 1;
 
-            // 3 colonnes (0, 4, 8) restreintes à 3 lignes (1, 2, 7)
+            // 3 columns (0, 4, 8) restricted to 3 rows (1, 2, 7)
             addNote(note, new int[]{1, 0}, new int[]{2, 0});
             addNote(note, new int[]{2, 4}, new int[]{7, 4});
             addNote(note, new int[]{1, 8}, new int[]{7, 8});
 
-            // Occurrences à retirer sur les lignes 1, 2, 7 hors de ces 3 colonnes
+            // Occurrences to remove on rows 1, 2, 7 outside these 3 columns
             addNote(note, new int[]{1, 3}, new int[]{7, 5});
 
-            // Case témoin
+            // Control cell
             addNote(note, new int[]{5, 3});
 
             assertTrue(RuleApplier.Swordfish(grid));
@@ -446,11 +451,11 @@ class RuleApplierTest {
 
             assertFalse(has(1, 3, note));
             assertFalse(has(7, 5, note));
-            assertTrue(has(5, 3, note), "une case hors des lignes cibles ne doit pas être touchée");
+            assertTrue(has(5, 3, note), "a cell outside the target rows should not be modified");
         }
 
         @Test
-        @DisplayName("Swordfish : renvoie false s'il n'y a rien à retirer")
+        @DisplayName("Swordfish: returns false when there is nothing to remove")
         void swordfish_whenNothingToRemove_returnsFalse() {
             int note = 4;
             addNote(note, new int[]{0, 1}, new int[]{0, 4});

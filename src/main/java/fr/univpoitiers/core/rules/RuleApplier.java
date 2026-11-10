@@ -7,44 +7,57 @@ import java.util.Set;
 
 import fr.univpoitiers.core.grid.Grid;
 
+/**
+ * Utility interface providing static methods to apply heuristic deduction rules
+ * on a Sudoku grid (Pointing Pairs/Triples, Box-Line Reductions, X-Wing, Y-Wing, Swordfish).
+ */
 public interface RuleApplier {
 
-	/**
-	 * 
-	 * @param grid
-	 */
+    /**
+     * Applies Naked K-tuples deduction rule on the grid.
+     * @param grid the current Sudoku grid
+     * @return
+     */
 	static boolean KObvious(Grid grid){
 		return true;
 	}
 
-	/**
-	 * 
-	 * @param grid
-	 */
+    /**
+     * Applies Hidden K-tuples deduction rule on the grid.
+     * @param grid the current Sudoku grid
+     * @return true if at least one candidate note was removed or a value was set
+     */
 	static boolean KHidden(Grid grid){
 		return true;
 	}
 
-	/**
-	 * Pointing pair : dans un bloc, si un candidat n'apparaît que dans 2 cellules
-	 * et que ces cellules sont sur la même ligne (ou colonne), on retire ce candidat
-	 * des autres cellules de cette ligne (ou colonne) hors du bloc.
-	 * @param grid grille courante
-	 * @return true si au moins une note a été supprimée
-	 */
+    /**
+     * Pointing pair: within a block, if a candidate appears in only 2 cells
+     * and these cells share the same row (or column), this candidate is removed
+     * from all other cells in that row (or column) outside the block.
+     * @param grid the current Sudoku grid
+     * @return true if at least one candidate note was removed
+     */
 	static boolean PointingPair(Grid grid) {
 		return pointing(grid, 2);
 	}
 
-	/**
-	 * Pointing triple : même principe avec 3 cellules.
-	 * @param grid grille courante
-	 * @return true si au moins une note a été supprimée
-	 */
+    /**
+     * Pointing triple: same principle as pointing pair, but involving 3 cells.
+     * @param grid the current Sudoku grid
+     * @return true if at least one candidate note was removed
+     */
 	static boolean PointingTriple(Grid grid) {
 		return pointing(grid, 3);
 	}
 
+    /**
+     * Generic helper method for Pointing Pairs and Triples.
+     *
+     * @param grid the Sudoku grid
+     * @param size the size of the tuple (2 for pair, 3 for triple)
+     * @return true if at least one note was removed, false otherwise
+     */
 	private static boolean pointing(Grid grid, int size) {
 		int width = grid.getWidth();
 		int height = grid.getHeight();
@@ -112,14 +125,35 @@ public interface RuleApplier {
 		return false;
 	}
 
+
+    /**
+     * Box/Line Reduction Pair (Box-2 Reduction): if a candidate in a row or column
+     * is confined to a single block across 2 cells, it is removed from the rest of that block.
+     *
+     * @param grid the current Sudoku grid
+     * @return true if at least one candidate note was removed
+     */
 	static boolean boxLineReductionPair(Grid grid) {
 		return boxLine(grid, 2);
 	}
 
+    /**
+     * Box/Line Reduction Triple (Box-3 Reduction): same principle as Box-2, but involving 3 cells.
+     *
+     * @param grid the current Sudoku grid
+     * @return true if at least one candidate note was removed
+     */
 	static boolean boxLineReductionTriple(Grid grid) {
 		return boxLine(grid, 3);
 	}
 
+    /**
+     * Generic helper method for Box/Line Reductions.
+     *
+     * @param grid the Sudoku grid
+     * @param size the size of the tuple (2 for pair, 3 for triple)
+     * @return true if at least one note was removed, false otherwise
+     */
 	private static boolean boxLine(Grid grid, int size) {
 		int width = grid.getWidth();
 		int height = grid.getHeight();
@@ -187,10 +221,17 @@ public interface RuleApplier {
 		return false; // Aucune déduction trouvée par cette règle
 	}
 
-	/**
-	 * Retire la note des cellules du bloc, sauf celles de la ligne (skipRow)
-	 * ou de la colonne (skipCol) concernée. Passer -1 pour ignorer un des deux.
-	 */
+    /**
+     * Removes the candidate note from cells within a block, except those belonging
+     * to the specified row (skipRow) or column (skipCol). Pass -1 to ignore either parameter.
+     *
+     * @param grid the Sudoku grid
+     * @param startBlock the top-left index of the target block
+     * @param note the zero-based index of the candidate note to eliminate
+     * @param skipRow row index to preserve (-1 to skip)
+     * @param skipCol column index to preserve (-1 to skip)
+     * @return true if at least one candidate note was removed
+     */
 	private static boolean eliminateInBlock(Grid grid, int startBlock, int note, int skipRow, int skipCol) {
 		int width = grid.getWidth();
 		int blockW = (int) Math.sqrt(width);
