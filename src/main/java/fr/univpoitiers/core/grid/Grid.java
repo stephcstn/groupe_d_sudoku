@@ -147,15 +147,6 @@ public class Grid {
         return checkBlock(pos, value) && checkColumn(pos, value) && checkRow(pos, value);
     }
 
-    /**
-     * Ajoute une note (candidat) dans une case.
-     *
-     * @param pos position de la case (index 1D)
-     * @param note index de la note (valeur - 1)
-     */
-    public void setNote(int pos, int note) {
-        this.cells[pos].setNote(note);
-    }
 
     /**
      * Places a value in the cell at the given position and updates the list of available cells.
@@ -235,10 +226,29 @@ public class Grid {
         backCellAvailable(pos);
     }
 
+
+
     /**
-     * Locks all non-empty cells on the board to prevent them from being cleared during reset or edition.
+     * Removes a specific candidate note (pencil mark) for the cell at the given position.
+     *
+     * @param pos the 1D position index of the target cell
+     * @param note the zero-based index of the candidate note to remove (ranging from 0 to max values - 1)
      */
-    public void lockFilledCells() {
+    public void removeNote(int pos, int note) {
+        this.cells[pos].removeNote(note);
+    }
+
+    /**
+     * Enables a specific candidate note (pencil mark) for the cell at the given position.
+     *
+     * @param pos the 1D position index of the target cell
+     * @param note the zero-based index of the candidate note to set (ranging from 0 to max values - 1)
+     */
+	public void setNote(int pos, int note) {
+		this.cells[pos].setNote(note);
+	}
+
+	public void lockFilledCells() {
         for (Cell cell : this.cells) {
             if (cell.getValue() != 0) {
                 cell.lock();
@@ -457,4 +467,6 @@ public class Grid {
         return true;
     }
 
+	public int getBlockWidth() { return this.BLOCK_WIDTH; }
+	public int getBlockHeight() { return this.BLOCK_HEIGHT; }
 }
