@@ -58,8 +58,8 @@
                   <CheckBox fx:id="checkPointingPairs" mnemonicParsing="false" text="Pointing Pairs" />
                   <CheckBox fx:id="checkPointingTriples" mnemonicParsing="false" text="Pointing Triples" />
                   <CheckBox fx:id="checkBoxReduction" mnemonicParsing="false" text="Box reduction" />
-                  <CheckBox fx:id="checkX_wing" mnemonicParsing="false" text="X-wing" />
-                  <CheckBox fx:id="checkY_wing" mnemonicParsing="false" text="Y-wing" />
+                  <CheckBox fx:id="checkXWing" mnemonicParsing="false" text="X-wing" />
+                  <CheckBox fx:id="checkYWing" mnemonicParsing="false" text="Y-wing" />
                   <CheckBox fx:id="checkSword_fish" mnemonicParsing="false" text="Sword-fish" />
                   <Button fx:id="runAutoResolution" mnemonicParsing="false" text="RUN AUTO RESOLUTION">
                      <VBox.margin>

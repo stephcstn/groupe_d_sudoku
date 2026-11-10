@@ -66,8 +66,8 @@ public class SudokuAppController {
 	@FXML private CheckBox checkPointingPairs;
 	@FXML private CheckBox checkPointingTriples;
 	@FXML private CheckBox checkBoxReduction;
-	@FXML private CheckBox checkX_wing;
-	@FXML private CheckBox checkY_wing;
+	@FXML private CheckBox checkYWing;
+	@FXML private CheckBox checkXWing;
 	@FXML private CheckBox checkSword_fish;
 
 	@FXML private Button runAutoResolution;
@@ -339,7 +339,7 @@ public class SudokuAppController {
 				checkNakedSingles, checkNakedPairs, checkNakedTriples, checkNakedTuples,
 				checkHiddenSingles, checkHiddenPairs, checkHiddenTriples, checkHiddenTuples,
 				checkPointingPairs, checkPointingTriples, checkBoxReduction,
-				checkX_wing, checkY_wing, checkSword_fish
+				checkXWing, checkYWing, checkSword_fish
 		);
 	}
 
