@@ -35,7 +35,13 @@ public class SudokuCoreModel {
 	 */
 	public boolean input(int value, int x, int y) {
 		Grid grid = requireGrid();
-		return grid.addNumber(grid.getPosition(x, y), value);
+		int index = toIndex(grid, x, y);
+		if (value == 0) {
+			// Vider une case : removeNumber la remet aussi dans les cases disponibles.
+			grid.removeNumber(index);
+			return true;
+		}
+		return grid.addNumber(index, value);
 	}
 
 	public int[] checkEntries() {
@@ -67,7 +73,7 @@ public class SudokuCoreModel {
 	 */
 	public int getNumber(int x, int y) {
 		Grid grid = requireGrid();
-		return grid.getNumber(grid.getPosition(x, y));
+		return grid.getNumber(toIndex(grid, x, y));
 	}
 
 	public void lockFilledCells() {
@@ -82,6 +88,23 @@ public class SudokuCoreModel {
 
 	public boolean isGridLocked() {
 		return gridLocked;
+	}
+
+	/**
+	 * Convertit des coordonnées 2D en index 1D de la grille, après avoir vérifié qu'elles
+	 * désignent bien une case ({@link Grid#cellToIndex(int, int)} ne fait pas cette vérification).
+	 *
+	 * @param grid grille concernée
+	 * @param x    colonne de la case
+	 * @param y    ligne de la case
+	 * @return l'index 1D de la case
+	 * @throws IllegalArgumentException si les coordonnées sont hors de la grille
+	 */
+	private static int toIndex(Grid grid, int x, int y) {
+		if (x < 0 || x >= grid.getWidth() || y < 0 || y >= grid.getHeight()) {
+			throw new IllegalArgumentException("Coordonnées hors de la grille : (" + x + ", " + y + ").");
+		}
+		return grid.cellToIndex(x, y);
 	}
 
 	private Grid requireGrid() {

@@ -50,4 +50,12 @@ class SudokuCoreModelTest {
         assertThrows(IllegalArgumentException.class, () -> model.getNumber(0, 9));
         assertThrows(IllegalArgumentException.class, () -> model.input(1, -1, 0));
     }
+
+    @Test
+    @DisplayName("Saisir 0 vide la case")
+    void inputZeroClearsTheCell() {
+        model.input(5, 3, 4);
+        assertTrue(model.input(0, 3, 4));
+        assertEquals(0, model.getNumber(3, 4));
+    }
 }
