@@ -115,7 +115,7 @@ public class Grid {
      *         (including if the value is out of bounds, e.g., 0 for an empty cell)
      */
     public boolean checkValidValues(int pos, int value) {
-        if (value < 1 || value > Math.max(this.WIDTH, this.HEIGHT)) {
+        if (value < 1 || value > Math.max(this.width, this.height)) {
             return false;
         }
         return checkBlock(pos, value) && checkColumn(pos, value) && checkRow(pos, value);
@@ -253,7 +253,7 @@ public class Grid {
      * @param valeur the note value to remove from the column
      */
     public void columnUpdate(int y, int valeur) {
-        for (int i = y; i < this.cells.length; i += this.WIDTH) {
+        for (int i = y; i < this.cells.length; i += this.width) {
             this.cells[i].removeNote(valeur);
         }
     }
@@ -349,6 +349,9 @@ public class Grid {
      * @return the corresponding 1D index
      */
     public int cellToIndex(int x, int y) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+            throw new IllegalArgumentException("Coordonnées hors de la grille : (" + x + ", " + y + ").");
+        }
         return y * width + x;
     }
 

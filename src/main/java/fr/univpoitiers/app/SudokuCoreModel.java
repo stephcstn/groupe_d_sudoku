@@ -43,6 +43,7 @@ public class SudokuCoreModel {
 		throw new UnsupportedOperationException();
 	}
 
+
 	/**
 	 * 
 	 * @param rules
