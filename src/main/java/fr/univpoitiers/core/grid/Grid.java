@@ -3,6 +3,10 @@ package fr.univpoitiers.core.grid;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * Represents the Sudoku game board, handling cells, board dimensions,
+ * constraint verification (rows, columns, sub-blocks), and candidate note updates.
+ */
 public class Grid {
 
     private Cell[] cells;
