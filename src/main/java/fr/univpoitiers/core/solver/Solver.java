@@ -169,7 +169,7 @@ public class Solver implements RuleApplier {
 			// restrictFromDiagonal(grid, pos, notesToAdd); TODO: NOT NOW
 
 			for (Integer note : notesToAdd) {
-				grid.addNoteToCell(pos, note);
+				grid.setNote(pos, note);
 			}
 			notesToAdd.clear();
 		}

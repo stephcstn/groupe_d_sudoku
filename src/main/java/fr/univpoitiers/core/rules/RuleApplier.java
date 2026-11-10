@@ -88,28 +88,19 @@ public interface RuleApplier {
 		fillValues(listOfValues, grid.getWidth());
 		listOfValuesBlock(grid, listOfValues, cellIndex);
 		if (listOfValues.size() == 1) {
-			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
-				grid.removeAvailableCell(cellIndex);
-				return true;
-			}
+			return grid.addNumber(cellIndex, listOfValues.getFirst());
 		}
 
 		fillValues(listOfValues, grid.getWidth());
 		listOfValuesRow(grid, listOfValues, cellIndex);
 		if (listOfValues.size() == 1) {
-			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
-				grid.removeAvailableCell(cellIndex);
-				return true;
-			}
+			return grid.addNumber(cellIndex, listOfValues.getFirst());
 		}
 
 		fillValues(listOfValues, grid.getWidth());
 		listOfValuesColumn(grid , listOfValues, cellIndex);
 		if (listOfValues.size() == 1) {
-			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
-				grid.removeAvailableCell(cellIndex);
-				return true;
-			}
+			return grid.addNumber(cellIndex, listOfValues.getFirst());
 		}
 		return false;
 	}
@@ -165,10 +156,7 @@ public interface RuleApplier {
 		listOfValuesColumn(grid, listOfValues, cellIndex);
 		listOfValuesRow(grid, listOfValues, cellIndex);
 		if (listOfValues.size() == 1) {
-			if (grid.addNumber(cellIndex, listOfValues.getFirst())) {
-				grid.removeAvailableCell(cellIndex);
-				return true;
-			}
+			return grid.addNumber(cellIndex, listOfValues.getFirst());
 		}
 
 		return false;
