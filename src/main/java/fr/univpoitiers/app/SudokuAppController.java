@@ -87,10 +87,10 @@ public class SudokuAppController {
 	 * Notes candidates saisies par l'utilisateur, indexées {@code [row][column][digit]}
 	 * avec {@code digit} de 1 à {@link #MAX_DIGIT} (l'indice 0 est inutilisé).
 	 */
-	private final boolean[][][] notes = new boolean[GRID_HEIGHT][GRID_WIDTH][MAX_DIGIT + 1];
+	//private final boolean[][][] notes = new boolean[GRID_HEIGHT][GRID_WIDTH][MAX_DIGIT + 1];
 
 	/** Cases verrouillées, indexées {@code [row][column]}. */
-	private final boolean[][] lockedCells = new boolean[GRID_HEIGHT][GRID_WIDTH];
+	//private final boolean[][] lockedCells = new boolean[GRID_HEIGHT][GRID_WIDTH];
 
 	private int selectedRow = -1;
 	private int selectedColumn = -1;
