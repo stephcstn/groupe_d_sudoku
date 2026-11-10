@@ -1,0 +1,87 @@
+/* Palette inspirée du logo de l'Université de Poitiers. */
+.app-root {
+    -fx-background-color: #f5f1eb;
+    -fx-font-family: "System";
+}
+
+.app-title {
+    -fx-text-fill: #a20d2b;
+}
+
+.button {
+    -fx-background-color: #a20d2b;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 14px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.button:hover {
+    -fx-background-color: #7f0a22;
+}
+
+.button:focused {
+    -fx-border-color: #a39380;
+    -fx-border-radius: 4px;
+    -fx-border-width: 2px;
+}
+
+.button:disabled {
+    -fx-background-color: #a39380;
+    -fx-text-fill: #f5f1eb;
+}
+
+.check-box {
+    -fx-text-fill: #443a33;
+}
+
+.check-box > .box {
+    -fx-background-color: #fffdf9;
+    -fx-border-color: #a39380;
+    -fx-border-radius: 3px;
+}
+
+.check-box:selected > .box {
+    -fx-background-color: #a20d2b;
+    -fx-border-color: #a20d2b;
+}
+
+.check-box:selected > .box > .mark {
+    -fx-background-color: #ffffff;
+}
+
+/* Style par défaut de la cellule */
+.cell-view {
+    -fx-background-color: #fffdf9;
+    -fx-border-color: #a39380;
+    -fx-border-width: 0.5px;
+    -fx-alignment: center;
+}
+
+/* Style lorsque la souris survole la cellule */
+.cell-view:hover {
+    -fx-background-color: #e8ded2;
+}
+
+.cell-view.highlighted {
+    -fx-background-color: #efe7dd;
+}
+
+.cell-view.selected {
+    -fx-background-color: #e6c6bd;
+}
+
+.cell-value-pane {
+    -fx-alignment: center;
+}
+
+.cell-value {
+    -fx-text-fill: #443a33;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.cell-note {
+    -fx-text-fill: #443a33;
+    -fx-font-size: 10px;
+}
