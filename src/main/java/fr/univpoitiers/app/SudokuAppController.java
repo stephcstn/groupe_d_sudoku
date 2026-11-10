@@ -28,11 +28,9 @@ import javafx.scene.layout.VBox;
  * au modèle ({@link SudokuCoreModel}).
  *
  * <p><b>Coordonnées.</b> La vue est un {@code GridPane} 2D adressé par {@code (row, column)}.
- * Le modèle, lui, stocke la grille à une dimension et {@link SudokuCoreModel#input(int, int, int)}
- * et {@link SudokuCoreModel#getNumber(int, int)} utilisent actuellement leur premier paramètre
- * de position directement comme index 1D. Toute la conversion {@code (row, column)} vers index 1D
- * est isolée dans {@link #toModelPosition(int, int)}, {@link #modelInput(int, int, int)} et
- * {@link #modelValue(int, int)} : c'est le seul endroit à adapter si le modèle change.</p>
+ * Le modèle prend des coordonnées {@code (x, y)} = {@code (column, row)} et se charge lui-même
+ * de la conversion vers son stockage 1D. Le passage de {@code (row, column)} à {@code (x, y)}
+ * est isolé dans {@link #modelInput(int, int, int)} et {@link #modelValue(int, int)}.</p>
  *
  * <p><b>Verrouillage.</b> Le modèle ne permet ni de savoir si une case est verrouillée, ni de la
  * protéger, ni de la déverrouiller. Le contrôleur mémorise donc lui-même les cases verrouillées
@@ -126,23 +124,11 @@ public class SudokuAppController {
 	}
 
 	// ------------------------------------------------------------------------------------------
-	// Adaptation au modèle (seul endroit où (row, column) devient un index 1D)
+	// Adaptation au modèle : (row, column) de la vue -> (x, y) = (column, row) du modèle
 	// ------------------------------------------------------------------------------------------
 
 	/**
-	 * Convertit une position de la vue 2D en index 1D de la grille du modèle.
-	 *
-	 * @param row    ligne de la cellule
-	 * @param column colonne de la cellule
-	 * @return l'index 1D, {@code row * GRID_WIDTH + column}
-	 */
-	private static int toModelPosition(int row, int column) {
-		return row * GRID_WIDTH + column;
-	}
-
-	/**
-	 * Saisit une valeur dans le modèle. Le modèle lit son premier paramètre de position comme
-	 * index 1D et ignore le second, qui est donc passé à 0.
+	 * Saisit une valeur dans le modèle.
 	 *
 	 * @param value  valeur à saisir, 0 pour vider la case
 	 * @param row    ligne de la cellule
@@ -150,18 +136,18 @@ public class SudokuAppController {
 	 * @return le résultat de {@link SudokuCoreModel#input(int, int, int)}
 	 */
 	private boolean modelInput(int value, int row, int column) {
-		return coreModel.input(value, toModelPosition(row, column), 0);
+		return coreModel.input(value, column, row);
 	}
 
 	/**
-	 * Lit la valeur d'une cellule dans le modèle (voir {@link #modelInput(int, int, int)}).
+	 * Lit la valeur d'une cellule dans le modèle.
 	 *
 	 * @param row    ligne de la cellule
 	 * @param column colonne de la cellule
 	 * @return la valeur, ou 0 si la cellule est vide
 	 */
 	private int modelValue(int row, int column) {
-		return coreModel.getNumber(toModelPosition(row, column), 0);
+		return coreModel.getNumber(column, row);
 	}
 
 	// ------------------------------------------------------------------------------------------

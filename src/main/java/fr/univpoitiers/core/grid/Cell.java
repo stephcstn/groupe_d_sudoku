@@ -2,7 +2,7 @@ package fr.univpoitiers.core.grid;
 
 public class Cell {
 
-	private byte[] note;
+	private final byte[] note;
 	private boolean locked;
 	private int value;
 

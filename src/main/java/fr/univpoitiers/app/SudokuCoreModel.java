@@ -25,13 +25,17 @@ public class SudokuCoreModel {
 	}
 
 	/**
-	 * 
-	 * @param value
-	 * @param x
-	 * @param y
+	 * Saisit une valeur dans la case de coordonnées {@code (x, y)}.
+	 *
+	 * @param value valeur à saisir, 0 pour vider la case
+	 * @param x     colonne de la case, à partir de 0
+	 * @param y     ligne de la case, à partir de 0
+	 * @return vrai si la saisie a été acceptée
+	 * @throws IllegalArgumentException si les coordonnées sont hors de la grille
 	 */
 	public boolean input(int value, int x, int y) {
-		return requireGrid().addNumber(x, value);
+		Grid grid = requireGrid();
+		return grid.addNumber(grid.getPosition(x, y), value);
 	}
 
 	public int[] checkEntries() {
@@ -53,8 +57,17 @@ public class SudokuCoreModel {
 		gridLocked = false;
 	}
 
+	/**
+	 * Lit la valeur de la case de coordonnées {@code (x, y)}.
+	 *
+	 * @param x colonne de la case, à partir de 0
+	 * @param y ligne de la case, à partir de 0
+	 * @return la valeur, ou 0 si la case est vide
+	 * @throws IllegalArgumentException si les coordonnées sont hors de la grille
+	 */
 	public int getNumber(int x, int y) {
-		return requireGrid().getNumber(x);
+		Grid grid = requireGrid();
+		return grid.getNumber(grid.getPosition(x, y));
 	}
 
 	public void lockFilledCells() {

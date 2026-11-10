@@ -18,7 +18,8 @@ public class Solver implements RuleApplier {
 	 * @param grid
 	 */
 	private void addSolvedGrid(Grid grid) {
-
+		// TODO - implement Solver.addSolvedGrid
+		throw new UnsupportedOperationException("addSolvedGrid n'est pas encore implémenté.");
 	}
 
 	/**
@@ -27,6 +28,7 @@ public class Solver implements RuleApplier {
 	 * @param rules
 	 */
 	public boolean solve(Grid grid, int[] rules) {
+		// TODO - implement Solver.solve
 		return true;
 	}
 
@@ -35,8 +37,8 @@ public class Solver implements RuleApplier {
 	 * @param grid
 	 */
 	public int[] checkEntries(Grid grid) {
+		// TODO - implement Solver.checkEntries
 		return null;
-
 	}
 
 	/**
@@ -44,7 +46,8 @@ public class Solver implements RuleApplier {
 	 * @param grid
 	 */
 	public void generate(Grid grid) {
-
+		// TODO - implement Solver.generate
+		throw new UnsupportedOperationException("generate n'est pas encore implémenté.");
 	}
 
 	/**
@@ -53,7 +56,8 @@ public class Solver implements RuleApplier {
 	 * @param countNumberLasting
 	 */
 	private void reduce(Grid grid, int countNumberLasting) {
-
+		// TODO - implement Solver.reduce
+		throw new UnsupportedOperationException("reduce n'est pas encore implémenté.");
 	}
 
 }

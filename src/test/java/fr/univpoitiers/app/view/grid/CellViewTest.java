@@ -161,101 +161,181 @@ class CellViewTest {
             cell.setValue(0);
             assertEquals(0, cell.getValue());
             assertThrows(IllegalArgumentException.class, () -> cell.setValue(10));
-            assertThrows(IllegalArgumentException.class, () -> cell.setNotes(Set.of(0)));
+            Set<Integer> invalidNotes = Set.of(0);
+            assertThrows(IllegalArgumentException.class, () -> cell.setNotes(invalidNotes));
             return null;
         });
     }
 
     @Test
-    void fxmlConnectsNotesModeDigitPadAndClearAction() throws Exception {
+    void fxmlLaysOutDigitPadWithExpectedSpacing() throws Exception {
         runOnJavaFxThread(() -> {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("views/vue.fxml"));
-            Parent root = loader.load();
-            new Scene(root);
-            GridView grid = (GridView) ((BorderPane) root.lookup("#centerPane")).getCenter();
-            BorderPane rightPane = (BorderPane) root.lookup("#rightPane");
-            VBox padControls = (VBox) rightPane.getCenter();
-            PadView pad = (PadView) padControls.getChildren().get(0);
-            CheckBox notesMode = (CheckBox) root.lookup("#notesMode");
-            Button clear = (Button) root.lookup("#clearButton");
-            Button reset = (Button) root.lookup("#resetGridButton");
-            CellView firstCell = grid.getCellAt(0, 0);
-            CellView secondCell = grid.getCellAt(0, 1);
-            Button one = digitButton(pad, 1);
-            Button two = digitButton(pad, 2);
-            Button seven = digitButton(pad, 7);
+            FxmlUi ui = loadFxmlUi();
 
-            assertEquals(8.0, pad.getHgap(), 0.0);
-            assertEquals(8.0, pad.getVgap(), 0.0);
-            assertEquals(14.0, padControls.getSpacing(), 0.0);
+            assertEquals(8.0, ui.pad().getHgap(), 0.0);
+            assertEquals(8.0, ui.pad().getVgap(), 0.0);
+            assertEquals(14.0, ui.padControls().getSpacing(), 0.0);
+            return null;
+        });
+    }
+
+    @Test
+    void fxmlIgnoresDigitsAndClearWithoutSelection() throws Exception {
+        runOnJavaFxThread(() -> {
+            FxmlUi ui = loadFxmlUi();
+            Button seven = digitButton(ui.pad(), 7);
 
             seven.fire();
-            notesMode.setSelected(true);
+            ui.notesMode().setSelected(true);
             seven.fire();
-            clear.fire();
-            assertEquals(0, firstCell.getValue());
-            assertFalse(firstCell.hasNote(7));
+            ui.clear().fire();
 
-            firstCell.fireEvent(mouseClick());
-            root.applyCss();
-            assertEquals(Color.web("#e6c6bd"), firstCell.getBackground().getFills().get(0).getFill());
-            assertEquals(Color.web("#efe7dd"), secondCell.getBackground().getFills().get(0).getFill());
+            assertEquals(0, ui.firstCell().getValue());
+            assertFalse(ui.firstCell().hasNote(7));
+            return null;
+        });
+    }
+
+    @Test
+    void fxmlStylesSelectedAndRelatedCells() throws Exception {
+        runOnJavaFxThread(() -> {
+            FxmlUi ui = loadFxmlUi();
+            Scene scene = new Scene(ui.root());
+
+            ui.firstCell().fireEvent(mouseClick());
+            scene.getRoot().applyCss();
+
+            assertEquals(Color.web("#e6c6bd"), ui.firstCell().getBackground().getFills().get(0).getFill());
+            assertEquals(Color.web("#efe7dd"), ui.secondCell().getBackground().getFills().get(0).getFill());
+            return null;
+        });
+    }
+
+    @Test
+    void fxmlNotesModeTogglesCandidatesOfSelectedCellOnly() throws Exception {
+        runOnJavaFxThread(() -> {
+            FxmlUi ui = loadFxmlUi();
+            Button one = digitButton(ui.pad(), 1);
+            Button two = digitButton(ui.pad(), 2);
+            Button seven = digitButton(ui.pad(), 7);
+            ui.notesMode().setSelected(true);
+            ui.firstCell().fireEvent(mouseClick());
+
             seven.fire();
-            assertTrue(firstCell.hasNote(7));
+            assertTrue(ui.firstCell().hasNote(7));
             seven.fire();
-            assertFalse(firstCell.hasNote(7));
+            assertFalse(ui.firstCell().hasNote(7));
+
             seven.fire();
             two.fire();
-            assertTrue(firstCell.hasNote(7));
-            assertTrue(firstCell.hasNote(2));
+            assertTrue(ui.firstCell().hasNote(7));
+            assertTrue(ui.firstCell().hasNote(2));
 
-            secondCell.fireEvent(mouseClick());
+            ui.secondCell().fireEvent(mouseClick());
             one.fire();
-            assertTrue(secondCell.hasNote(1));
-            assertTrue(firstCell.hasNote(7));
+            assertTrue(ui.secondCell().hasNote(1));
+            assertTrue(ui.firstCell().hasNote(7));
+            return null;
+        });
+    }
 
-            firstCell.fireEvent(mouseClick());
-            notesMode.setSelected(false);
+    @Test
+    void fxmlValueReplacesNotesAndBlocksNewNotes() throws Exception {
+        runOnJavaFxThread(() -> {
+            FxmlUi ui = loadFxmlUi();
+            Button two = digitButton(ui.pad(), 2);
+            Button seven = digitButton(ui.pad(), 7);
+            ui.firstCell().fireEvent(mouseClick());
+            ui.notesMode().setSelected(true);
             seven.fire();
-            assertEquals(7, firstCell.getValue());
-            assertFalse(firstCell.hasNote(7));
-            notesMode.setSelected(true);
+
+            ui.notesMode().setSelected(false);
+            seven.fire();
+            assertEquals(7, ui.firstCell().getValue());
+            assertFalse(ui.firstCell().hasNote(7));
+
+            ui.notesMode().setSelected(true);
             two.fire();
-            assertFalse(firstCell.hasNote(2));
+            assertFalse(ui.firstCell().hasNote(2));
+            return null;
+        });
+    }
 
-            clear.fire();
-            assertEquals(0, firstCell.getValue());
-            assertFalse(firstCell.hasNote(7));
-            assertFalse(firstCell.hasNote(2));
-            assertTrue(secondCell.hasNote(1));
+    @Test
+    void fxmlClearEmptiesOnlyTheSelectedCell() throws Exception {
+        runOnJavaFxThread(() -> {
+            FxmlUi ui = loadFxmlUi();
+            Button one = digitButton(ui.pad(), 1);
+            Button two = digitButton(ui.pad(), 2);
+            Button seven = digitButton(ui.pad(), 7);
+            ui.notesMode().setSelected(true);
+            ui.secondCell().fireEvent(mouseClick());
+            one.fire();
+            ui.firstCell().fireEvent(mouseClick());
             seven.fire();
-            assertTrue(firstCell.hasNote(7));
-            clear.fire();
-            assertFalse(firstCell.hasNote(7));
-
-            notesMode.setSelected(false);
-            seven.fire();
-            secondCell.fireEvent(mouseClick());
-            notesMode.setSelected(true);
             two.fire();
-            assertEquals(7, firstCell.getValue());
-            assertTrue(secondCell.hasNote(2));
+            ui.notesMode().setSelected(false);
+            seven.fire();
 
-            firstCell.fireEvent(mouseClick());
-            reset.fire();
-            assertTrue(firstCell.isSelected());
-            assertTrue(notesMode.isSelected());
+            ui.clear().fire();
+            assertEquals(0, ui.firstCell().getValue());
+            assertFalse(ui.firstCell().hasNote(7));
+            assertFalse(ui.firstCell().hasNote(2));
+            assertTrue(ui.secondCell().hasNote(1));
+
+            ui.notesMode().setSelected(true);
+            seven.fire();
+            assertTrue(ui.firstCell().hasNote(7));
+            ui.clear().fire();
+            assertFalse(ui.firstCell().hasNote(7));
+            return null;
+        });
+    }
+
+    @Test
+    void fxmlNotesCanBeAddedNextToAFilledCell() throws Exception {
+        runOnJavaFxThread(() -> {
+            FxmlUi ui = loadFxmlUi();
+            ui.firstCell().fireEvent(mouseClick());
+            digitButton(ui.pad(), 7).fire();
+
+            ui.secondCell().fireEvent(mouseClick());
+            ui.notesMode().setSelected(true);
+            digitButton(ui.pad(), 2).fire();
+
+            assertEquals(7, ui.firstCell().getValue());
+            assertTrue(ui.secondCell().hasNote(2));
+            return null;
+        });
+    }
+
+    @Test
+    void fxmlResetClearsGridButKeepsSelectionAndNotesMode() throws Exception {
+        runOnJavaFxThread(() -> {
+            FxmlUi ui = loadFxmlUi();
+            Button seven = digitButton(ui.pad(), 7);
+            ui.firstCell().fireEvent(mouseClick());
+            seven.fire();
+            ui.secondCell().fireEvent(mouseClick());
+            ui.notesMode().setSelected(true);
+            digitButton(ui.pad(), 2).fire();
+            ui.firstCell().fireEvent(mouseClick());
+
+            ui.reset().fire();
+            assertTrue(ui.firstCell().isSelected());
+            assertTrue(ui.notesMode().isSelected());
             for (int row = 0; row < 9; row++) {
                 for (int column = 0; column < 9; column++) {
-                    CellView cell = grid.getCellAt(row, column);
+                    CellView cell = ui.grid().getCellAt(row, column);
                     assertEquals(0, cell.getValue());
                     for (int digit = 1; digit <= 9; digit++) {
                         assertFalse(cell.hasNote(digit));
                     }
                 }
             }
+
             seven.fire();
-            assertTrue(firstCell.hasNote(7));
+            assertTrue(ui.firstCell().hasNote(7));
             return null;
         });
     }
@@ -331,6 +411,30 @@ class CellViewTest {
             assertThrows(IllegalArgumentException.class, () -> new GridView(3, 0, CSS));
             return null;
         });
+    }
+
+    /** Éléments de l'interface chargée depuis {@code vue.fxml}, utilisés par les tests FXML. */
+    private record FxmlUi(Parent root, GridView grid, VBox padControls, PadView pad,
+                          CheckBox notesMode, Button clear, Button reset) {
+
+        CellView firstCell() {
+            return grid.getCellAt(0, 0);
+        }
+
+        CellView secondCell() {
+            return grid.getCellAt(0, 1);
+        }
+    }
+
+    private static FxmlUi loadFxmlUi() throws java.io.IOException {
+        Parent root = new FXMLLoader(App.class.getResource("views/vue.fxml")).load();
+        GridView grid = (GridView) ((BorderPane) root.lookup("#centerPane")).getCenter();
+        VBox padControls = (VBox) ((BorderPane) root.lookup("#rightPane")).getCenter();
+        PadView pad = (PadView) padControls.getChildren().get(0);
+        return new FxmlUi(root, grid, padControls, pad,
+                (CheckBox) root.lookup("#notesMode"),
+                (Button) root.lookup("#clearButton"),
+                (Button) root.lookup("#resetGridButton"));
     }
 
     private static MouseEvent mouseClick() {
