@@ -94,6 +94,13 @@ public class Cell {
     }
 
     /**
+     * Unlocks this cell so that its value can be modified or cleared again.
+     */
+    public void unlock() {
+        this.locked = false;
+    }
+
+    /**
      * Gets the current numeric value of this cell.
      *
      * @return the value of the cell (0 if empty)

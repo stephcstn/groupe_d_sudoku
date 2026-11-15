@@ -477,10 +477,12 @@ public class Grid {
         return this.cells[pos].isLocked();
     }
 
+    /**
+     * Unlocks every cell of the grid, making all values editable again.
+     */
     public void unlockGrid() {
         for (Cell cell : this.cells) {
-            // Si Cell ne possède pas unlock(), ajoutez this.locked = false dans Cell
-            // ou réinitialisez le statut locked via une méthode dédiée.
+            cell.unlock();
         }
     }
 

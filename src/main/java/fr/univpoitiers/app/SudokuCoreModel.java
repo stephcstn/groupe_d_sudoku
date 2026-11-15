@@ -117,6 +117,7 @@ public class SudokuCoreModel {
      * Déverrouille la grille.
      */
     public void unlockGrid() {
+        requireGrid().unlockGrid();
         gridLocked = false;
     }
 
@@ -163,10 +164,11 @@ public class SudokuCoreModel {
     public void toggleNote(int noteValue, int x, int y) {
         Grid grid = requireGrid();
         int pos = grid.cellToIndex(x, y);
-        if (grid.isCellContaining(pos, noteValue - 1)) {
-            grid.removeNote(pos, noteValue);
+        int index = noteValue - 1;
+        if (grid.isCellContaining(pos, index)) {
+            grid.removeNote(pos, index);
         } else {
-            grid.setNote(pos, noteValue);
+            grid.setNote(pos, index);
         }
     }
 
