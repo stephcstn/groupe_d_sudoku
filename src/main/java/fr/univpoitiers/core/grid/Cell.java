@@ -119,6 +119,12 @@ public class Cell {
     }
 
 
+    /**
+     * Two cells are equal when they have the same value, lock status and candidate notes.
+     *
+     * @param obj the object to compare with
+     * @return true if {@code obj} is an equal cell
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -131,6 +137,11 @@ public class Cell {
         return true;
     }
 
+    /**
+     * Computes a hash code from the value and the candidate notes.
+     *
+     * @return the hash code of this cell
+     */
     @Override
     public int hashCode() {
         int result = Integer.hashCode(this.value);

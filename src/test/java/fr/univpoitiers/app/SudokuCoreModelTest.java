@@ -53,6 +53,19 @@ class SudokuCoreModelTest {
     }
 
     @Test
+    @DisplayName("Saisir une valeur conserve les notes de la case")
+    void inputKeepsCellNotes() {
+        model.toggleNote(3, 1, 1);
+        model.toggleNote(8, 1, 1);
+
+        assertTrue(model.input(5, 1, 1));
+
+        assertEquals(5, model.getNumber(1, 1));
+        assertTrue(model.getNote(3, 1, 1));
+        assertTrue(model.getNote(8, 1, 1));
+    }
+
+    @Test
     @DisplayName("unlockGrid rend de nouveau modifiables les cases verrouillées")
     void unlockGridMakesLockedCellsEditableAgain() {
         model.input(4, 0, 0);

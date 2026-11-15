@@ -7,12 +7,21 @@ import fr.univpoitiers.core.solver.Solver;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Modèle de l'application : fait le lien entre l'interface et la grille du cœur
+ * ({@link Grid}), en manipulant les cases par leurs coordonnées (x = colonne, y = ligne).
+ */
 public class SudokuCoreModel {
 
     private Solver solver;
     private Grid currentGrid;
     private boolean gridLocked;
 
+    /**
+     * Génère une nouvelle grille à résoudre. Pas encore implémenté.
+     *
+     * @throws UnsupportedOperationException toujours, en attendant le générateur
+     */
     public void generateGrid() {
         // TODO : Dépendra de l'implémentation de Solver / Generator
         throw new UnsupportedOperationException();
@@ -121,6 +130,11 @@ public class SudokuCoreModel {
         gridLocked = false;
     }
 
+    /**
+     * Indique si la grille est verrouillée.
+     *
+     * @return vrai si les cases remplies ont été verrouillées
+     */
     public boolean isGridLocked() {
         return gridLocked;
     }
@@ -138,12 +152,23 @@ public class SudokuCoreModel {
 
     /**
      * Vérifie si la case (x, y) contient une note candidate donnée.
+     *
+     * @param noteValue indice de la note, à partir de 0 (contrairement à {@link #getNote})
+     * @param x         colonne de la case, à partir de 0
+     * @param y         ligne de la case, à partir de 0
+     * @return vrai si la note est active
      */
     public boolean isCellContainingNote(int noteValue, int x, int y) {
         Grid grid = requireGrid();
         return grid.isCellContaining(grid.cellToIndex(x, y), noteValue);
     }
 
+    /**
+     * Retourne la grille courante.
+     *
+     * @return la grille courante
+     * @throws IllegalStateException si aucune grille n'a été créée
+     */
     private Grid requireGrid() {
         if (currentGrid == null) {
             throw new IllegalStateException("La grille doit être créée avant d'être utilisée.");
@@ -151,16 +176,38 @@ public class SudokuCoreModel {
         return currentGrid;
     }
 
+    /**
+     * Indique si la case (x, y) est verrouillée.
+     *
+     * @param x colonne de la case, à partir de 0
+     * @param y ligne de la case, à partir de 0
+     * @return vrai si la case est verrouillée
+     */
     public boolean isCellLocked(int x, int y) {
         Grid grid = requireGrid();
         return grid.isLocked(grid.cellToIndex(x, y));
     }
 
+    /**
+     * Indique si la case (x, y) contient la note d'un chiffre.
+     *
+     * @param noteValue chiffre de la note, à partir de 1
+     * @param x         colonne de la case, à partir de 0
+     * @param y         ligne de la case, à partir de 0
+     * @return vrai si la note est active
+     */
     public boolean getNote(int noteValue, int x, int y) {
         Grid grid = requireGrid();
         return grid.isCellContaining(grid.cellToIndex(x, y), noteValue - 1);
     }
 
+    /**
+     * Ajoute la note d'un chiffre à la case (x, y), ou la retire si elle y est déjà.
+     *
+     * @param noteValue chiffre de la note, à partir de 1
+     * @param x         colonne de la case, à partir de 0
+     * @param y         ligne de la case, à partir de 0
+     */
     public void toggleNote(int noteValue, int x, int y) {
         Grid grid = requireGrid();
         int pos = grid.cellToIndex(x, y);
@@ -172,6 +219,12 @@ public class SudokuCoreModel {
         }
     }
 
+    /**
+     * Retire toutes les notes de la case (x, y), sans toucher à sa valeur.
+     *
+     * @param x colonne de la case, à partir de 0
+     * @param y ligne de la case, à partir de 0
+     */
     public void clearCellNotes(int x, int y) {
         Grid grid = requireGrid();
         grid.clearNotes(grid.cellToIndex(x, y));

@@ -240,7 +240,7 @@ class CellViewTest {
     }
 
     @Test
-    void fxmlValueReplacesNotesAndBlocksNewNotes() throws Exception {
+    void fxmlValueKeepsNotesAndNotesModeShowsOnlyNotes() throws Exception {
         runOnJavaFxThread(() -> {
             FxmlUi ui = loadFxmlUi();
             Button two = digitButton(ui.pad(), 2);
@@ -251,11 +251,18 @@ class CellViewTest {
 
             ui.notesMode().setSelected(false);
             seven.fire();
-            assertEquals(7, ui.firstCell().getValue());
-            assertFalse(ui.firstCell().hasNote(7));
+            assertEquals(7, ui.firstCell().getValue(), "hors mode notes, la valeur est affichée");
+            assertFalse(ui.firstCell().hasNote(7), "hors mode notes, les notes d'une case remplie sont masquées");
 
             ui.notesMode().setSelected(true);
+            assertEquals(0, ui.firstCell().getValue(), "en mode notes, la valeur est masquée");
+            assertTrue(ui.firstCell().hasNote(7), "la note saisie avant la valeur est conservée");
+
             two.fire();
+            assertTrue(ui.firstCell().hasNote(2), "on peut ajouter une note à une case remplie");
+
+            ui.notesMode().setSelected(false);
+            assertEquals(7, ui.firstCell().getValue());
             assertFalse(ui.firstCell().hasNote(2));
             return null;
         });
@@ -278,16 +285,20 @@ class CellViewTest {
             seven.fire();
 
             ui.clear().fire();
-            assertEquals(0, ui.firstCell().getValue());
-            assertFalse(ui.firstCell().hasNote(7));
-            assertFalse(ui.firstCell().hasNote(2));
+            assertEquals(0, ui.firstCell().getValue(), "hors mode notes, Effacer vide la valeur");
+            assertTrue(ui.firstCell().hasNote(7), "hors mode notes, Effacer conserve les notes");
+            assertTrue(ui.firstCell().hasNote(2));
             assertTrue(ui.secondCell().hasNote(1));
 
-            ui.notesMode().setSelected(true);
             seven.fire();
-            assertTrue(ui.firstCell().hasNote(7));
+            ui.notesMode().setSelected(true);
             ui.clear().fire();
-            assertFalse(ui.firstCell().hasNote(7));
+            assertFalse(ui.firstCell().hasNote(7), "en mode notes, Effacer vide les notes");
+            assertFalse(ui.firstCell().hasNote(2));
+            assertTrue(ui.secondCell().hasNote(1), "seule la case sélectionnée est effacée");
+
+            ui.notesMode().setSelected(false);
+            assertEquals(7, ui.firstCell().getValue(), "en mode notes, Effacer conserve la valeur");
             return null;
         });
     }
@@ -303,8 +314,12 @@ class CellViewTest {
             ui.notesMode().setSelected(true);
             digitButton(ui.pad(), 2).fire();
 
-            assertEquals(7, ui.firstCell().getValue());
+            assertEquals(7, ui.firstCell().getValue(), "le mode notes ne masque pas la valeur des autres cases");
             assertTrue(ui.secondCell().hasNote(2));
+
+            ui.firstCell().fireEvent(mouseClick());
+            assertEquals(0, ui.firstCell().getValue(), "la case sélectionnée en mode notes masque sa valeur");
+            assertTrue(ui.secondCell().hasNote(2), "la case vide quittée affiche toujours ses notes");
             return null;
         });
     }
