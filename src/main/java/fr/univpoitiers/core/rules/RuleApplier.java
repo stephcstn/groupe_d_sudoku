@@ -183,9 +183,9 @@ public interface RuleApplier {
 
 
     /**
-     * Applies Naked K-tuples deduction rule on the grid.
+     * Applies Naked K-tuples deduction rule on the grid. Not implemented yet.
      * @param grid the current Sudoku grid
-     * @return
+     * @return If it has changed grid state; currently always true
      */
 	static boolean KObvious(Grid grid){
 		return true;
@@ -798,8 +798,10 @@ public interface RuleApplier {
     }
 
 	/**
-	 * 
-	 * @param grid
+	 * Fallback rule applied when no other deduction rule progresses. Not implemented yet.
+	 *
+	 * @param grid the current Sudoku grid
+	 * @return If it has changed grid state; currently always true
 	 */
 	static boolean FirstNaive(Grid grid){
 		return true;

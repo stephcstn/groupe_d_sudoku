@@ -6,11 +6,20 @@ import fr.univpoitiers.core.rules.RuleApplier;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
+/**
+ * Solves a Sudoku grid by repeatedly applying the deduction rules of {@link RuleApplier},
+ * recording each successful step in an {@link ExecutionStack}.
+ */
 public class Solver implements RuleApplier {
 
 	private ExecutionStack executionStack;
 	private Grid solvedGrid;
 
+	/**
+	 * Creates a solver for a grid whose solution is already known.
+	 *
+	 * @param solvedGrid the reference solution of the grid
+	 */
 	public Solver(Grid solvedGrid) {
 		this.solvedGrid = solvedGrid;
 		executionStack = new ExecutionStack();
@@ -18,7 +27,7 @@ public class Solver implements RuleApplier {
 
 	/**
 	 * Replace the previous solution by another different solution of the grid.
-	 * @param newSolvedGrid
+	 * @param newSolvedGrid the new reference solution
 	 */
 	private void setSolvedGrid(Grid newSolvedGrid) {
 		solvedGrid = newSolvedGrid;
@@ -28,6 +37,7 @@ public class Solver implements RuleApplier {
 	 * Resolve the current grid based on rules that are given.
 	 * @param grid - The current grid to resolve
 	 * @param rules - All rules applied
+	 * @return true if the grid was completely filled before all rules were exhausted
 	 */
 	public boolean solve(Grid grid, int[] rules) {
 		int ruleApplierIndex = 0;
@@ -119,6 +129,13 @@ public class Solver implements RuleApplier {
 		return ruleApplierIndex < rules.length && !hasNextValue;
 	}
 
+	/**
+	 * Removes from the candidates the values already placed in the block of the given cell.
+	 *
+	 * @param grid the grid being annotated
+	 * @param currentPos the 1D position of the cell
+	 * @param notesToAdd the candidate values to restrict, modified in place
+	 */
 	private void restrictFromBlock(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
 		int value;
 		int startIndex = grid.getBlockIndex(currentPos);
@@ -132,6 +149,13 @@ public class Solver implements RuleApplier {
 		}
 	}
 
+	/**
+	 * Removes from the candidates the values already placed in the row of the given cell.
+	 *
+	 * @param grid the grid being annotated
+	 * @param currentPos the 1D position of the cell
+	 * @param notesToAdd the candidate values to restrict, modified in place
+	 */
 	private void restrictFromLine(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
 		int value;
 		int startIndex = grid.getStartRowIndex(currentPos);
@@ -143,6 +167,13 @@ public class Solver implements RuleApplier {
 		}
 	}
 
+	/**
+	 * Removes from the candidates the values already placed in the column of the given cell.
+	 *
+	 * @param grid the grid being annotated
+	 * @param currentPos the 1D position of the cell
+	 * @param notesToAdd the candidate values to restrict, modified in place
+	 */
 	private void restrictFromColumn(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
 		int value;
 		int startIndex = grid.getColumnIndex(currentPos);
@@ -154,6 +185,12 @@ public class Solver implements RuleApplier {
 		}
 	}
 
+	/**
+	 * Fills the candidate notes of the cells with the values not yet used in their block,
+	 * row and column, then records the annotated grid in the execution stack (rule -1).
+	 *
+	 * @param grid the grid to annotate, modified in place
+	 */
 	public void annotate(Grid grid) {
 		ArrayList<Integer> notesToAdd = new ArrayList<>();
 
@@ -173,8 +210,10 @@ public class Solver implements RuleApplier {
 	}
 
 	/**
-	 * 
-	 * @param grid
+	 * Checks the values entered in the grid against the solution. Not implemented yet.
+	 *
+	 * @param grid the grid to check
+	 * @return the positions of the wrong entries; currently always {@code null}
 	 */
 	public int[] checkEntries(Grid grid) {
 		// TODO - implement Solver.checkEntries
@@ -182,8 +221,10 @@ public class Solver implements RuleApplier {
 	}
 
 	/**
-	 * 
-	 * @param grid
+	 * Generates a new puzzle in the given grid. Not implemented yet.
+	 *
+	 * @param grid the grid to fill
+	 * @throws UnsupportedOperationException always, until the method is implemented
 	 */
 	public void generate(Grid grid) {
 		// TODO - implement Solver.generate
@@ -191,9 +232,11 @@ public class Solver implements RuleApplier {
 	}
 
 	/**
-	 * 
-	 * @param grid
-	 * @param countNumberLasting
+	 * Removes values from a full grid until the given number of values remains. Not implemented yet.
+	 *
+	 * @param grid the grid to reduce
+	 * @param countNumberLasting the number of values to keep
+	 * @throws UnsupportedOperationException always, until the method is implemented
 	 */
 	private void reduce(Grid grid, int countNumberLasting) {
 		// TODO - implement Solver.reduce

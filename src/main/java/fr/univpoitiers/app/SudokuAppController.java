@@ -22,6 +22,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
+/**
+ * Controller of the main view ({@code vue.fxml}): connects the grid, the number pad,
+ * the notes mode, the lock and the rule selection to the {@link SudokuCoreModel}.
+ */
 public class SudokuAppController {
 
     private static final Logger LOGGER = Logger.getLogger(SudokuAppController.class.getName());
@@ -70,6 +74,11 @@ public class SudokuAppController {
 
     private boolean isUpdating = false;
 
+    /**
+     * Creates the model and the grid, inserts the grid and the pad into the view, then sets up
+     * the notes mode, the lock display and the rule selection. Called by JavaFX after the
+     * {@code @FXML} fields have been injected.
+     */
     @FXML
     public void initialize() {
         coreModel = new SudokuCoreModel();
@@ -85,6 +94,12 @@ public class SudokuAppController {
         lockedIcon = loadIcon(LOCKED_ICON_PATH);
         unlockedIcon = loadIcon(UNLOCKED_ICON_PATH);
 
+        notesMode.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (hasSelection()) {
+                refreshCell(selectedRow, selectedColumn);
+            }
+        });
+
         setupRuleSelection();
         updateLockDisplay();
     }
@@ -93,53 +108,73 @@ public class SudokuAppController {
     // Interactions
     // ------------------------------------------------------------------------------------------
 
+    /**
+     * Selects a cell and refreshes the display of the previous and the new cell,
+     * because the notes mode only applies to the selected cell.
+     *
+     * @param row    row of the cell, starting at 0
+     * @param column column of the cell, starting at 0
+     */
     private void selectCell(int row, int column) {
+        int previousRow = selectedRow;
+        int previousColumn = selectedColumn;
         selectedRow = row;
         selectedColumn = column;
+        if (previousRow >= 0 && previousColumn >= 0) {
+            refreshCell(previousRow, previousColumn);
+        }
+        refreshCell(row, column);
     }
 
+    /**
+     * Applies a digit from the pad to the selected cell: in notes mode, adds or removes the
+     * note; otherwise, enters the value. The notes of the cell are kept. Does nothing if
+     * no cell is selected or if the cell is locked.
+     *
+     * @param digit the chosen digit, starting at 1
+     */
     private void handleDigit(int digit) {
         if (!hasSelection() || coreModel.isCellLocked(selectedColumn, selectedRow)) {
             return;
         }
 
         if (notesMode.isSelected()) {
-            if (coreModel.getNumber(selectedColumn, selectedRow) != 0) {
-                return;
-            }
             coreModel.toggleNote(digit, selectedColumn, selectedRow);
-        } else {
-            if (!coreModel.input(digit, selectedColumn, selectedRow)) {
-                return;
-            }
-            coreModel.clearCellNotes(selectedColumn, selectedRow);
+        } else if (!coreModel.input(digit, selectedColumn, selectedRow)) {
+            return;
         }
         refreshCell(selectedRow, selectedColumn);
     }
 
+    /**
+     * Clears the selected cell according to the mode: its notes in notes mode, its value otherwise.
+     */
     @FXML
     private void clearSelectedCell() {
         if (!hasSelection() || coreModel.isCellLocked(selectedColumn, selectedRow)) {
             return;
         }
-        if (!coreModel.input(0, selectedColumn, selectedRow)) {
+        if (notesMode.isSelected()) {
+            coreModel.clearCellNotes(selectedColumn, selectedRow);
+        } else if (!coreModel.input(0, selectedColumn, selectedRow)) {
             return;
         }
-        coreModel.clearCellNotes(selectedColumn, selectedRow);
         refreshCell(selectedRow, selectedColumn);
     }
 
+    /**
+     * Resets the grid and refreshes every cell and the lock display.
+     */
     @FXML
     private void resetGrid() {
         coreModel.resetGrid();
-        for (int row = 0; row < GRID_HEIGHT; row++) {
-            for (int column = 0; column < GRID_WIDTH; column++) {
-                refreshCell(row, column);
-            }
-        }
+        refreshAllCells();
         updateLockDisplay();
     }
 
+    /**
+     * Locks the filled cells, or unlocks the whole grid if it is already locked.
+     */
     @FXML
     private void toggleGridLock() {
         if (coreModel.isGridLocked()) {
@@ -154,6 +189,9 @@ public class SudokuAppController {
     // Affichage
     // ------------------------------------------------------------------------------------------
 
+    /**
+     * Updates the text and the icon of the lock button according to the state of the grid.
+     */
     private void updateLockDisplay() {
         boolean locked = coreModel.isGridLocked();
         lockGridButton.setText(locked ? "LOCK" : "UNLOCK");
@@ -163,6 +201,12 @@ public class SudokuAppController {
         }
     }
 
+    /**
+     * Loads an icon from the application resources.
+     *
+     * @param path path relative to the {@link App} class
+     * @return the loaded image, or {@code null} if the resource cannot be found
+     */
     private Image loadIcon(String path) {
         URL url = App.class.getResource(path);
         if (url == null) {
@@ -172,16 +216,49 @@ public class SudokuAppController {
         return new Image(url.toExternalForm());
     }
 
+    /**
+     * Tells whether a cell is selected.
+     *
+     * @return true if a cell is selected
+     */
     private boolean hasSelection() {
         return selectedRow >= 0 && selectedColumn >= 0;
     }
 
-    private void refreshCell(int row, int column) {
-        CellView cellView = gridView.getCellAt(row, column);
-        cellView.setValue(coreModel.getNumber(column, row));
-        cellView.setNotes(visibleNotes(row, column));
+    /**
+     * Refreshes the display of every cell of the grid.
+     */
+    private void refreshAllCells() {
+        for (int row = 0; row < GRID_HEIGHT; row++) {
+            for (int column = 0; column < GRID_WIDTH; column++) {
+                refreshCell(row, column);
+            }
+        }
     }
 
+    /**
+     * Refreshes the display of a cell: in notes mode, the selected cell only shows its notes;
+     * the other cells show their value, and their notes only when they are empty.
+     *
+     * @param row    row of the cell, starting at 0
+     * @param column column of the cell, starting at 0
+     */
+    private void refreshCell(int row, int column) {
+        CellView cellView = gridView.getCellAt(row, column);
+        int value = coreModel.getNumber(column, row);
+        boolean notesOnly = notesMode.isSelected() && row == selectedRow && column == selectedColumn;
+        boolean showNotes = notesOnly || value == 0;
+        cellView.setValue(notesOnly ? 0 : value);
+        cellView.setNotes(showNotes ? visibleNotes(row, column) : Set.of());
+    }
+
+    /**
+     * Returns the active notes of a cell.
+     *
+     * @param row    row of the cell, starting at 0
+     * @param column column of the cell, starting at 0
+     * @return the noted digits, starting at 1
+     */
     private Set<Integer> visibleNotes(int row, int column) {
         Set<Integer> visible = new HashSet<>();
         for (int digit = 1; digit <= MAX_DIGIT; digit++) {
@@ -196,6 +273,11 @@ public class SudokuAppController {
     // Règles de résolution
     // ------------------------------------------------------------------------------------------
 
+    /**
+     * Returns the check boxes of the individual rules (all of them except "all rules").
+     *
+     * @return the list of rule check boxes
+     */
     private List<CheckBox> individualRules() {
         return List.of(
                 checkLastFreeCell, checkLastRemainingCell, checkLastPossibleNumber,
@@ -206,6 +288,11 @@ public class SudokuAppController {
         );
     }
 
+    /**
+     * Sets up the rule selection: checking "all rules" unchecks the individual rules
+     * and vice versa, and the solve button stays disabled as long as
+     * no rule is checked.
+     */
     private void setupRuleSelection() {
         List<CheckBox> rules = individualRules();
 

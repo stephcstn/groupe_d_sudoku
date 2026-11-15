@@ -73,9 +73,9 @@ public class Grid {
     }
 
     /**
-     * Returns cell notes wanted
-     * @param pos
-     * @return byte[] of 0 or 1 (true/false) value where index refers to note value
+     * Returns the active candidate notes of a cell.
+     * @param pos the 1D position of the cell
+     * @return the zero-based indices of the active notes; empty if {@code pos} is outside the grid
      */
     public ArrayList<Integer> getNotes(int pos) {
         ArrayList<Integer> res = new ArrayList<>();
@@ -248,6 +248,9 @@ public class Grid {
 		this.cells[pos].setNote(note);
 	}
 
+	/**
+	 * Locks every cell that currently holds a value, so that it can no longer be modified.
+	 */
 	public void lockFilledCells() {
         for (Cell cell : this.cells) {
             if (cell.getValue() != 0) {
@@ -356,6 +359,13 @@ public class Grid {
         }
     }
 
+    /**
+     * Two grids are equal when they have the same dimensions and every cell holds the same
+     * value and the same candidate notes (lock status is ignored).
+     *
+     * @param obj the object to compare with
+     * @return true if {@code obj} is an equal grid
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass()) return false;
@@ -379,6 +389,11 @@ public class Grid {
         return true;
     }
 
+    /**
+     * Computes a hash code from the cells and the dimensions of the grid.
+     *
+     * @return the hash code of this grid
+     */
     @Override
     public int hashCode() {
         int result = java.util.Arrays.hashCode(this.cells);
@@ -390,9 +405,10 @@ public class Grid {
     /**
      * Converts 2D coordinates (x, y) into a 1D array index.
      *
-     * @param x
-     * @param y
+     * @param x the column, starting at 0
+     * @param y the row, starting at 0
      * @return the corresponding 1D index
+     * @throws IllegalArgumentException if the coordinates are outside the grid
      */
     public int cellToIndex(int x, int y) {
         if (x < 0 || x >= this.WIDTH || y < 0 || y >= this.HEIGHT) {
@@ -470,9 +486,26 @@ public class Grid {
         return true;
     }
 
+    /**
+     * Returns the width of a sub-block.
+     *
+     * @return the number of columns in a sub-block
+     */
     public int getBlockWidth() { return this.BLOCK_WIDTH; }
+
+    /**
+     * Returns the height of a sub-block.
+     *
+     * @return the number of rows in a sub-block
+     */
     public int getBlockHeight() { return this.BLOCK_HEIGHT; }
 
+    /**
+     * Checks whether the cell at the given position is locked.
+     *
+     * @param pos the 1D position of the cell
+     * @return true if the cell is locked
+     */
     public boolean isLocked(int pos) {
         return this.cells[pos].isLocked();
     }
@@ -486,6 +519,11 @@ public class Grid {
         }
     }
 
+    /**
+     * Removes every candidate note of the cell at the given position.
+     *
+     * @param pos the 1D position of the cell
+     */
     public void clearNotes(int pos) {
         int max = Math.max(this.WIDTH, this.HEIGHT);
         for (int i = 0; i < max; i++) {
