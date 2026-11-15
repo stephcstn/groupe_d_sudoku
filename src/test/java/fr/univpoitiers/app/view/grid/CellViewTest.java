@@ -428,7 +428,7 @@ class CellViewTest {
         });
     }
 
-    /** Éléments de l'interface chargée depuis {@code vue.fxml}, utilisés par les tests FXML. */
+    /** Elements of the interface loaded from {@code vue.fxml}, used by the FXML tests. */
     private record FxmlUi(Parent root, GridView grid, VBox padControls, PadView pad,
                           CheckBox notesMode, Button clear, Button reset) {
 

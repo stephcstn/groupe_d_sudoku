@@ -38,7 +38,7 @@ public class ExecutionStack {
 	/**
 	 * Removes and returns the last saved state.
 	 *
-	 * <p>/!\ TODO : à réécrire. The current version is a placeholder that always returns an
+	 * <p>/!\ TODO: to be rewritten. The current version is a placeholder that always returns an
 	 * empty 0x0 grid paired with rule 0, without reading the stack.</p>
 	 *
 	 * @return the last grid state and the rule that produced it

@@ -7,15 +7,15 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Point d'entrée de l'application JavaFX : charge la vue principale et ouvre la fenêtre.
+ * Entry point of the JavaFX application: loads the main view and opens the window.
  */
 public class App extends Application {
 
     /**
-     * Charge la vue {@code views/vue.fxml} et l'affiche dans une fenêtre maximisée non redimensionnable.
+     * Loads the {@code views/vue.fxml} view and shows it in a maximized, non-resizable window.
      *
-     * @param primaryStage fenêtre principale fournie par JavaFX
-     * @throws Exception si la vue ne peut pas être chargée
+     * @param primaryStage the main window provided by JavaFX
+     * @throws Exception if the view cannot be loaded
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -35,9 +35,9 @@ public class App extends Application {
     }
 
     /**
-     * Lance l'application JavaFX.
+     * Launches the JavaFX application.
      *
-     * @param args arguments de la ligne de commande, transmis à JavaFX
+     * @param args command-line arguments, passed on to JavaFX
      */
     public static void main(String[] args) {
         launch(args);

@@ -23,8 +23,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 /**
- * Contrôleur de la vue principale ({@code vue.fxml}) : relie la grille, le pavé numérique,
- * le mode notes, le verrouillage et le choix des règles au {@link SudokuCoreModel}.
+ * Controller of the main view ({@code vue.fxml}): connects the grid, the number pad,
+ * the notes mode, the lock and the rule selection to the {@link SudokuCoreModel}.
  */
 public class SudokuAppController {
 
@@ -75,9 +75,9 @@ public class SudokuAppController {
     private boolean isUpdating = false;
 
     /**
-     * Crée le modèle et la grille, insère la grille et le pavé dans la vue, puis configure
-     * le mode notes, l'affichage du verrou et le choix des règles. Appelée par JavaFX après
-     * l'injection des champs {@code @FXML}.
+     * Creates the model and the grid, inserts the grid and the pad into the view, then sets up
+     * the notes mode, the lock display and the rule selection. Called by JavaFX after the
+     * {@code @FXML} fields have been injected.
      */
     @FXML
     public void initialize() {
@@ -109,11 +109,11 @@ public class SudokuAppController {
     // ------------------------------------------------------------------------------------------
 
     /**
-     * Sélectionne une case et met à jour l'affichage de l'ancienne et de la nouvelle case,
-     * car le mode notes ne s'applique qu'à la case sélectionnée.
+     * Selects a cell and refreshes the display of the previous and the new cell,
+     * because the notes mode only applies to the selected cell.
      *
-     * @param row    ligne de la case, à partir de 0
-     * @param column colonne de la case, à partir de 0
+     * @param row    row of the cell, starting at 0
+     * @param column column of the cell, starting at 0
      */
     private void selectCell(int row, int column) {
         int previousRow = selectedRow;
@@ -127,11 +127,11 @@ public class SudokuAppController {
     }
 
     /**
-     * Traite un chiffre du pavé sur la case sélectionnée : en mode notes, ajoute ou retire la
-     * note ; sinon, saisit la valeur. Les notes de la case sont conservées. Sans effet si
-     * aucune case n'est sélectionnée ou si la case est verrouillée.
+     * Applies a digit from the pad to the selected cell: in notes mode, adds or removes the
+     * note; otherwise, enters the value. The notes of the cell are kept. Does nothing if
+     * no cell is selected or if the cell is locked.
      *
-     * @param digit chiffre choisi, à partir de 1
+     * @param digit the chosen digit, starting at 1
      */
     private void handleDigit(int digit) {
         if (!hasSelection() || coreModel.isCellLocked(selectedColumn, selectedRow)) {
@@ -147,7 +147,7 @@ public class SudokuAppController {
     }
 
     /**
-     * Efface la case sélectionnée selon le mode : ses notes en mode notes, sa valeur sinon.
+     * Clears the selected cell according to the mode: its notes in notes mode, its value otherwise.
      */
     @FXML
     private void clearSelectedCell() {
@@ -163,7 +163,7 @@ public class SudokuAppController {
     }
 
     /**
-     * Réinitialise la grille et rafraîchit toutes les cases et l'affichage du verrou.
+     * Resets the grid and refreshes every cell and the lock display.
      */
     @FXML
     private void resetGrid() {
@@ -173,7 +173,7 @@ public class SudokuAppController {
     }
 
     /**
-     * Verrouille les cases remplies, ou déverrouille toute la grille si elle est déjà verrouillée.
+     * Locks the filled cells, or unlocks the whole grid if it is already locked.
      */
     @FXML
     private void toggleGridLock() {
@@ -190,7 +190,7 @@ public class SudokuAppController {
     // ------------------------------------------------------------------------------------------
 
     /**
-     * Met à jour le texte et l'icône du bouton de verrouillage selon l'état de la grille.
+     * Updates the text and the icon of the lock button according to the state of the grid.
      */
     private void updateLockDisplay() {
         boolean locked = coreModel.isGridLocked();
@@ -202,10 +202,10 @@ public class SudokuAppController {
     }
 
     /**
-     * Charge une icône depuis les ressources de l'application.
+     * Loads an icon from the application resources.
      *
-     * @param path chemin relatif à la classe {@link App}
-     * @return l'image chargée, ou {@code null} si la ressource est introuvable
+     * @param path path relative to the {@link App} class
+     * @return the loaded image, or {@code null} if the resource cannot be found
      */
     private Image loadIcon(String path) {
         URL url = App.class.getResource(path);
@@ -217,16 +217,16 @@ public class SudokuAppController {
     }
 
     /**
-     * Indique si une case est sélectionnée.
+     * Tells whether a cell is selected.
      *
-     * @return vrai si une case est sélectionnée
+     * @return true if a cell is selected
      */
     private boolean hasSelection() {
         return selectedRow >= 0 && selectedColumn >= 0;
     }
 
     /**
-     * Met à jour l'affichage de toutes les cases de la grille.
+     * Refreshes the display of every cell of the grid.
      */
     private void refreshAllCells() {
         for (int row = 0; row < GRID_HEIGHT; row++) {
@@ -237,11 +237,11 @@ public class SudokuAppController {
     }
 
     /**
-     * Met à jour l'affichage d'une case : la case sélectionnée en mode notes n'affiche que ses
-     * notes ; les autres cases affichent leur valeur, et leurs notes seulement si elles sont vides.
+     * Refreshes the display of a cell: in notes mode, the selected cell only shows its notes;
+     * the other cells show their value, and their notes only when they are empty.
      *
-     * @param row    ligne de la case, à partir de 0
-     * @param column colonne de la case, à partir de 0
+     * @param row    row of the cell, starting at 0
+     * @param column column of the cell, starting at 0
      */
     private void refreshCell(int row, int column) {
         CellView cellView = gridView.getCellAt(row, column);
@@ -253,11 +253,11 @@ public class SudokuAppController {
     }
 
     /**
-     * Retourne les notes actives d'une case.
+     * Returns the active notes of a cell.
      *
-     * @param row    ligne de la case, à partir de 0
-     * @param column colonne de la case, à partir de 0
-     * @return les chiffres notés, à partir de 1
+     * @param row    row of the cell, starting at 0
+     * @param column column of the cell, starting at 0
+     * @return the noted digits, starting at 1
      */
     private Set<Integer> visibleNotes(int row, int column) {
         Set<Integer> visible = new HashSet<>();
@@ -274,9 +274,9 @@ public class SudokuAppController {
     // ------------------------------------------------------------------------------------------
 
     /**
-     * Retourne les cases à cocher des règles individuelles (toutes sauf « toutes les règles »).
+     * Returns the check boxes of the individual rules (all of them except "all rules").
      *
-     * @return la liste des cases à cocher des règles
+     * @return the list of rule check boxes
      */
     private List<CheckBox> individualRules() {
         return List.of(
@@ -289,9 +289,9 @@ public class SudokuAppController {
     }
 
     /**
-     * Configure le choix des règles : cocher « toutes les règles » décoche les règles
-     * individuelles et inversement, et le bouton de résolution reste désactivé tant
-     * qu'aucune règle n'est cochée.
+     * Sets up the rule selection: checking "all rules" unchecks the individual rules
+     * and vice versa, and the solve button stays disabled as long as
+     * no rule is checked.
      */
     private void setupRuleSelection() {
         List<CheckBox> rules = individualRules();
