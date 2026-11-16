@@ -45,25 +45,20 @@ public class Solver implements RuleApplier {
 		try {
 			grid.nextAvailableCell(); // Throws NoSuchElementException if there's
 			hasNextValue = true;
+			RuleApplier.annotate(grid);
 		} catch (Exception e) {
 			hasNextValue = false;
 		}
-		annotate(grid);
+
 		while (ruleApplierIndex < rules.length && hasNextValue) {
 			Grid clonedGridToStack = new Grid(grid);
 			switch (ruleApplierIndex) {
 				case 0:
-					if (!RuleApplier.BasicRules(grid)) {
+					if (!RuleApplier.KObvious(grid)) {
 						ruleApplierIndex++;
 					} else executionStack.stack(clonedGridToStack, ruleApplierIndex);
 					break;
 				case 1:
-					if (RuleApplier.KObvious(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
-						ruleApplierIndex = 0;
-					}
-					break;
-				case 2:
 					if (RuleApplier.KHidden(grid)) {
 						executionStack.stack(clonedGridToStack, ruleApplierIndex);
 						ruleApplierIndex = 0;
@@ -127,86 +122,6 @@ public class Solver implements RuleApplier {
 			}
 		}
 		return ruleApplierIndex < rules.length && !hasNextValue;
-	}
-
-	/**
-	 * Removes from the candidates the values already placed in the block of the given cell.
-	 *
-	 * @param grid the grid being annotated
-	 * @param currentPos the 1D position of the cell
-	 * @param notesToAdd the candidate values to restrict, modified in place
-	 */
-	private void restrictFromBlock(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
-		int value;
-		int startIndex = grid.getBlockIndex(currentPos);
-		for (int i = startIndex; i <= startIndex + 9 * 2; i++) {
-			for (int j = i; j < i + 3; j++) {
-				value = grid.getNumber(j);
-				if (value != 0 && notesToAdd.contains(value)) {
-					notesToAdd.remove(value);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Removes from the candidates the values already placed in the row of the given cell.
-	 *
-	 * @param grid the grid being annotated
-	 * @param currentPos the 1D position of the cell
-	 * @param notesToAdd the candidate values to restrict, modified in place
-	 */
-	private void restrictFromLine(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
-		int value;
-		int startIndex = grid.getStartRowIndex(currentPos);
-		for (int i = startIndex; i < startIndex + 9; i++) {
-			value = grid.getNumber(i);
-			if (value != 0 && notesToAdd.contains(value)) {
-				notesToAdd.remove(value);
-			}
-		}
-	}
-
-	/**
-	 * Removes from the candidates the values already placed in the column of the given cell.
-	 *
-	 * @param grid the grid being annotated
-	 * @param currentPos the 1D position of the cell
-	 * @param notesToAdd the candidate values to restrict, modified in place
-	 */
-	private void restrictFromColumn(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
-		int value;
-		int startIndex = grid.getColumnIndex(currentPos);
-		for (int i = startIndex; i <= startIndex * 9; i += 9) {
-			value = grid.getNumber(i);
-			if (value != 0 && notesToAdd.contains(value)) {
-				notesToAdd.remove(value);
-			}
-		}
-	}
-
-	/**
-	 * Fills the candidate notes of the cells with the values not yet used in their block,
-	 * row and column, then records the annotated grid in the execution stack (rule -1).
-	 *
-	 * @param grid the grid to annotate, modified in place
-	 */
-	public void annotate(Grid grid) {
-		ArrayList<Integer> notesToAdd = new ArrayList<>();
-
-		for (int pos = 0; pos < grid.getWidth(); pos++) {
-			RuleApplier.fillValues(notesToAdd, grid.getWidth());
-			restrictFromBlock(grid, pos, notesToAdd);
-			restrictFromLine(grid, pos, notesToAdd);
-			restrictFromColumn(grid, pos, notesToAdd);
-			// restrictFromDiagonal(grid, pos, notesToAdd); TODO: NOT NOW
-
-			for (Integer note : notesToAdd) {
-				grid.setNote(pos, note);
-			}
-			notesToAdd.clear();
-		}
-		executionStack.stack(grid, -1);
 	}
 
 	/**

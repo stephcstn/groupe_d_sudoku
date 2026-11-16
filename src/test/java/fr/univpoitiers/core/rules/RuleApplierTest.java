@@ -1,10 +1,7 @@
 package fr.univpoitiers.core.rules;
 
 import fr.univpoitiers.core.grid.Grid;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,6 +38,112 @@ class RuleApplierTest {
     /** Helper method checking if a cell contains a specific candidate note. */
     private boolean has(int row, int col, int note) {
         return grid.isCellContaining(pos(row, col), note);
+    }
+
+    private void populateGrid(Grid targetGrid, int[] values) {
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] != 0) {
+                targetGrid.addNumber(i, values[i]);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("annotate: the grid state once executed in filled of notes")
+    class Annotate {
+        @BeforeEach
+        void setup() {
+            int[] initialGrid = {
+                    4, 9, 6, 8, 3, 2, 5, 1, 7,
+                    8, 1, 3, 6, 5, 7, 4, 2, 9,
+                    2, 7, 5, 4, 9, 1, 3, 8, 6,
+                    6, 4, 2, 5, 8, 9, 7, 3, 1,
+                    7, 3, 8, 1, 2, 6, 9, 5, 4,
+                    9, 5, 1, 7, 4, 3, 8, 6, 2,
+                    5, 6, 4, 2, 7, 8, 1, 9, 3,
+                    3, 2, 7, 9, 1, 5, 6, 4, 8,
+                    1, 8, 9, 3, 6, 4, 2, 7, 5,
+            };
+            populateGrid(grid, initialGrid);
+        }
+        @Test
+        @DisplayName("The grid is already full")
+        void annotate_gridAlreadyFull() {
+            RuleApplier.annotate(grid);
+            for (int i = 0; i < grid.getWidth() * grid.getWidth(); i++) {
+                Assertions.assertTrue(grid.getNotes(i).isEmpty());
+            }
+        }
+        @Test
+        @DisplayName("A row is empty")
+        void annotate_emptyRow() {
+            for (int i = 0; i < grid.getWidth(); i++) {
+                grid.removeNumber(i);
+            }
+            RuleApplier.annotate(grid);
+
+            for (int i = 0; i < grid.getWidth(); i++) {
+                assertEquals(1, grid.getNotes(i).size());
+            }
+            Assertions.assertTrue(grid.isCellContaining(0, 4));
+            Assertions.assertTrue(grid.isCellContaining(1, 9));
+            Assertions.assertTrue(grid.isCellContaining(2, 6));
+            Assertions.assertTrue(grid.isCellContaining(3, 8));
+            Assertions.assertTrue(grid.isCellContaining(4, 3));
+            Assertions.assertTrue(grid.isCellContaining(5, 2));
+            Assertions.assertTrue(grid.isCellContaining(6, 5));
+            Assertions.assertTrue(grid.isCellContaining(7, 1));
+            Assertions.assertTrue(grid.isCellContaining(8, 7));
+        }
+
+        @Test
+        @DisplayName("A column is empty")
+        void annotate_emptyColumn() {
+            for (int i = 0; i <= grid.getWidth() * (grid.getWidth() - 1); i += grid.getWidth()) {
+                grid.removeNumber(i);
+            }
+            RuleApplier.annotate(grid);
+
+            for (int i = 0; i < grid.getWidth() * (grid.getWidth() - 1); i += grid.getWidth()) {
+                assertEquals(1, grid.getNotes(i).size());
+            }
+            Assertions.assertTrue(grid.isCellContaining(0, 4));
+            Assertions.assertTrue(grid.isCellContaining(9, 8));
+            Assertions.assertTrue(grid.isCellContaining(18, 2));
+            Assertions.assertTrue(grid.isCellContaining(27, 6));
+            Assertions.assertTrue(grid.isCellContaining(36, 7));
+            Assertions.assertTrue(grid.isCellContaining(45, 9));
+            Assertions.assertTrue( grid.isCellContaining(54, 5));
+            Assertions.assertTrue( grid.isCellContaining(63, 3));
+            Assertions.assertTrue(grid.isCellContaining(72, 1));
+        }
+
+        @Test
+        @DisplayName("A block is empty")
+        void annotate_emptyBlock() {
+            for (int i = 0; i <= grid.getWidth() * (grid.getBlockHeight() - 1); i += grid.getWidth()) {
+                for (int j = i; j < i + grid.getBlockWidth(); j++) {
+                    grid.removeNumber(j);
+
+                }
+            }
+            RuleApplier.annotate(grid);
+
+            for (int i = 0; i <= grid.getWidth() * (grid.getBlockHeight() - 1); i += grid.getWidth()) {
+                for (int j = i; j < i + grid.getBlockWidth(); j++) {
+                    assertEquals(1, grid.getNotes(j).size());
+                }
+            }
+            Assertions.assertTrue(grid.isCellContaining(0, 4));
+            Assertions.assertTrue(grid.isCellContaining(1, 9));
+            Assertions.assertTrue(grid.isCellContaining(2, 6));
+            Assertions.assertTrue(grid.isCellContaining(9, 8));
+            Assertions.assertTrue(grid.isCellContaining(10, 1));
+            Assertions.assertTrue(grid.isCellContaining(11, 3));
+            Assertions.assertTrue(grid.isCellContaining(18, 2));
+            Assertions.assertTrue(grid.isCellContaining(19, 7));
+            Assertions.assertTrue(grid.isCellContaining(20, 5));
+        }
     }
 
     @Nested
@@ -292,9 +395,9 @@ class RuleApplierTest {
         @Test
         @DisplayName("Classic Y-Wing: removes target candidate seeing both pincers")
         void yWing_removesTargetCandidate() {
-            int candA = 0;
-            int candB = 1;
-            int candC = 2;
+            int candA = 1;
+            int candB = 2;
+            int candC = 3;
 
             // Pivot at (0,0) with {A, B}
             addNote(candA, new int[]{0, 0});
@@ -327,9 +430,9 @@ class RuleApplierTest {
         @Test
         @DisplayName("Y-Wing: returns false if pivot has more than 2 candidates")
         void yWing_whenPivotNotBivalue_returnsFalse() {
-            int candA = 0;
-            int candB = 1;
-            int candC = 2;
+            int candA = 1;
+            int candB = 2;
+            int candC = 3;
 
             // Pivot with 3 candidates
             addNote(candA, new int[]{0, 0});
@@ -350,9 +453,9 @@ class RuleApplierTest {
         @Test
         @DisplayName("Y-Wing: returns false if pincers do not see the pivot")
         void yWing_whenWingsDoNotSeePivot_returnsFalse() {
-            int candA = 0;
-            int candB = 1;
-            int candC = 2;
+            int candA = 1;
+            int candB = 2;
+            int candC = 3;
 
             addNote(candA, new int[]{0, 0});
             addNote(candB, new int[]{0, 0});
@@ -374,9 +477,9 @@ class RuleApplierTest {
         @Test
         @DisplayName("Y-Wing: returns false when there is nothing to remove")
         void yWing_whenNothingToRemove_returnsFalse() {
-            int candA = 0;
-            int candB = 1;
-            int candC = 2;
+            int candA = 1;
+            int candB = 2;
+            int candC = 3;
 
             addNote(candA, new int[]{0, 0});
             addNote(candB, new int[]{0, 0});
