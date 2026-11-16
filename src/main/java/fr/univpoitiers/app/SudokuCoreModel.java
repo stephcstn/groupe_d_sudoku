@@ -36,6 +36,7 @@ public class SudokuCoreModel {
     public void createGrid(int width, int height) {
         currentGrid = new Grid(width, height);
         gridLocked = false;
+        currentGrid.printGrid();
     }
 
     /**
@@ -53,10 +54,13 @@ public class SudokuCoreModel {
 
         if (value == 0) {
             grid.removeNumber(pos);
+            grid.printGrid();
             return true;
         }
 
-        return grid.addNumber(pos, value);
+        boolean accepted = grid.addNumber(pos, value);
+        grid.printGrid();
+        return accepted;
     }
 
     /**
@@ -99,6 +103,7 @@ public class SudokuCoreModel {
     public void resetGrid() {
         requireGrid().resetGrid();
         gridLocked = false;
+        currentGrid.printGrid();
     }
 
     /**
@@ -120,6 +125,7 @@ public class SudokuCoreModel {
     public void lockFilledCells() {
         requireGrid().lockFilledCells();
         gridLocked = true;
+        currentGrid.printGrid();
     }
 
     /**
@@ -128,6 +134,7 @@ public class SudokuCoreModel {
     public void unlockGrid() {
         requireGrid().unlockGrid();
         gridLocked = false;
+        currentGrid.printGrid();
     }
 
     /**
@@ -144,6 +151,7 @@ public class SudokuCoreModel {
      */
     public void clearGrid() {
         requireGrid().clearEntries();
+        currentGrid.printGrid();
     }
 
     // -------------------------------------------------------------------------
@@ -217,6 +225,7 @@ public class SudokuCoreModel {
         } else {
             grid.setNote(pos, index);
         }
+        grid.printGrid();
     }
 
     /**
@@ -228,6 +237,7 @@ public class SudokuCoreModel {
     public void clearCellNotes(int x, int y) {
         Grid grid = requireGrid();
         grid.clearNotes(grid.cellToIndex(x, y));
+        grid.printGrid();
     }
 
 
