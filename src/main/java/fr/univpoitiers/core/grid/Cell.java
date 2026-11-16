@@ -1,6 +1,8 @@
 package fr.univpoitiers.core.grid;
 
 
+import java.util.stream.IntStream;
+
 /**
  * Represents an individual cell within the Sudoku grid, holding its value,
  * candidate notes, and locked status.
@@ -40,7 +42,7 @@ public class Cell {
      * @param value the index/value of the candidate note to enable
      */
     public void setNote(int value) {
-        this.note[value] = 1;
+        this.note[value - 1] = 1;
     }
 
     /**
@@ -49,13 +51,10 @@ public class Cell {
      * @return the number of active notes
      */
     public int count() {
-        int count = 0;
-        for (int i = 0; i < this.note.length; i++) {
-            if (this.note[i] == 1) {
-                count++;
-            }
-        }
-        return count;
+        return (int) IntStream
+                .range(0, this.note.length)
+                .filter(i -> this.note[i] == 1)
+                .count();
     }
 
     /**
@@ -65,7 +64,7 @@ public class Cell {
      * @return 1 if the note is active, 0 otherwise
      */
     public int getNote(int value) {
-        return this.note[value];
+        return this.note[value - 1];
     }
 
     /**
@@ -74,7 +73,7 @@ public class Cell {
      * @param value the index/value of the candidate note to disable
      */
     public void removeNote(int value) {
-        this.note[value] = 0;
+        this.note[value - 1] = 0;
     }
 
     /**
