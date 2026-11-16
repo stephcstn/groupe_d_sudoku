@@ -577,7 +577,7 @@ public class Grid {
             }
             System.out.printf("%n");
         }
-        if (notes.length() > 0) {
+        if (!notes.isEmpty()) {
             System.out.printf("%s%n", blockLine);
             System.out.printf("Notes :%n%s", notes);
         }
