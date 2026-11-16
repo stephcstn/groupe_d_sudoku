@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"fr.univpoitiers"},{"l":"fr.univpoitiers.app"},{"l":"fr.univpoitiers.app.view.grid"},{"l":"fr.univpoitiers.app.view.pad"},{"l":"fr.univpoitiers.core.grid"},{"l":"fr.univpoitiers.core.rules"},{"l":"fr.univpoitiers.core.solver"},{"l":"fr.univpoitiers.utils"}];updateSearchResults();

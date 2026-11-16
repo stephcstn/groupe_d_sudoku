@@ -44,6 +44,12 @@ class RuleApplierTest {
     }
 
     @Nested
+    @DisplayName("KObvious")
+    class KObviousTest{
+
+    }
+
+    @Nested
     @DisplayName("Pointing Pair / Triple")
     class PointingTests {
 

@@ -182,13 +182,141 @@ public interface RuleApplier {
 	}
 
 
-    /**
-     * Applies Naked K-tuples deduction rule on the grid.
-     * @param grid the current Sudoku grid
-     * @return
-     */
-	static boolean KObvious(Grid grid){
-		return true;
+
+	/** Plus petite taille de K-uplet gérée pour l'instant (Naked Pairs). */
+	int K_MIN = 2;
+	/** Plus grande taille de K-uplet gérée pour l'instant (Naked Triples). */
+	int K_MAX = 3;
+
+	/**
+	 * Applies Naked Pairs then Naked Triples on the grid.
+	 * Default version used by the Solver.
+	 * @param grid the current Sudoku grid
+	 * @return true if at least one candidate note was removed
+	 */
+	static boolean KObvious(Grid grid) {
+		return KObvious(grid, K_MIN, K_MAX);
+	}
+
+	/**
+	 * Applies the Naked K-tuples rule for one value of K (2 = Pairs, 3 = Triples).
+	 * @param grid the current Sudoku grid
+	 * @param k size of the tuple, must be 2 or 3
+	 * @return true if at least one candidate note was removed
+	 * @throws IllegalArgumentException if k is not supported
+	 */
+	static boolean KObvious(Grid grid, int k) {
+		return KObvious(grid, k, k);
+	}
+
+	/**
+	 * Applies the Naked K-tuples rule for every K in [kMin, kMax],
+	 * limited to the supported range [K_MIN, K_MAX].
+	 * @param grid the current Sudoku grid
+	 * @param kMin minimum tuple size
+	 * @param kMax maximum tuple size
+	 * @return true if at least one candidate note was removed
+	 * @throws IllegalArgumentException if the range is outside [K_MIN, K_MAX]
+	 */
+	static boolean KObvious(Grid grid, int kMin, int kMax) {
+		if (kMin < K_MIN || kMax > K_MAX || kMin > kMax) {
+			throw new IllegalArgumentException(
+					"KObvious ne gère que K entre " + K_MIN + " et " + K_MAX);
+		}
+		int nbValues = Math.max(grid.getWidth(), grid.getHeight());
+
+		boolean changed = false;
+		for (List<Integer> unit : getUnits(grid)) {
+			List<Integer> empty = new ArrayList<>();
+			List<Integer> masks = new ArrayList<>();
+			for (int pos : unit) {
+				if (grid.getNumber(pos) != 0) continue;
+				empty.add(pos);
+				masks.add(candidatesMask(grid, pos, nbValues));
+			}
+			for (int k = kMin; k <= kMax && k < empty.size(); k++) {
+				changed |= searchNaked(grid, empty, masks, k, 0, new ArrayList<>(), 0, nbValues);
+			}
+		}
+		return changed;
+	}
+
+	/**
+	 * Returns all units of the grid: rows, columns, then blocks.
+	 * Each unit is a list of 1D cell positions.
+	 */
+	private static List<List<Integer>> getUnits(Grid grid) {
+		int width = grid.getWidth();
+		int height = grid.getHeight();
+		int bw = grid.getBlockWidth();
+		int bh = grid.getBlockHeight();
+		List<List<Integer>> units = new ArrayList<>();
+
+		for (int row = 0; row < height; row++) {
+			List<Integer> unit = new ArrayList<>();
+			for (int col = 0; col < width; col++) unit.add(row * width + col);
+			units.add(unit);
+		}
+		for (int col = 0; col < width; col++) {
+			List<Integer> unit = new ArrayList<>();
+			for (int row = 0; row < height; row++) unit.add(row * width + col);
+			units.add(unit);
+		}
+		for (int by = 0; by < height; by += bh) {
+			for (int bx = 0; bx < width; bx += bw) {
+				List<Integer> unit = new ArrayList<>();
+				for (int dy = 0; dy < bh; dy++)
+					for (int dx = 0; dx < bw; dx++)
+						unit.add((by + dy) * width + (bx + dx));
+				units.add(unit);
+			}
+		}
+		return units;
+	}
+
+	/**
+	 * Encodes the candidate notes of a cell as a bitmask (bit i = note i).
+	 */
+	private static int candidatesMask(Grid grid, int pos, int nbValues) {
+		int mask = 0;
+		for (int note = 0; note < nbValues; note++)
+			if (grid.isCellContaining(pos, note)) mask |= 1 << note;
+		return mask;
+	}
+
+	/**
+	 * Recursively enumerates combinations of k cells whose union of candidates
+	 * has exactly k values, then removes those values from the other cells.
+	 */
+	private static boolean searchNaked(Grid grid, List<Integer> empty, List<Integer> masks,
+									   int k, int start, List<Integer> chosen, int union, int nbValues) {
+		if (Integer.bitCount(union) > k) return false;   // élagage : déjà trop de candidats
+
+		if (chosen.size() == k) {
+			if (Integer.bitCount(union) != k) return false;
+			boolean changed = false;
+			for (int i = 0; i < empty.size(); i++) {
+				if (chosen.contains(i)) continue;
+				int pos = empty.get(i);
+				for (int note = 0; note < nbValues; note++) {
+					if ((union & (1 << note)) != 0 && grid.isCellContaining(pos, note)) {
+						grid.removeNote(pos, note);
+						changed = true;
+					}
+				}
+			}
+			return changed;
+		}
+
+		boolean changed = false;
+		for (int i = start; i < empty.size(); i++) {
+			int m = masks.get(i);
+			if (m == 0 || Integer.bitCount(m) > k) continue;  // une cellule à plus de k candidats ne peut pas en faire partie
+			chosen.add(i);
+			changed |= searchNaked(grid, empty, masks, k, i + 1, chosen, union | m, nbValues);
+			chosen.remove(chosen.size() - 1);
+		}
+		return changed;
 	}
 
     /**
