@@ -7,15 +7,15 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 
 /**
- * Affiche une grille de Sudoku en créant une vue pour chaque cellule.
+ * Displays a Sudoku grid by creating a view for each cell.
  *
- * <p>La vue gère la sélection d'une cellule au clic et la surbrillance croisée (ligne,
- * colonne et bloc de la cellule sélectionnée). Elle ne dépend pas du modèle : les
- * dimensions des blocs sont dérivées des dimensions de la grille avec la même règle que
- * {@code Grid} ({@code (int) Math.sqrt(dimension)}), ce qui donne des blocs 3x3 en 9x9,
- * 4x4 en 16x16 et 5x5 en 25x25.</p>
+ * <p>The view handles the selection of a cell on click and the cross highlight (row,
+ * column and block of the selected cell). It does not depend on the model: the
+ * block dimensions are derived from the grid dimensions with the same rule as
+ * {@code Grid} ({@code (int) Math.sqrt(dimension)}), which gives 3x3 blocks for 9x9,
+ * 4x4 for 16x16 and 5x5 for 25x25.</p>
  *
- * <p><b>Threading :</b> toutes les méthodes doivent être appelées depuis le thread JavaFX.</p>
+ * <p><b>Threading:</b> every method must be called from the JavaFX thread.</p>
  */
 public class GridView extends GridPane {
 
@@ -24,35 +24,35 @@ public class GridView extends GridPane {
 
     private final CellView[][] cells;
 
-    /** Largeur d'un bloc, en cellules. */
+    /** Width of a block, in cells. */
     private final int blockWidth;
 
-    /** Hauteur d'un bloc, en cellules. */
+    /** Height of a block, in cells. */
     private final int blockHeight;
 
     /**
-     * Construit une nouvelle grille de Sudoku avec des dimensions spécifiques.
-     * Le nombre de notes par cellule est déterminé par la valeur maximale
-     * entre la largeur et la hauteur.
+     * Builds a new Sudoku grid with the given dimensions.
+     * The number of notes per cell is the maximum
+     * of the width and the height.
      *
-     * @param w   largeur de la grille (nombre de colonnes)
-     * @param h   hauteur de la grille (nombre de lignes)
-     * @param css feuille de style des cellules
-     * @throws IllegalArgumentException si la largeur ou la hauteur n'est pas positive
+     * @param w   width of the grid (number of columns)
+     * @param h   height of the grid (number of rows)
+     * @param css style sheet of the cells
+     * @throws IllegalArgumentException if the width or the height is not positive
      */
     public GridView(int w, int h, String css) {
         this(w, h, css, (row, column) -> { });
     }
 
     /**
-     * Construit une grille dont les clics sont transmis au gestionnaire fourni.
+     * Builds a grid whose clicks are passed on to the given handler.
      *
-     * @param w              largeur en cellules
-     * @param h              hauteur en cellules
-     * @param css            feuille de style des cellules
-     * @param onCellSelected gestionnaire recevant la ligne puis la colonne sélectionnées
-     * @throws IllegalArgumentException si une dimension n'est pas positive
-     * @throws NullPointerException     si le gestionnaire ou la feuille de style est nul
+     * @param w              width in cells
+     * @param h              height in cells
+     * @param css            style sheet of the cells
+     * @param onCellSelected handler receiving the selected row, then the selected column
+     * @throws IllegalArgumentException if a dimension is not positive
+     * @throws NullPointerException     if the handler or the style sheet is null
      */
     public GridView(int w, int h, String css, BiConsumer<Integer, Integer> onCellSelected) {
         if (w <= 0 || h <= 0) {
@@ -71,12 +71,12 @@ public class GridView extends GridPane {
     }
 
     /**
-     * Retourne la vue de cellule aux coordonnées indiquées, à partir de zéro.
+     * Returns the cell view at the given coordinates, starting at zero.
      *
-     * @param row    ligne de la cellule
-     * @param column colonne de la cellule
-     * @return vue de la cellule
-     * @throws IllegalArgumentException si les coordonnées sont hors de la grille
+     * @param row    row of the cell
+     * @param column column of the cell
+     * @return the cell view
+     * @throws IllegalArgumentException if the coordinates are outside the grid
      */
     public CellView getCellAt(int row, int column) {
         if (row < 0 || row >= cells.length || column < 0 || column >= cells[row].length) {
@@ -86,12 +86,12 @@ public class GridView extends GridPane {
     }
 
     /**
-     * Crée toutes les cellules, leur bordure et leur gestionnaire de clic.
+     * Creates every cell, its border and its click handler.
      *
-     * @param w              largeur en cellules
-     * @param h              hauteur en cellules
-     * @param css            feuille de style des cellules
-     * @param onCellSelected gestionnaire appelé après la mise à jour visuelle de la sélection
+     * @param w              width in cells
+     * @param h              height in cells
+     * @param css            style sheet of the cells
+     * @param onCellSelected handler called after the selection has been updated visually
      */
     private void buildCells(int w, int h, String css, BiConsumer<Integer, Integer> onCellSelected) {
         int notesPerCell = Math.max(w, h);
@@ -113,12 +113,12 @@ public class GridView extends GridPane {
     }
 
     /**
-     * Calcule le style de bordure d'une cellule : bordure épaisse en haut ou à gauche
-     * lorsque la cellule ouvre un bloc (hors bord de la grille), fine sinon.
+     * Computes the border style of a cell: thick border at the top or on the left
+     * when the cell starts a block (except on the grid edge), thin otherwise.
      *
-     * @param row    ligne de la cellule
-     * @param column colonne de la cellule
-     * @return la déclaration CSS {@code -fx-border-width} de la cellule
+     * @param row    row of the cell
+     * @param column column of the cell
+     * @return the CSS {@code -fx-border-width} declaration of the cell
      */
     private String borderStyle(int row, int column) {
         String top = (row % blockHeight == 0 && row != 0) ? BLOCK_BORDER : THIN_BORDER;
@@ -127,11 +127,11 @@ public class GridView extends GridPane {
     }
 
     /**
-     * Met à jour la sélection et la surbrillance croisée autour de la cellule indiquée.
+     * Updates the selection and the cross highlight around the given cell.
      *
-     * @param row    ligne de la cellule sélectionnée
-     * @param column colonne de la cellule sélectionnée
-     * @throws IllegalArgumentException si les coordonnées sont hors de la grille
+     * @param row    row of the selected cell
+     * @param column column of the selected cell
+     * @throws IllegalArgumentException if the coordinates are outside the grid
      */
     private void selectCell(int row, int column) {
         getCellAt(row, column);
@@ -149,13 +149,13 @@ public class GridView extends GridPane {
     }
 
     /**
-     * Indique si deux cellules appartiennent au même bloc.
+     * Tells whether two cells belong to the same block.
      *
-     * @param rowA    ligne de la première cellule
-     * @param columnA colonne de la première cellule
-     * @param rowB    ligne de la seconde cellule
-     * @param columnB colonne de la seconde cellule
-     * @return vrai si les deux cellules sont dans le même bloc
+     * @param rowA    row of the first cell
+     * @param columnA column of the first cell
+     * @param rowB    row of the second cell
+     * @param columnB column of the second cell
+     * @return true if both cells are in the same block
      */
     private boolean isSameBlock(int rowA, int columnA, int rowB, int columnB) {
         return rowA / blockHeight == rowB / blockHeight

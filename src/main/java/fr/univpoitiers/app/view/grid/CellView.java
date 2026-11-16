@@ -14,22 +14,22 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 
 /**
- * Affiche une cellule de la grille de Sudoku.
+ * Displays a cell of the Sudoku grid.
  *
- * <p>La cellule superpose deux couches : une grille de notes (candidats) en arrière-plan et
- * un panneau contenant la valeur finale au premier plan. Elle affiche uniquement ce que le
- * contrôleur lui fournit et ne modifie jamais le modèle du jeu.</p>
+ * <p>The cell stacks two layers: a grid of notes (candidates) in the background and
+ * a pane holding the final value in the foreground. It only displays what the
+ * controller gives it and never modifies the game model.</p>
  *
- * <p>Les états visuels (sélection, surbrillance) sont portés par les classes CSS
- * {@value #SELECTED_STYLE_CLASS} et {@value #HIGHLIGHTED_STYLE_CLASS}, définies dans
+ * <p>The visual states (selection, highlight) are carried by the CSS classes
+ * {@value #SELECTED_STYLE_CLASS} and {@value #HIGHLIGHTED_STYLE_CLASS}, defined in
  * {@code style.css}.</p>
  *
- * <p><b>Threading :</b> toutes les méthodes doivent être appelées depuis le thread JavaFX
- * (utiliser {@code Platform.runLater} depuis un autre thread).</p>
+ * <p><b>Threading:</b> every method must be called from the JavaFX thread
+ * (use {@code Platform.runLater} from another thread).</p>
  */
 public class CellView extends StackPane {
 
-    /** Taille (largeur et hauteur) d'une cellule, en pixels. */
+    /** Size (width and height) of a cell, in pixels. */
     private static final double CELL_SIZE = 50.0;
 
     private static final String CELL_STYLE_CLASS = "cell-view";
@@ -37,30 +37,30 @@ public class CellView extends StackPane {
     private static final String VALUE_PANE_STYLE_CLASS = "cell-value-pane";
     private static final String NOTE_STYLE_CLASS = "cell-note";
 
-    /** Classe CSS appliquée à la cellule sélectionnée. */
+    /** CSS class applied to the selected cell. */
     static final String SELECTED_STYLE_CLASS = "selected";
 
-    /** Classe CSS appliquée aux cellules partageant ligne, colonne ou bloc avec la sélection. */
+    /** CSS class applied to the cells sharing a row, column or block with the selection. */
     static final String HIGHLIGHTED_STYLE_CLASS = "highlighted";
 
-    /** Libellé de la valeur finale ; vide lorsque la cellule n'a pas de valeur. */
+    /** Label of the final value; empty when the cell has no value. */
     private final Label finalValue;
 
-    /** Libellés de notes ; l'élément d'indice {@code i} affiche le candidat {@code i + 1}. */
+    /** Note labels; the element at index {@code i} shows the candidate {@code i + 1}. */
     private final List<Label> noteLabels = new ArrayList<>();
 
     private boolean selected;
     private boolean highlighted;
 
     /**
-     * Crée une cellule affichant le nombre demandé d'emplacements de notes.
-     * Les emplacements sont répartis sur autant de lignes et de colonnes que
-     * nécessaire, sans ajouter de note fictive lorsque le nombre n'est pas carré.
+     * Creates a cell showing the requested number of note slots.
+     * The slots are spread over as many rows and columns as needed,
+     * without adding a dummy note when the number is not a perfect square.
      *
-     * @param howManyNotes nombre d'emplacements de notes, strictement positif
-     * @param css          URL externe de la feuille de style à appliquer, non nulle
-     * @throws IllegalArgumentException si le nombre d'emplacements n'est pas positif
-     * @throws NullPointerException     si la feuille de style est nulle
+     * @param howManyNotes number of note slots, strictly positive
+     * @param css          external URL of the style sheet to apply, not null
+     * @throws IllegalArgumentException if the number of slots is not positive
+     * @throws NullPointerException     if the style sheet is null
      */
     public CellView(int howManyNotes, String css) {
         if (howManyNotes <= 0) {
@@ -84,10 +84,10 @@ public class CellView extends StackPane {
     }
 
     /**
-     * Construit la grille de notes et enregistre ses libellés dans {@link #noteLabels}.
+     * Builds the notes grid and stores its labels in {@link #noteLabels}.
      *
-     * @param howManyNotes nombre d'emplacements de notes
-     * @return la grille de notes prête à être ajoutée à la cellule
+     * @param howManyNotes number of note slots
+     * @return the notes grid, ready to be added to the cell
      */
     private GridPane createNotesGrid(int howManyNotes) {
         int columns = (int) Math.ceil(Math.sqrt(howManyNotes));
@@ -119,10 +119,10 @@ public class CellView extends StackPane {
     }
 
     /**
-     * Affiche une valeur, ou vide l'affichage pour la valeur zéro.
+     * Displays a value, or clears the display for the value zero.
      *
-     * @param value valeur à afficher, entre zéro et le nombre de notes
-     * @throws IllegalArgumentException si la valeur est hors limites
+     * @param value the value to display, between zero and the number of notes
+     * @throws IllegalArgumentException if the value is out of bounds
      */
     public void setValue(int value) {
         if (value < 0 || value > noteLabels.size()) {
@@ -133,11 +133,11 @@ public class CellView extends StackPane {
     }
 
     /**
-     * Affiche exactement les notes candidates fournies ; les autres sont effacées.
+     * Displays exactly the given candidate notes; the others are cleared.
      *
-     * @param notes candidats à afficher, numérotés à partir de un, non nul
-     * @throws NullPointerException     si l'ensemble est nul
-     * @throws IllegalArgumentException si un candidat est hors limites
+     * @param notes the candidates to display, numbered from one, not null
+     * @throws NullPointerException     if the set is null
+     * @throws IllegalArgumentException if a candidate is out of bounds
      */
     public void setNotes(Set<Integer> notes) {
         Objects.requireNonNull(notes, "Les notes ne peuvent pas être nulles.");
@@ -151,9 +151,9 @@ public class CellView extends StackPane {
     }
 
     /**
-     * Modifie l'état visuel de sélection de la cellule.
+     * Changes the visual selection state of the cell.
      *
-     * @param selected vrai si la cellule est sélectionnée
+     * @param selected true if the cell is selected
      */
     public void setSelected(boolean selected) {
         this.selected = selected;
@@ -161,18 +161,18 @@ public class CellView extends StackPane {
     }
 
     /**
-     * Indique si la cellule est affichée comme sélectionnée.
+     * Tells whether the cell is displayed as selected.
      *
-     * @return vrai si la cellule est sélectionnée
+     * @return true if the cell is selected
      */
     public boolean isSelected() {
         return selected;
     }
 
     /**
-     * Modifie l'état visuel de surbrillance d'une cellule liée à la sélection.
+     * Changes the visual highlight state of a cell related to the selection.
      *
-     * @param highlighted vrai si la cellule partage la ligne, la colonne ou le bloc sélectionné
+     * @param highlighted true if the cell shares the row, the column or the block of the selection
      */
     public void setHighlighted(boolean highlighted) {
         this.highlighted = highlighted;
@@ -180,29 +180,29 @@ public class CellView extends StackPane {
     }
 
     /**
-     * Indique si la cellule est affichée en surbrillance.
+     * Tells whether the cell is displayed as highlighted.
      *
-     * @return vrai si la cellule est en surbrillance
+     * @return true if the cell is highlighted
      */
     public boolean isHighlighted() {
         return highlighted;
     }
 
     /**
-     * Retourne la valeur actuellement affichée.
+     * Returns the value currently displayed.
      *
-     * @return la valeur affichée, ou 0 si la cellule est vide
+     * @return the displayed value, or 0 if the cell is empty
      */
     public int getValue() {
         return finalValue.getText().isEmpty() ? 0 : Integer.parseInt(finalValue.getText());
     }
 
     /**
-     * Indique si un candidat est actuellement affiché dans les notes.
+     * Tells whether a candidate is currently displayed in the notes.
      *
-     * @param value candidat testé, à partir de un
-     * @return vrai si la note est affichée
-     * @throws IllegalArgumentException si le candidat est hors limites
+     * @param value the tested candidate, starting at one
+     * @return true if the note is displayed
+     * @throws IllegalArgumentException if the candidate is out of bounds
      */
     public boolean hasNote(int value) {
         requireValidNote(value);
@@ -210,10 +210,10 @@ public class CellView extends StackPane {
     }
 
     /**
-     * Ajoute ou retire une classe CSS sans jamais la dupliquer.
+     * Adds or removes a CSS class without ever duplicating it.
      *
-     * @param styleClass classe CSS concernée
-     * @param present    vrai pour l'ajouter, faux pour la retirer
+     * @param styleClass the CSS class concerned
+     * @param present    true to add it, false to remove it
      */
     private void setStyleClassPresent(String styleClass, boolean present) {
         if (present) {
@@ -226,10 +226,10 @@ public class CellView extends StackPane {
     }
 
     /**
-     * Vérifie qu'un candidat est compris entre 1 et le nombre d'emplacements de notes.
+     * Checks that a candidate is between 1 and the number of note slots.
      *
-     * @param note candidat à vérifier
-     * @throws IllegalArgumentException si le candidat est hors limites
+     * @param note the candidate to check
+     * @throws IllegalArgumentException if the candidate is out of bounds
      */
     private void requireValidNote(int note) {
         if (note < 1 || note > noteLabels.size()) {

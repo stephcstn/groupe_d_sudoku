@@ -1,6 +1,7 @@
 package fr.univpoitiers.app;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -49,5 +50,53 @@ class SudokuCoreModelTest {
         assertThrows(IllegalArgumentException.class, () -> model.getNumber(9, 0));
         assertThrows(IllegalArgumentException.class, () -> model.getNumber(0, 9));
         assertThrows(IllegalArgumentException.class, () -> model.input(1, -1, 0));
+    }
+
+    @Test
+    @DisplayName("Saisir une valeur conserve les notes de la case")
+    void inputKeepsCellNotes() {
+        model.toggleNote(3, 1, 1);
+        model.toggleNote(8, 1, 1);
+
+        assertTrue(model.input(5, 1, 1));
+
+        assertEquals(5, model.getNumber(1, 1));
+        assertTrue(model.getNote(3, 1, 1));
+        assertTrue(model.getNote(8, 1, 1));
+    }
+
+    @Test
+    @DisplayName("unlockGrid rend de nouveau modifiables les cases verrouillées")
+    void unlockGridMakesLockedCellsEditableAgain() {
+        model.input(4, 0, 0);
+        model.lockFilledCells();
+        assertTrue(model.isCellLocked(0, 0));
+
+        model.unlockGrid();
+
+        assertFalse(model.isGridLocked());
+        assertFalse(model.isCellLocked(0, 0));
+        assertTrue(model.input(7, 0, 0));
+        assertEquals(7, model.getNumber(0, 0));
+    }
+
+    @Test
+    @DisplayName("toggleNote ajoute puis retire la note du chiffre demandé, de 1 à 9")
+    void toggleNoteAddsAndRemovesTheRequestedDigit() {
+        for (int digit = 1; digit <= 9; digit++) {
+            model.toggleNote(digit, 3, 4);
+
+            for (int other = 1; other <= 9; other++) {
+                assertEquals(other == digit, model.getNote(other, 3, 4),
+                        "après ajout de " + digit + ", note " + other);
+            }
+
+            model.toggleNote(digit, 3, 4);
+
+            for (int other = 1; other <= 9; other++) {
+                assertFalse(model.getNote(other, 3, 4),
+                        "après retrait de " + digit + ", note " + other);
+            }
+        }
     }
 }

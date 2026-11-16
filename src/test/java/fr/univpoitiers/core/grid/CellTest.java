@@ -37,7 +37,7 @@ class CellTest {
         @DisplayName("Toutes les notes doivent être initialisées à 0")
         void testDefaultNotes() {
             assertEquals(0, cell.count());
-            for (int i = 0; i < NB_VARIABLES; i++) {
+            for (int i = 1; i <= NB_VARIABLES; i++) {
                 assertEquals(0, cell.getNote(i));
             }
         }
@@ -117,13 +117,13 @@ class CellTest {
         void testCountNotes() {
             assertEquals(0, cell.count());
 
-            cell.setNote(0);
+            cell.setNote(1);
             cell.setNote(3);
             cell.setNote(8);
             assertEquals(3, cell.count());
 
             // Réassigner une note déjà présente ne change pas le décompte
-            cell.setNote(0);
+            cell.setNote(1);
             assertEquals(3, cell.count());
 
             cell.removeNote(3);
@@ -134,12 +134,12 @@ class CellTest {
         @DisplayName("Débordement d'indice lève IndexOutOfBoundsException")
         void testNoteOutOfBounds() {
             // Indice négatif
-            assertThrows(IndexOutOfBoundsException.class, () -> cell.getNote(-1));
-            assertThrows(IndexOutOfBoundsException.class, () -> cell.setNote(-1));
+            assertThrows(IndexOutOfBoundsException.class, () -> cell.getNote(0));
+            assertThrows(IndexOutOfBoundsException.class, () -> cell.setNote(0));
 
             // Indice égal à la taille (rappel : indices de 0 à NB_VARIABLES - 1)
-            assertThrows(IndexOutOfBoundsException.class, () -> cell.getNote(NB_VARIABLES));
-            assertThrows(IndexOutOfBoundsException.class, () -> cell.setNote(NB_VARIABLES));
+            assertThrows(IndexOutOfBoundsException.class, () -> cell.getNote(NB_VARIABLES + 1));
+            assertThrows(IndexOutOfBoundsException.class, () -> cell.setNote(NB_VARIABLES + 1));
         }
     }
 }
