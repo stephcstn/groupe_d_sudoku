@@ -531,4 +531,57 @@ public class Grid {
         }
     }
 
+    /**
+     * Prints the current state of the grid to the standard output
+     * ('.' for an empty cell), followed by the notes of each cell that has some.
+     */
+    public void printGrid() {
+        int max = Math.max(this.WIDTH, this.HEIGHT);
+        int digits = String.valueOf(max).length();
+        StringBuilder notes = new StringBuilder();
+
+        StringBuilder blockLine = new StringBuilder();
+        for (int x = 0; x < this.WIDTH; x++) {
+            if (x > 0 && x % this.BLOCK_WIDTH == 0) {
+                blockLine.append("+-");
+            }
+            blockLine.append("-".repeat(digits + 1));
+        }
+        String frame = "=".repeat(blockLine.length());
+
+        System.out.printf("%n%s%n", frame);
+        System.out.printf("ÉTAT DE LA GRILLE%n");
+        System.out.printf("%s%n", frame);
+
+        for (int y = 0; y < this.HEIGHT; y++) {
+            if (y > 0 && y % this.BLOCK_HEIGHT == 0) {
+                System.out.printf("%s%n", blockLine);
+            }
+            for (int x = 0; x < this.WIDTH; x++) {
+                if (x > 0 && x % this.BLOCK_WIDTH == 0) {
+                    System.out.printf("| ");
+                }
+                Cell cell = this.cells[cellToIndex(x, y)];
+                int value = cell.getValue();
+                System.out.printf("%" + digits + "s ", value == 0 ? "." : String.valueOf(value));
+
+                if (cell.count() > 0) {
+                    notes.append(String.format("  (%d, %d) :", x, y));
+                    for (int i = 0; i < max; i++) {
+                        if (cell.getNote(i) == 1) {
+                            notes.append(' ').append(i + 1);
+                        }
+                    }
+                    notes.append(String.format("%n"));
+                }
+            }
+            System.out.printf("%n");
+        }
+        if (notes.length() > 0) {
+            System.out.printf("%s%n", blockLine);
+            System.out.printf("Notes :%n%s", notes);
+        }
+        System.out.printf("%s%n%n", frame);
+    }
+
 }
