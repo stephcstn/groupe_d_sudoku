@@ -94,6 +94,13 @@ public class Cell {
     }
 
     /**
+     * Unlocks this cell so that its value can be modified or cleared again.
+     */
+    public void unlock() {
+        this.locked = false;
+    }
+
+    /**
      * Gets the current numeric value of this cell.
      *
      * @return the value of the cell (0 if empty)
@@ -112,6 +119,12 @@ public class Cell {
     }
 
 
+    /**
+     * Two cells are equal when they have the same value, lock status and candidate notes.
+     *
+     * @param obj the object to compare with
+     * @return true if {@code obj} is an equal cell
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -124,6 +137,11 @@ public class Cell {
         return true;
     }
 
+    /**
+     * Computes a hash code from the value and the candidate notes.
+     *
+     * @return the hash code of this cell
+     */
     @Override
     public int hashCode() {
         int result = Integer.hashCode(this.value);

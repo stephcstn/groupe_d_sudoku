@@ -7,22 +7,31 @@ import fr.univpoitiers.core.solver.Solver;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Application model: links the user interface to the core grid
+ * ({@link Grid}), addressing cells by their coordinates (x = column, y = row).
+ */
 public class SudokuCoreModel {
 
     private Solver solver;
     private Grid currentGrid;
     private boolean gridLocked;
 
+    /**
+     * Generates a new grid to solve. Not implemented yet.
+     *
+     * @throws UnsupportedOperationException always, until the generator is available
+     */
     public void generateGrid() {
         // TODO : Dépendra de l'implémentation de Solver / Generator
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Crée et initialise une nouvelle grille aux dimensions spécifiées.
+     * Creates and initializes a new grid with the given dimensions.
      *
-     * @param width  largeur
-     * @param height hauteur
+     * @param width  width of the grid
+     * @param height height of the grid
      */
     public void createGrid(int width, int height) {
         currentGrid = new Grid(width, height);
@@ -30,13 +39,13 @@ public class SudokuCoreModel {
     }
 
     /**
-     * Saisit une valeur dans la case de coordonnées {@code (x, y)}.
+     * Enters a value in the cell at coordinates {@code (x, y)}.
      *
-     * @param value valeur à saisir (1 à 9), ou 0 pour vider la case
-     * @param x     colonne de la case, à partir de 0
-     * @param y     ligne de la case, à partir de 0
-     * @return vrai si la saisie a été acceptée
-     * @throws IllegalArgumentException si les coordonnées sont hors de la grille
+     * @param value the value to enter (1 to 9), or 0 to empty the cell
+     * @param x     column of the cell, starting at 0
+     * @param y     row of the cell, starting at 0
+     * @return true if the input was accepted
+     * @throws IllegalArgumentException if the coordinates are outside the grid
      */
     public boolean input(int value, int x, int y) {
         Grid grid = requireGrid();
@@ -51,9 +60,9 @@ public class SudokuCoreModel {
     }
 
     /**
-     * Vérifie les cases remplies et renvoie la liste des 1D indices des cases invalides / en conflit.
+     * Checks the filled cells and returns the 1D indices of the invalid / conflicting cells.
      *
-     * @return un tableau d'indices 1D des cases comportant une erreur
+     * @return an array of the 1D indices of the cells containing an error
      */
     public int[] checkEntries() {
         Grid grid = requireGrid();
@@ -74,10 +83,10 @@ public class SudokuCoreModel {
     }
 
     /**
-     * Résout la grille courante selon les règles fournies.
+     * Solves the current grid using the given rules.
      *
-     * @param rules tableau d'identifiants de règles à appliquer
-     * @return vrai si une solution a été trouvée
+     * @param rules identifiers of the rules to apply
+     * @return true if a solution was found
      */
     public boolean solve(int[] rules) {
         // TODO : à brancher sur le Solver une fois disponible
@@ -85,7 +94,7 @@ public class SudokuCoreModel {
     }
 
     /**
-     * Réinitialise complètement la grille (toutes les cases redeviennent vides).
+     * Completely resets the grid (every cell becomes empty again).
      */
     public void resetGrid() {
         requireGrid().resetGrid();
@@ -93,12 +102,12 @@ public class SudokuCoreModel {
     }
 
     /**
-     * Lit la valeur de la case de coordonnées {@code (x, y)}.
+     * Reads the value of the cell at coordinates {@code (x, y)}.
      *
-     * @param x colonne de la case, à partir de 0
-     * @param y ligne de la case, à partir de 0
-     * @return la valeur, ou 0 si la case est vide
-     * @throws IllegalArgumentException si les coordonnées sont hors de la grille
+     * @param x column of the cell, starting at 0
+     * @param y row of the cell, starting at 0
+     * @return the value, or 0 if the cell is empty
+     * @throws IllegalArgumentException if the coordinates are outside the grid
      */
     public int getNumber(int x, int y) {
         Grid grid = requireGrid();
@@ -106,7 +115,7 @@ public class SudokuCoreModel {
     }
 
     /**
-     * Verrouille toutes les cases non vides (pour marquer les indices initiaux de la grille).
+     * Locks every non-empty cell (to mark the initial clues of the grid).
      */
     public void lockFilledCells() {
         requireGrid().lockFilledCells();
@@ -114,18 +123,24 @@ public class SudokuCoreModel {
     }
 
     /**
-     * Déverrouille la grille.
+     * Unlocks the grid.
      */
     public void unlockGrid() {
+        requireGrid().unlockGrid();
         gridLocked = false;
     }
 
+    /**
+     * Tells whether the grid is locked.
+     *
+     * @return true if the filled cells have been locked
+     */
     public boolean isGridLocked() {
         return gridLocked;
     }
 
     /**
-     * Efface uniquement les chiffres saisis par l'utilisateur sans supprimer les cases verrouillées.
+     * Clears only the digits entered by the user, keeping the locked cells.
      */
     public void clearGrid() {
         requireGrid().clearEntries();
@@ -136,13 +151,24 @@ public class SudokuCoreModel {
     // -------------------------------------------------------------------------
 
     /**
-     * Vérifie si la case (x, y) contient une note candidate donnée.
+     * Checks whether the cell (x, y) contains a given candidate note.
+     *
+     * @param noteValue index of the note, starting at 0 (unlike {@link #getNote})
+     * @param x         column of the cell, starting at 0
+     * @param y         row of the cell, starting at 0
+     * @return true if the note is active
      */
     public boolean isCellContainingNote(int noteValue, int x, int y) {
         Grid grid = requireGrid();
         return grid.isCellContaining(grid.cellToIndex(x, y), noteValue);
     }
 
+    /**
+     * Returns the current grid.
+     *
+     * @return the current grid
+     * @throws IllegalStateException if no grid has been created
+     */
     private Grid requireGrid() {
         if (currentGrid == null) {
             throw new IllegalStateException("La grille doit être créée avant d'être utilisée.");
@@ -150,26 +176,55 @@ public class SudokuCoreModel {
         return currentGrid;
     }
 
+    /**
+     * Tells whether the cell (x, y) is locked.
+     *
+     * @param x column of the cell, starting at 0
+     * @param y row of the cell, starting at 0
+     * @return true if the cell is locked
+     */
     public boolean isCellLocked(int x, int y) {
         Grid grid = requireGrid();
         return grid.isLocked(grid.cellToIndex(x, y));
     }
 
+    /**
+     * Tells whether the cell (x, y) contains the note of a digit.
+     *
+     * @param noteValue digit of the note, starting at 1
+     * @param x         column of the cell, starting at 0
+     * @param y         row of the cell, starting at 0
+     * @return true if the note is active
+     */
     public boolean getNote(int noteValue, int x, int y) {
         Grid grid = requireGrid();
         return grid.isCellContaining(grid.cellToIndex(x, y), noteValue - 1);
     }
 
+    /**
+     * Adds the note of a digit to the cell (x, y), or removes it if it is already there.
+     *
+     * @param noteValue digit of the note, starting at 1
+     * @param x         column of the cell, starting at 0
+     * @param y         row of the cell, starting at 0
+     */
     public void toggleNote(int noteValue, int x, int y) {
         Grid grid = requireGrid();
         int pos = grid.cellToIndex(x, y);
-        if (grid.isCellContaining(pos, noteValue - 1)) {
-            grid.removeNote(pos, noteValue);
+        int index = noteValue - 1;
+        if (grid.isCellContaining(pos, index)) {
+            grid.removeNote(pos, index);
         } else {
-            grid.setNote(pos, noteValue);
+            grid.setNote(pos, index);
         }
     }
 
+    /**
+     * Removes every note of the cell (x, y), without changing its value.
+     *
+     * @param x column of the cell, starting at 0
+     * @param y row of the cell, starting at 0
+     */
     public void clearCellNotes(int x, int y) {
         Grid grid = requireGrid();
         grid.clearNotes(grid.cellToIndex(x, y));
