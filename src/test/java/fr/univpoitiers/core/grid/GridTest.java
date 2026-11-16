@@ -383,6 +383,18 @@ class GridTest {
     }
 
     @Test
+    @DisplayName("getNotes renvoie correctement les notes de cellules")
+    void testGetNotes() {
+        assertTrue(grid.getNotes(0).isEmpty());
+        grid.removeNumber(0);
+        grid.setNote(0, 2);
+        grid.setNote(0, 5);
+        assertEquals(2, grid.getNotes(0).size());
+        assertEquals(2, grid.getNotes(0).get(0));
+        assertEquals(5, grid.getNotes(0).get(1));
+    }
+
+    @Test
     @DisplayName("Le clone copie correctement les notes et garantit l'indépendance mémoire")
     void testCloneNotesComplet() {
         Grid clonedGrid = new Grid(grid9x9);
