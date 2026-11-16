@@ -80,7 +80,7 @@ public class Grid {
     public ArrayList<Integer> getNotes(int pos) {
         ArrayList<Integer> res = new ArrayList<>();
         if (0 <= pos && pos < this.cells.length) {
-            for (int i = 0; i < WIDTH; i++) {
+            for (int i = 1; i <= WIDTH; i++) {
                 if (this.cells[pos].getNote(i) == 1) {
                     res.add(i);
                 }
@@ -379,7 +379,7 @@ public class Grid {
                 return false;
             }
             int max = Math.max(this.WIDTH, this.HEIGHT);
-            for (int j = 0; j < max; j++) {
+            for (int j = 1; j <= max; j++) {
                 if (this.cells[i].getNote(j) != otherGrid.cells[i].getNote(j)) {
                     return false;
                 }
@@ -561,23 +561,23 @@ public class Grid {
                 if (x > 0 && x % this.BLOCK_WIDTH == 0) {
                     System.out.printf("| ");
                 }
-                Cell cell = this.cells[cellToIndex(x, y)];
-                int value = cell.getValue();
+                int pos = cellToIndex(x, y);
+                int value = this.cells[pos].getValue();
                 System.out.printf("%" + digits + "s ", value == 0 ? "." : String.valueOf(value));
 
-                if (cell.count() > 0) {
-                    notes.append(String.format("  (%d, %d) :", x, y));
-                    for (int i = 0; i < max; i++) {
-                        if (cell.getNote(i) == 1) {
-                            notes.append(' ').append(i + 1);
-                        }
+                ArrayList<Integer> cellNotes = new ArrayList<>();
+                for (int i = 0; i < max; i++) {
+                    if (isCellContaining(pos, i)) {
+                        cellNotes.add(i + 1);
                     }
-                    notes.append(String.format("%n"));
+                }
+                if (!cellNotes.isEmpty()) {
+                    notes.append(String.format("  (%d, %d) : %s%n", x, y, cellNotes));
                 }
             }
             System.out.printf("%n");
         }
-        if (!notes.isEmpty()) {
+        if (notes.length() > 0) {
             System.out.printf("%s%n", blockLine);
             System.out.printf("Notes :%n%s", notes);
         }
