@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="689.0" prefWidth="878.0" styleClass="app-root" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.univpoitiers.app.SudokuAppController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="689.0" prefWidth="878.0" styleClass="app-root" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.univpoitiers.app.SudokuAppController">
    <right>
       <BorderPane fx:id="rightPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <top>
@@ -30,6 +30,7 @@
          <bottom>
             <HBox alignment="CENTER_RIGHT" BorderPane.alignment="CENTER_RIGHT">
                <children>
+                  <Button fx:id="checkButton" mnemonicParsing="false" onAction="#onCheckButtonClick" text="CHECK" />
                   <Button fx:id="resetGridButton" mnemonicParsing="false" onAction="#resetGrid" text="RESET GRID" />
                </children>
                <padding>
@@ -87,7 +88,10 @@
          </center></BorderPane>
    </top>
    <bottom>
-      <BorderPane prefHeight="57.0" prefWidth="878.0" BorderPane.alignment="CENTER" />
+      <BorderPane prefHeight="57.0" prefWidth="878.0" BorderPane.alignment="CENTER">
+         <center>
+            <Label fx:id="errorLabel" BorderPane.alignment="CENTER" />
+         </center></BorderPane>
    </bottom>
    <center>
        <BorderPane fx:id="centerPane" prefHeight="358.0" prefWidth="549.0" BorderPane.alignment="CENTER">

@@ -71,6 +71,10 @@
     -fx-background-color: #e6c6bd;
 }
 
+.cell-view.error {
+    -fx-background-color: #ff6363;
+}
+
 .cell-value-pane {
     -fx-alignment: center;
 }

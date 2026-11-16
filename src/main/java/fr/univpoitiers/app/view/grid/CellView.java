@@ -43,6 +43,9 @@ public class CellView extends StackPane {
     /** CSS class applied to the cells sharing a row, column or block with the selection. */
     static final String HIGHLIGHTED_STYLE_CLASS = "highlighted";
 
+    /** CSS class applied to the cells with an error. */
+    static final String ERROR_STYLE_CLASS = "error";
+
     /** Label of the final value; empty when the cell has no value. */
     private final Label finalValue;
 
@@ -51,6 +54,7 @@ public class CellView extends StackPane {
 
     private boolean selected;
     private boolean highlighted;
+    private boolean error;
 
     /**
      * Creates a cell showing the requested number of note slots.
@@ -236,5 +240,10 @@ public class CellView extends StackPane {
             throw new IllegalArgumentException("La note doit être comprise entre 1 et "
                     + noteLabels.size() + ".");
         }
+    }
+
+    public void setError(boolean error) {
+        this.error = error;
+        setStyleClassPresent(ERROR_STYLE_CLASS, error);
     }
 }

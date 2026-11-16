@@ -1,6 +1,5 @@
 package fr.univpoitiers.app;
 
-import fr.univpoitiers.core.grid.Cell;
 import fr.univpoitiers.core.grid.Grid;
 import fr.univpoitiers.core.solver.Solver;
 
@@ -68,21 +67,18 @@ public class SudokuCoreModel {
      *
      * @return an array of the 1D indices of the cells containing an error
      */
-    public int[] checkEntries() {
+    public int[] checkValidValues() {
         Grid grid = requireGrid();
         int totalCells = grid.getWidth() * grid.getHeight();
         List<Integer> invalidPositions = new ArrayList<>();
 
         for (int pos = 0; pos < totalCells; pos++) {
             int val = grid.getNumber(pos);
-            if (val != 0) {
-                // checkValidValues vérifie la cohérence ligne, colonne, bloc
-                if (!grid.checkValidValues(pos, val)) {
-                    invalidPositions.add(pos);
-                }
+            // checkValidValues vérifie la cohérence ligne, colonne, bloc
+            if (val != 0 && !grid.checkValidValues(pos, val)) {
+                invalidPositions.add(pos);
             }
         }
-
         return invalidPositions.stream().mapToInt(Integer::intValue).toArray();
     }
 
@@ -238,6 +234,23 @@ public class SudokuCoreModel {
         Grid grid = requireGrid();
         grid.clearNotes(grid.cellToIndex(x, y));
         grid.printGrid();
+    }
+
+    public int[] getRowAndColumn(int pos) {
+        int row = currentGrid.getRowIndex(pos);
+        int column = currentGrid.getColumnIndex(pos);
+        return new int[]{row, column};
+    }
+
+    public boolean isGridComplete() {
+        Grid grid = requireGrid();
+        int totalCells = grid.getWidth() * grid.getHeight();
+        for (int pos = 0; pos < totalCells; pos++) {
+            if (grid.getNumber(pos) == 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
 

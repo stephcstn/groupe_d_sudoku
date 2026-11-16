@@ -17,6 +17,7 @@ import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -38,6 +39,8 @@ public class SudokuAppController {
     private static final String LOCKED_ICON_PATH = "images/Cadenas-ferme-rouge.png";
     private static final String UNLOCKED_ICON_PATH = "images/Cadenas-ouvert-vert.png";
 
+    @FXML public Button checkButton;
+    @FXML Label errorLabel;
     @FXML private CheckBox checkAllRules;
     @FXML private CheckBox checkLastFreeCell;
     @FXML private CheckBox checkLastRemainingCell;
@@ -324,5 +327,27 @@ public class SudokuAppController {
         runAutoResolution.disableProperty().bind(Bindings.createBooleanBinding(
                 () -> allCheckBoxes.stream().noneMatch(CheckBox::isSelected),
                 dependencies));
+    }
+
+    @FXML
+    public void onCheckButtonClick() {
+        // 1. Toujours nettoyer les anciennes cases rouges avant de revérifier
+        gridView.clearErrors(); // (ou le nom de ta méthode qui remet le style normal)
+
+        int[] invalidPositions = coreModel.checkValidValues();
+
+        if (invalidPositions.length == 0) {
+            if (coreModel.isGridComplete()) {
+                errorLabel.setText("Félicitations ! La grille est complète et valide.");
+            } else {
+                errorLabel.setText("Aucune erreur pour le moment, continue !");
+            }
+        } else {
+            for (int pos : invalidPositions) {
+                int[] rowColumn = coreModel.getRowAndColumn(pos);
+                gridView.highlightError(rowColumn[0], rowColumn[1]);
+            }
+            errorLabel.setText(invalidPositions.length + " erreur(s) détectée(s).");
+        }
     }
 }
