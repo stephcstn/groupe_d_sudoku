@@ -161,4 +161,17 @@ public class GridView extends GridPane {
         return rowA / blockHeight == rowB / blockHeight
                 && columnA / blockWidth == columnB / blockWidth;
     }
+
+    public void highlightError(int row, int column) {
+        getCellAt(row, column);
+        cells[row][column].setError(true);
+    }
+
+    public void clearErrors() {
+        for (int row = 0; row < cells.length; row++) {
+            for (int column = 0; column < cells[row].length; column++) {
+                cells[row][column].setError(false);
+            }
+        }
+    }
 }
