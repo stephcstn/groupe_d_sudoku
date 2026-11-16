@@ -561,18 +561,18 @@ public class Grid {
                 if (x > 0 && x % this.BLOCK_WIDTH == 0) {
                     System.out.printf("| ");
                 }
-                int pos = cellToIndex(x, y);
-                int value = this.cells[pos].getValue();
+                Cell cell = this.cells[cellToIndex(x, y)];
+                int value = cell.getValue();
                 System.out.printf("%" + digits + "s ", value == 0 ? "." : String.valueOf(value));
 
-                ArrayList<Integer> cellNotes = new ArrayList<>();
-                for (int i = 0; i < max; i++) {
-                    if (isCellContaining(pos, i)) {
-                        cellNotes.add(i + 1);
+                if (cell.count() > 0) {
+                    notes.append(String.format("  (%d, %d) :", x, y));
+                    for (int i = 0; i < max; i++) {
+                        if (cell.getNote(i) == 1) {
+                            notes.append(' ').append(i + 1);
+                        }
                     }
-                }
-                if (!cellNotes.isEmpty()) {
-                    notes.append(String.format("  (%d, %d) : %s%n", x, y, cellNotes));
+                    notes.append(String.format("%n"));
                 }
             }
             System.out.printf("%n");
