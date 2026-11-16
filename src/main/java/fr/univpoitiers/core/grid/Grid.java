@@ -80,7 +80,7 @@ public class Grid {
     public ArrayList<Integer> getNotes(int pos) {
         ArrayList<Integer> res = new ArrayList<>();
         if (0 <= pos && pos < this.cells.length) {
-            for (int i = 0; i < WIDTH; i++) {
+            for (int i = 1; i <= WIDTH; i++) {
                 if (this.cells[pos].getNote(i) == 1) {
                     res.add(i);
                 }
@@ -379,7 +379,7 @@ public class Grid {
                 return false;
             }
             int max = Math.max(this.WIDTH, this.HEIGHT);
-            for (int j = 0; j < max; j++) {
+            for (int j = 1; j <= max; j++) {
                 if (this.cells[i].getNote(j) != otherGrid.cells[i].getNote(j)) {
                     return false;
                 }
