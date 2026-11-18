@@ -8,8 +8,6 @@ import java.util.Set;
 import fr.univpoitiers.core.grid.Grid;
 
 
-
-
 /**
  * Utility interface providing static methods to apply heuristic deduction rules
  * on a Sudoku grid (Pointing Pairs/Triples, Box-Line Reductions, X-Wing, Y-Wing, Swordfish).
@@ -212,6 +210,8 @@ public interface RuleApplier {
 	/**
 	 * Applies the Naked K-tuples rule for every K in [kMin, kMax],
 	 * limited to the supported range [K_MIN, K_MAX].
+	 * Step-by-step: stops as soon as one K-tuple has removed at least one note,
+	 * so a single deduction is applied per call.
 	 * @param grid the current Sudoku grid
 	 * @param kMin minimum tuple size
 	 * @param kMax maximum tuple size
@@ -225,20 +225,22 @@ public interface RuleApplier {
 		}
 		int nbValues = Math.max(grid.getWidth(), grid.getHeight());
 
-		boolean changed = false;
-		for (List<Integer> unit : getUnits(grid)) {
-			List<Integer> empty = new ArrayList<>();
-			List<Integer> masks = new ArrayList<>();
-			for (int pos : unit) {
-				if (grid.getNumber(pos) != 0) continue;
-				empty.add(pos);
-				masks.add(candidatesMask(grid, pos, nbValues));
-			}
-			for (int k = kMin; k <= kMax && k < empty.size(); k++) {
-				changed |= searchNaked(grid, empty, masks, k, 0, new ArrayList<>(), 0, nbValues);
+		for (int k = kMin; k <= kMax; k++) {
+			for (List<Integer> unit : getUnits(grid)) {
+				List<Integer> empty = new ArrayList<>();
+				List<Integer> masks = new ArrayList<>();
+				for (int pos : unit) {
+					if (grid.getNumber(pos) != 0) continue;
+					empty.add(pos);
+					masks.add(candidatesMask(grid, pos, nbValues));
+				}
+				if (k < empty.size()
+						&& searchNaked(grid, empty, masks, k, 0, new ArrayList<>(), 0, nbValues)) {
+					return true; // une seule déduction par appel
+				}
 			}
 		}
-		return changed;
+		return false;
 	}
 
 	/**
@@ -287,6 +289,7 @@ public interface RuleApplier {
 	/**
 	 * Recursively enumerates combinations of k cells whose union of candidates
 	 * has exactly k values, then removes those values from the other cells.
+	 * Stops at the first K-tuple that removes at least one note.
 	 */
 	private static boolean searchNaked(Grid grid, List<Integer> empty, List<Integer> masks,
 									   int k, int start, List<Integer> chosen, int union, int nbValues) {
@@ -308,15 +311,15 @@ public interface RuleApplier {
 			return changed;
 		}
 
-		boolean changed = false;
 		for (int i = start; i < empty.size(); i++) {
 			int m = masks.get(i);
 			if (m == 0 || Integer.bitCount(m) > k) continue;  // une cellule à plus de k candidats ne peut pas en faire partie
 			chosen.add(i);
-			changed |= searchNaked(grid, empty, masks, k, i + 1, chosen, union | m, nbValues);
+			boolean changed = searchNaked(grid, empty, masks, k, i + 1, chosen, union | m, nbValues);
 			chosen.remove(chosen.size() - 1);
+			if (changed) return true;  // arrêt dès la première élimination
 		}
-		return changed;
+		return false;
 	}
 
     /**
@@ -926,11 +929,42 @@ public interface RuleApplier {
     }
 
 	/**
-	 * 
-	 * @param grid
+	 * Naive backtracking (iterative version of the recursive algorithm):
+	 * empty cells are visited in a fixed order (row by row, left to right) and
+	 * values are tried in increasing order (1 to n). When no value fits a cell,
+	 * the algorithm goes back to the previous cell and tries its next value.
+	 * Stops at the first solution found.
+	 * @param grid the current Sudoku grid
+	 * @return true if the grid has been completed, false if it was already full
+	 *         or has no solution (in which case the grid is left unchanged)
 	 */
 	static boolean FirstNaive(Grid grid){
-		return true;
+		int nbValues = Math.max(grid.getWidth(), grid.getHeight());
+
+		// Ordre de parcours fixé : cases vides de haut en bas, de gauche à droite
+		List<Integer> empty = new ArrayList<>();
+		for (int pos = 0; pos < grid.getWidth() * grid.getHeight(); pos++) {
+			if (grid.getNumber(pos) == 0) empty.add(pos);
+		}
+		if (empty.isEmpty()) return false;
+
+		int i = 0;
+		while (i >= 0 && i < empty.size()) {
+			int pos = empty.get(i);
+			// Reprend à la valeur suivante (1 si la case est vide)
+			int val = grid.getNumber(pos) + 1;
+			if (grid.getNumber(pos) != 0) grid.removeNumber(pos);
+
+			while (val <= nbValues && !grid.checkValidValues(pos, val)) val++;
+
+			if (val <= nbValues) {
+				grid.addNumber(pos, val);
+				i++;   // case suivante
+			} else {
+				i--;   // aucune valeur possible : retour arrière (la case reste vide)
+			}
+		}
+		return i == empty.size();
 	}
 
 }

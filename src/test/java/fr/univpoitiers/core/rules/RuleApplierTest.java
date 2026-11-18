@@ -11,8 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for deduction rules.
  *
- * Includes tests for Pointing (Pair / Triple), Box/Line Reduction (Pair / Triple),
- * X-Wing, Y-Wing, and Swordfish rules.
+ * Includes tests for KObvious, Pointing (Pair / Triple), Box/Line Reduction (Pair / Triple),
+ * X-Wing, Y-Wing, Swordfish rules and First Naive.
  *
  * Each test starts from an empty 9x9 grid without any notes, then manually places
  * the necessary notes for the scenario.
@@ -394,6 +394,72 @@ class RuleApplierTest {
             Grid before = new Grid(grid);
             assertFalse(RuleApplier.YWing(grid));
             assertEquals(before, grid);
+        }
+    }
+
+    @Nested
+    @DisplayName("FirstNaive")
+    class FirstNaiveTests {
+
+        /** Fills the grid from 81 digits (0 = empty). */
+        private void load(String digits) {
+            for (int p = 0; p < 81; p++) {
+                int v = digits.charAt(p) - '0';
+                if (v != 0) grid.addNumber(p, v);
+            }
+        }
+
+        /** Checks every cell is filled and respects row/column/block constraints. */
+        private void assertSolved() {
+            for (int p = 0; p < 81; p++) {
+                int v = grid.getNumber(p);
+                assertNotEquals(0, v, "cell " + p + " should be filled");
+                assertTrue(grid.checkValidValues(p, v), "cell " + p + " breaks a constraint");
+            }
+        }
+
+        @Test
+        @DisplayName("Solves a classic puzzle and keeps the given clues")
+        void firstNaive_solvesPuzzle() {
+            String puzzle = "530070000600195000098000060800060003400803001700020006060000280000419005000080079";
+            String solution = "534678912672195348198342567859761423426853791713924856961537284287419635345286179";
+            load(puzzle);
+
+            assertTrue(RuleApplier.FirstNaive(grid));
+            assertSolved();
+            for (int p = 0; p < 81; p++) {
+                assertEquals(solution.charAt(p) - '0', grid.getNumber(p));
+            }
+        }
+
+        @Test
+        @DisplayName("Empty grid: finds the first solution in arithmetic order")
+        void firstNaive_emptyGrid_firstRowIsAscending() {
+            assertTrue(RuleApplier.FirstNaive(grid));
+            assertSolved();
+            for (int col = 0; col < 9; col++) {
+                assertEquals(col + 1, grid.getNumber(pos(0, col)));
+            }
+        }
+
+        @Test
+        @DisplayName("Returns false and leaves the grid unchanged when there is no solution")
+        void firstNaive_noSolution_returnsFalseAndRestoresGrid() {
+            // Row 0 holds 1..8 in columns 0..7, and 9 is already in column 8 further down:
+            // cell (0,8) can take no value.
+            for (int col = 0; col < 8; col++) grid.addNumber(pos(0, col), col + 1);
+            grid.addNumber(pos(5, 8), 9);
+            Grid before = new Grid(grid);
+
+            assertFalse(RuleApplier.FirstNaive(grid));
+            assertEquals(before, grid);
+        }
+
+        @Test
+        @DisplayName("Returns false on an already full grid")
+        void firstNaive_fullGrid_returnsFalse() {
+            load("534678912672195348198342567859761423426853791713924856961537284287419635345286179");
+            assertFalse(RuleApplier.FirstNaive(grid));
         }
     }
 
