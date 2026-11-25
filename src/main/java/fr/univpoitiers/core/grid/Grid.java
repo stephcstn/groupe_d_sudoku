@@ -158,9 +158,10 @@ public class Grid {
     public boolean addNumber(int pos, int value) {
         this.cells[pos].setValue(value);
         this.availableCells.remove(Integer.valueOf(pos));
+        this.clearNotes(pos);
         this.blockUpdate(pos, value);
-        this.lineUpdate(pos, value);
-        this.columnUpdate(pos, value);
+        this.lineUpdate(getRowIndex(pos), value);
+        this.columnUpdate(getColumnIndex(pos), value);
         return true;
     }
 

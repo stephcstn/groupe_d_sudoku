@@ -406,4 +406,102 @@ class GridTest {
         grid9x9.addNumber(0, 9);
         assertNotEquals(grid9x9.getNumber(0), clonedGrid.getNumber(0), "Le clone doit être indépendant en mémoire");
     }
+
+    @Nested
+    @DisplayName("addNumber met à jour les notes")
+    class AddNumberNotesTests {
+
+        private int pos(int row, int col) {
+            return row * 9 + col;
+        }
+
+        /** Met la note donnée dans toutes les cases de la grille vide. */
+        private void noteEverywhere(int note) {
+            for (int i = 0; i < 81; i++) {
+                grid9x9.setNote(i, note);
+            }
+        }
+
+        @Test
+        @DisplayName("La valeur posée disparaît des notes de toute la ligne")
+        void addNumber_removesNoteInWholeRow() {
+            noteEverywhere(5);
+            grid9x9.addNumber(pos(4, 4), 5);
+
+            for (int col = 0; col < 9; col++) {
+                assertFalse(grid9x9.isCellContaining(pos(4, col), 5), "ligne 4, colonne " + col);
+            }
+        }
+
+        @Test
+        @DisplayName("La valeur posée disparaît des notes de toute la colonne")
+        void addNumber_removesNoteInWholeColumn() {
+            noteEverywhere(5);
+            grid9x9.addNumber(pos(4, 4), 5);
+
+            for (int row = 0; row < 9; row++) {
+                assertFalse(grid9x9.isCellContaining(pos(row, 4), 5), "colonne 4, ligne " + row);
+            }
+        }
+
+        @Test
+        @DisplayName("La valeur posée disparaît des notes de tout le bloc")
+        void addNumber_removesNoteInWholeBlock() {
+            noteEverywhere(5);
+            grid9x9.addNumber(pos(4, 4), 5);
+
+            for (int row = 3; row < 6; row++) {
+                for (int col = 3; col < 6; col++) {
+                    assertFalse(grid9x9.isCellContaining(pos(row, col), 5), "bloc central (" + row + "," + col + ")");
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("Les cases hors ligne, colonne et bloc gardent leur note")
+        void addNumber_keepsNoteOutsidePeers() {
+            noteEverywhere(5);
+            grid9x9.addNumber(pos(4, 4), 5);
+
+            assertTrue(grid9x9.isCellContaining(pos(0, 0), 5));
+            assertTrue(grid9x9.isCellContaining(pos(8, 8), 5));
+            assertTrue(grid9x9.isCellContaining(pos(3, 0), 5), "même bande de blocs mais autre ligne et autre bloc");
+            assertTrue(grid9x9.isCellContaining(pos(0, 3), 5), "même pile de blocs mais autre colonne et autre bloc");
+        }
+
+        @Test
+        @DisplayName("Les autres valeurs restent dans les notes des cases voisines")
+        void addNumber_keepsOtherNotesOfPeers() {
+            noteEverywhere(5);
+            noteEverywhere(7);
+            grid9x9.addNumber(pos(4, 4), 5);
+
+            assertTrue(grid9x9.isCellContaining(pos(4, 0), 7), "ligne");
+            assertTrue(grid9x9.isCellContaining(pos(0, 4), 7), "colonne");
+            assertTrue(grid9x9.isCellContaining(pos(3, 3), 7), "bloc");
+        }
+
+        @Test
+        @DisplayName("La case remplie n'a plus aucune note")
+        void addNumber_clearsAllNotesOfFilledCell() {
+            for (int note = 1; note <= 9; note++) {
+                grid9x9.setNote(pos(4, 4), note);
+            }
+            grid9x9.addNumber(pos(4, 4), 5);
+
+            assertTrue(grid9x9.getNotes(pos(4, 4)).isEmpty());
+        }
+
+        @Test
+        @DisplayName("Fonctionne sur la dernière case de la grille")
+        void addNumber_lastCell() {
+            noteEverywhere(9);
+            assertDoesNotThrow(() -> grid9x9.addNumber(pos(8, 8), 9));
+
+            assertFalse(grid9x9.isCellContaining(pos(8, 0), 9), "ligne 8");
+            assertFalse(grid9x9.isCellContaining(pos(0, 8), 9), "colonne 8");
+            assertFalse(grid9x9.isCellContaining(pos(6, 6), 9), "bloc en bas à droite");
+            assertTrue(grid9x9.isCellContaining(pos(0, 0), 9));
+        }
+    }
 }
