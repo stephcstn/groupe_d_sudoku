@@ -346,13 +346,171 @@ public interface RuleApplier {
 		return false;
 	}
 
-    /**
-     * Applies Hidden K-tuples deduction rule on the grid.
-     * @param grid the current Sudoku grid
-     * @return true if at least one candidate note was removed or a value was set
-     */
-	static boolean KHidden(Grid grid){
-		return true;
+	/**
+	 * Applies Hidden Pairs then Hidden Triples on the grid.
+	 * Default version used by the Solver.
+	 * @param grid the current Sudoku grid
+	 * @return true if at least one candidate note was removed
+	 */
+	static boolean KHidden(Grid grid) {
+		return KHidden(grid, K_MIN, K_MAX);
+	}
+
+	/**
+	 * Applies the Hidden Pair.
+	 * @param grid the current Sudoku grid
+	 * @return true if at least one candidate note was removed
+	 * @throws IllegalArgumentException if k is not supported
+	 */
+	static boolean KHiddenPair(Grid grid) {
+		return KHidden(grid, 2, 2);
+	}
+
+	/**
+	 * Applies the Hidden Triple.
+	 * @param grid the current Sudoku grid
+	 * @return true if at least one candidate note was removed
+	 * @throws IllegalArgumentException if k is not supported
+	 */
+	static boolean KHiddenTriple(Grid grid) {
+		return KHidden(grid, 3, 3);
+	}
+
+	/**
+	 * Applies the Hidden Tuples (Quads, Quints, Sextets: K from 4 to 6).
+	 * @param grid the current Sudoku grid
+	 * @return true if at least one candidate note was removed
+	 */
+	static boolean KHiddenTuples(Grid grid) {
+		return KHidden(grid, 4, 6);
+	}
+
+	/**
+	 * Applies the Hidden Single: in a unit (row, column or block), if a value
+	 * can only go in one cell, that value is placed in this cell.
+	 * Unlike the other Hidden rules, this one places a value (through {@link Grid#addNumber},
+	 * which also removes the value from the notes of the row, column and block).
+	 * Step-by-step: places a single value per call.
+	 * @param grid the current Sudoku grid
+	 * @return true if a value was placed
+	 */
+	static boolean KHiddenSingle(Grid grid) {
+		int nbValues = Math.max(grid.getWidth(), grid.getHeight());
+
+		for (List<Integer> unit : getUnits(grid)) {
+			for (int value = 1; value <= nbValues; value++) {
+				if (unitContainsValue(grid, unit, value)) continue;
+				int onlyCell = -1;
+				int count = 0;
+				for (int pos : unit) {
+					if (grid.getNumber(pos) == 0 && grid.isCellContaining(pos, value)) {
+						onlyCell = pos;
+						count++;
+					}
+				}
+				if (count == 1) {
+					return grid.addNumber(onlyCell, value); // une seule déduction par appel
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Applies the Hidden K-tuples rule for every K in [kMin, kMax] (K at least 2).
+	 * In a unit (row, column or block), if K values can only go in the same K cells,
+	 * those cells cannot hold any other value: every other note is removed from them.
+	 * A K that does not fit in a unit (K greater than or equal to its number of empty cells)
+	 * is simply skipped for that unit.
+	 * Step-by-step: stops as soon as one K-tuple has removed at least one note,
+	 * so a single deduction is applied per call. Never places a value
+	 * (K = 1 is the Hidden Single, see {@link #KHiddenSingle}).
+	 * @param grid the current Sudoku grid
+	 * @param kMin minimum tuple size (at least 2)
+	 * @param kMax maximum tuple size
+	 * @return true if at least one candidate note was removed
+	 * @throws IllegalArgumentException if kMin is lower than 2 or greater than kMax
+	 */
+	static boolean KHidden(Grid grid, int kMin, int kMax) {
+		if (kMin < 2 || kMin > kMax) {
+			throw new IllegalArgumentException(
+					"KHidden demande 2 <= kMin <= kMax (K = 1 : utiliser KHiddenSingle)");
+		}
+		int nbValues = Math.max(grid.getWidth(), grid.getHeight());
+
+		for (int k = kMin; k <= kMax; k++) {
+			for (List<Integer> unit : getUnits(grid)) {
+				List<Integer> empty = new ArrayList<>();
+				for (int pos : unit) {
+					if (grid.getNumber(pos) == 0) empty.add(pos);
+				}
+				if (k >= empty.size()) continue; // the tuple would fill the whole unit: nothing to learn
+
+				// For each value still missing from the unit: bitmask of the empty cells that can hold it
+				List<Integer> values = new ArrayList<>();
+				List<Integer> cellMasks = new ArrayList<>();
+				for (int value = 1; value <= nbValues; value++) {
+					if (unitContainsValue(grid, unit, value)) continue;
+					int mask = 0;
+					for (int i = 0; i < empty.size(); i++) {
+						if (grid.isCellContaining(empty.get(i), value)) mask |= 1 << i;
+					}
+					if (mask != 0) {
+						values.add(value);
+						cellMasks.add(mask);
+					}
+				}
+				if (searchHidden(grid, empty, values, cellMasks, k, 0, new ArrayList<>(), 0, nbValues)) {
+					return true; // une seule déduction par appel
+				}
+			}
+		}
+		return false;
+	}
+
+	/** Returns true if the value is already placed in one of the cells of the unit. */
+	private static boolean unitContainsValue(Grid grid, List<Integer> unit, int value) {
+		for (int pos : unit) {
+			if (grid.getNumber(pos) == value) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Recursively enumerates combinations of k values whose possible cells (union)
+	 * are exactly k cells, then removes every other note from those cells.
+	 * Stops at the first K-tuple that removes at least one note.
+	 */
+	private static boolean searchHidden(Grid grid, List<Integer> empty, List<Integer> values,
+										List<Integer> cellMasks, int k, int start, List<Integer> chosen,
+										int union, int nbValues) {
+		if (Integer.bitCount(union) > k) return false; // élagage : déjà trop de cases
+
+		if (chosen.size() == k) {
+			if (Integer.bitCount(union) != k) return false;
+			boolean changed = false;
+			for (int i = 0; i < empty.size(); i++) {
+				if ((union & (1 << i)) == 0) continue;
+				int pos = empty.get(i);
+				for (int note = 1; note <= nbValues; note++) {
+					if (!chosen.contains(note) && grid.isCellContaining(pos, note)) {
+						grid.removeNote(pos, note);
+						changed = true;
+					}
+				}
+			}
+			return changed;
+		}
+
+		for (int i = start; i < values.size(); i++) {
+			int m = cellMasks.get(i);
+			if (Integer.bitCount(m) > k) continue; // une valeur possible dans plus de k cases ne peut pas en faire partie
+			chosen.add(values.get(i));
+			boolean changed = searchHidden(grid, empty, values, cellMasks, k, i + 1, chosen, union | m, nbValues);
+			chosen.remove(chosen.size() - 1);
+			if (changed) return true; // arrêt dès la première élimination
+		}
+		return false;
 	}
 
     /**

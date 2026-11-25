@@ -308,6 +308,226 @@ class RuleApplierTest {
     }
 
     @Nested
+    @DisplayName("KHidden")
+    class KHiddenTest {
+
+        /** Adds every given note to a single cell. */
+        private void notes(int row, int col, int... values) {
+            for (int v : values) {
+                grid.setNote(pos(row, col), v);
+            }
+        }
+
+        @Test
+        @DisplayName("Pair on a row: removes the other notes from the 2 cells only")
+        void kHidden_pairOnRow_removesOtherNotesInPair() {
+            // 2 and 7 can only go in (0,0) and (0,3)
+            notes(0, 0, 2, 7, 4);
+            notes(0, 3, 2, 7, 5, 9);
+            notes(0, 6, 4, 5);
+            notes(0, 8, 4, 9);
+
+            assertTrue(RuleApplier.KHidden(grid));
+
+            assertTrue(has(0, 0, 2) && has(0, 0, 7), "the pair values are kept");
+            assertFalse(has(0, 0, 4));
+            assertTrue(has(0, 3, 2) && has(0, 3, 7), "the pair values are kept");
+            assertFalse(has(0, 3, 5));
+            assertFalse(has(0, 3, 9), "the last note (9) is handled");
+            assertTrue(has(0, 6, 4) && has(0, 6, 5), "cells outside the pair are not modified");
+            assertTrue(has(0, 8, 4) && has(0, 8, 9), "cells outside the pair are not modified");
+        }
+
+        @Test
+        @DisplayName("Pair on a column: removes the other notes from the 2 cells only")
+        void kHidden_pairOnColumn_removesOtherNotesInPair() {
+            // 1 and 8 can only go in (1,4) and (6,4)
+            notes(1, 4, 1, 8, 3);
+            notes(6, 4, 1, 8, 6);
+            notes(2, 4, 3, 6);
+
+            assertTrue(RuleApplier.KHidden(grid));
+
+            assertFalse(has(1, 4, 3));
+            assertFalse(has(6, 4, 6));
+            assertTrue(has(1, 4, 1) && has(1, 4, 8));
+            assertTrue(has(6, 4, 1) && has(6, 4, 8));
+            assertTrue(has(2, 4, 3) && has(2, 4, 6), "a cell outside the pair is not modified");
+        }
+
+        @Test
+        @DisplayName("Triple where no cell holds all 3 values (K = 3)")
+        void kHidden_incompleteTriple_removesOtherNotes() {
+            // 1, 2 and 3 can only go in (5,0), (5,3) and (5,7)
+            notes(5, 0, 1, 2, 8);
+            notes(5, 3, 2, 3, 9);
+            notes(5, 7, 1, 3, 8, 9);
+            notes(5, 5, 8, 9);
+
+            assertTrue(RuleApplier.KHiddenTriple(grid));
+
+            assertFalse(has(5, 0, 8));
+            assertFalse(has(5, 3, 9));
+            assertFalse(has(5, 7, 8));
+            assertFalse(has(5, 7, 9));
+            assertTrue(has(5, 0, 1) && has(5, 0, 2));
+            assertTrue(has(5, 3, 2) && has(5, 3, 3));
+            assertTrue(has(5, 7, 1) && has(5, 7, 3));
+            assertTrue(has(5, 5, 8) && has(5, 5, 9), "a cell outside the triple is not modified");
+        }
+
+        @Test
+        @DisplayName("Returns false and leaves the grid unchanged when the pair has no other note (K = 2)")
+        void kHidden_whenNothingToRemove_returnsFalse() {
+            // K = 2 only: with K = 3, {2, 7, 4} would be a real hidden triple here,
+            // because the other empty cells of the row have no notes in this test grid.
+            notes(0, 0, 2, 7);
+            notes(0, 3, 2, 7);
+            notes(0, 6, 4, 5);
+            Grid before = new Grid(grid);
+
+            assertFalse(RuleApplier.KHiddenPair(grid));
+            assertEquals(before, grid);
+        }
+
+        @Test
+        @DisplayName("Ignores already filled cells, even if they still hold notes")
+        void kHidden_ignoresFilledCells() {
+            grid.addNumber(pos(0, 5), 9);
+            notes(0, 5, 2, 7); // stale notes on a filled cell: must not count as a possible place
+            notes(0, 0, 2, 7, 4);
+            notes(0, 3, 2, 7, 5);
+            notes(0, 6, 4, 5);
+
+            assertTrue(RuleApplier.KHidden(grid));
+
+            assertFalse(has(0, 0, 4));
+            assertFalse(has(0, 3, 5));
+            assertTrue(has(0, 5, 2) && has(0, 5, 7), "notes of a filled cell are not modified");
+        }
+
+        @Test
+        @DisplayName("Never places a value")
+        void kHidden_neverPlacesValue() {
+            notes(0, 0, 2, 7, 4);
+            notes(0, 3, 2, 7, 5);
+            notes(0, 6, 4, 5);
+
+            assertTrue(RuleApplier.KHidden(grid));
+
+            assertEquals(0, grid.getNumber(pos(0, 0)), "KHidden only removes notes");
+            assertEquals(0, grid.getNumber(pos(0, 3)), "KHidden only removes notes");
+        }
+
+        @Test
+        @DisplayName("Step by step: applies a single tuple per call")
+        void kHidden_appliesOneTuplePerCall() {
+            notes(0, 0, 2, 7, 4);
+            notes(0, 3, 2, 7, 5);
+            notes(0, 6, 4, 5);
+            notes(5, 0, 1, 6, 3);
+            notes(5, 3, 1, 6, 8);
+            notes(5, 6, 3, 8);
+
+            assertTrue(RuleApplier.KHidden(grid));
+            assertFalse(has(0, 0, 4), "first pair applied");
+            assertTrue(has(5, 0, 3), "second pair not applied yet");
+
+            assertTrue(RuleApplier.KHidden(grid));
+            assertFalse(has(5, 0, 3), "second pair applied on the next call");
+        }
+
+        @Test
+        @DisplayName("Throws IllegalArgumentException when kMin < 2 or kMin > kMax")
+        void kHidden_invalidK_throws() {
+            assertThrows(IllegalArgumentException.class, () -> RuleApplier.KHidden(grid, 0, 2));
+            assertThrows(IllegalArgumentException.class, () -> RuleApplier.KHidden(grid, 1, 1));
+            assertThrows(IllegalArgumentException.class, () -> RuleApplier.KHidden(grid, 3, 2));
+        }
+
+        @Test
+        @DisplayName("Every Hidden variant can be called on an empty grid without throwing")
+        void kHidden_allVariants_doNotThrow() {
+            assertFalse(assertDoesNotThrow(() -> RuleApplier.KHiddenSingle(grid)));
+            assertFalse(assertDoesNotThrow(() -> RuleApplier.KHiddenPair(grid)));
+            assertFalse(assertDoesNotThrow(() -> RuleApplier.KHiddenTriple(grid)));
+            assertFalse(assertDoesNotThrow(() -> RuleApplier.KHiddenTuples(grid)));
+            assertFalse(assertDoesNotThrow(() -> RuleApplier.KHidden(grid)));
+        }
+
+        @Test
+        @DisplayName("Tuples: hidden quad (K = 4) on a row removes the other notes from the 4 cells")
+        void kHiddenTuples_quadOnRow_removesOtherNotes() {
+            // 1, 2, 3 and 4 can only go in (2,0), (2,2), (2,4) and (2,6)
+            notes(2, 0, 1, 2, 7);
+            notes(2, 2, 2, 3, 8);
+            notes(2, 4, 3, 4, 9);
+            notes(2, 6, 1, 4, 7, 8);
+            notes(2, 8, 7, 8, 9);
+
+            assertTrue(RuleApplier.KHiddenTuples(grid));
+
+            assertFalse(has(2, 0, 7));
+            assertFalse(has(2, 2, 8));
+            assertFalse(has(2, 4, 9));
+            assertFalse(has(2, 6, 7));
+            assertFalse(has(2, 6, 8));
+            assertTrue(has(2, 0, 1) && has(2, 0, 2));
+            assertTrue(has(2, 2, 2) && has(2, 2, 3));
+            assertTrue(has(2, 4, 3) && has(2, 4, 4));
+            assertTrue(has(2, 6, 1) && has(2, 6, 4));
+            assertTrue(has(2, 8, 7) && has(2, 8, 8) && has(2, 8, 9), "a cell outside the quad is not modified");
+        }
+
+        @Test
+        @DisplayName("Single: a value with only one possible cell in a row is placed")
+        void kHiddenSingle_placesValue() {
+            // 5 can only go in (0,4), even though the cell has 3 notes
+            notes(0, 1, 6, 7);
+            notes(0, 4, 5, 6, 7);
+            notes(0, 7, 6, 7);
+
+            assertTrue(RuleApplier.KHiddenSingle(grid));
+
+            assertEquals(5, grid.getNumber(pos(0, 4)));
+            assertTrue(grid.getNotes(pos(0, 4)).isEmpty(), "the filled cell has no more notes");
+            assertTrue(has(0, 1, 6) && has(0, 1, 7), "other cells keep their notes");
+        }
+
+        @Test
+        @DisplayName("Single: returns false and leaves the grid unchanged when every value has 2 places")
+        void kHiddenSingle_whenNoSingle_returnsFalse() {
+            // Each value appears twice in every row, column and block
+            notes(0, 0, 1, 2);
+            notes(0, 1, 1, 2);
+            notes(1, 0, 1, 2);
+            notes(1, 1, 1, 2);
+            Grid before = new Grid(grid);
+
+            assertFalse(RuleApplier.KHiddenSingle(grid));
+            assertEquals(before, grid);
+        }
+
+        @Test
+        @DisplayName("Single: places one value per call")
+        void kHiddenSingle_placesOneValuePerCall() {
+            notes(0, 1, 6, 7);
+            notes(0, 4, 5, 6, 7);
+            notes(0, 7, 6, 7);
+            notes(8, 1, 2, 3);
+            notes(8, 4, 1, 2, 3);
+            notes(8, 7, 2, 3);
+
+            assertTrue(RuleApplier.KHiddenSingle(grid));
+            assertEquals(5, grid.getNumber(pos(0, 4)), "first single placed");
+            assertEquals(0, grid.getNumber(pos(8, 4)), "second single not placed yet");
+
+            assertTrue(RuleApplier.KHiddenSingle(grid));
+            assertEquals(1, grid.getNumber(pos(8, 4)), "second single placed on the next call");
+        }
+    }
+
+    @Nested
     @DisplayName("Pointing Pair / Triple")
     class PointingTests {
 
@@ -371,9 +591,10 @@ class RuleApplierTest {
         @DisplayName("Pair: ignores already filled cells")
         void pointingPair_ignoresFilledCells() {
             int note = 4;
-            addNote(note, new int[]{0, 0}, new int[]{0, 1}, new int[]{0, 5});
-            // Cell (0,5) is filled: its note should not be modified
+            // Cell (0,5) is filled: its note should not be modified.
+            // The value is placed first because addNumber clears the notes of the cell.
             grid.addNumber(pos(0, 5), 7);
+            addNote(note, new int[]{0, 0}, new int[]{0, 1}, new int[]{0, 5});
 
             assertFalse(RuleApplier.PointingPair(grid));
             assertTrue(has(0, 5, note));
@@ -537,12 +758,13 @@ class RuleApplierTest {
         @DisplayName("X-Wing: ignores already filled cells")
         void xWing_ignoresFilledCells() {
             int note = 3;
+            // Cell (7,2) is filled: its candidate should not be modified.
+            // The value is placed first because addNumber clears the notes of the cell.
+            grid.addNumber(pos(7, 2), 4);
+
             addNote(note, new int[]{1, 2}, new int[]{1, 5});
             addNote(note, new int[]{4, 2}, new int[]{4, 5});
             addNote(note, new int[]{7, 2});
-
-            // Cell (7,2) is filled: its candidate should not be modified
-            grid.addNumber(pos(7, 2), 4);
 
             assertFalse(RuleApplier.XWing(grid));
             assertTrue(has(7, 2, note));
