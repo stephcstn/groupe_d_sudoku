@@ -2,8 +2,8 @@ package fr.univpoitiers.core.solver;
 
 import fr.univpoitiers.core.grid.Grid;
 import fr.univpoitiers.core.rules.RuleApplier;
+import fr.univpoitiers.utils.Pair;
 
-import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 /**
@@ -17,11 +17,8 @@ public class Solver implements RuleApplier {
 
 	/**
 	 * Creates a solver for a grid whose solution is already known.
-	 *
-	 * @param solvedGrid the reference solution of the grid
 	 */
-	public Solver(Grid solvedGrid) {
-		this.solvedGrid = solvedGrid;
+	public Solver() {
 		executionStack = new ExecutionStack();
 	}
 
@@ -41,10 +38,9 @@ public class Solver implements RuleApplier {
 	 */
 	public boolean solve(Grid grid, int[] rules) {
 		int ruleApplierIndex = 0;
-		boolean hasNextValue;
+		boolean hasNextValue = rules.length > 0;
 		try {
 			grid.nextAvailableCell(); // Throws NoSuchElementException if there's
-			hasNextValue = true;
 			RuleApplier.annotate(grid);
 		} catch (Exception e) {
 			hasNextValue = false;
@@ -52,68 +48,118 @@ public class Solver implements RuleApplier {
 
 		while (ruleApplierIndex < rules.length && hasNextValue) {
 			Grid clonedGridToStack = new Grid(grid);
-			switch (ruleApplierIndex) {
+			switch (rules[ruleApplierIndex]) {
 				case 0:
-					if (!RuleApplier.KObvious(grid)) {
+					Bet bet = new Bet();
+					if (RuleApplier.lastFreeCell(grid, bet)) {
+						executionStack.stack(clonedGridToStack, bet);
+						ruleApplierIndex = 0;
+					} else {
 						ruleApplierIndex++;
-					} else executionStack.stack(clonedGridToStack, ruleApplierIndex);
+					}
 					break;
 				case 1:
-					if (RuleApplier.KHidden(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
+					Bet bet = new Bet();
+					if (RuleApplier.lastRemainingCell(grid, bet)) {
+						executionStack.stack(clonedGridToStack, bet);
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+				case 2:
+					Bet bet = new Bet();
+					if (RuleApplier.lastPossibleCell(grid, bet)) {
+						executionStack.stack(grid, bet);
 						ruleApplierIndex = 0;
 					} else {
 						ruleApplierIndex++;
 					}
 					break;
 				case 3:
-					if (RuleApplier.PointingPair(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
+					Bet bet = new Bet();
+					if (RuleApplier.BasicRules(grid, bet)) {
 						ruleApplierIndex = 0;
 					} else {
 						ruleApplierIndex++;
 					}
 					break;
 				case 4:
-					if (RuleApplier.PointingTriple(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
+					if (RuleApplier.KObvious(grid)) {
 						ruleApplierIndex = 0;
 					} else {
 						ruleApplierIndex++;
 					}
 					break;
 				case 5:
-					if (RuleApplier.Swordfish(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
+					if (RuleApplier.KHidden(grid)) {
 						ruleApplierIndex = 0;
 					} else {
 						ruleApplierIndex++;
 					}
 					break;
 				case 6:
-					if (RuleApplier.XWing(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
+					if (RuleApplier.PointingPair(grid)) {
 						ruleApplierIndex = 0;
 					} else {
 						ruleApplierIndex++;
 					}
 					break;
 				case 7:
-					if (RuleApplier.YWing(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
+					if (RuleApplier.PointingTriple(grid)) {
 						ruleApplierIndex = 0;
 					} else {
 						ruleApplierIndex++;
 					}
 					break;
 				case 8:
-					if (RuleApplier.FirstNaive(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
+					if (RuleApplier.Swordfish(grid)) {
 						ruleApplierIndex = 0;
 					} else {
 						ruleApplierIndex++;
 					}
 					break;
+				case 9:
+					if (RuleApplier.XWing(grid)) {
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+				case 10:
+					if (RuleApplier.YWing(grid)) {
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+				case 11:
+					Bet bet = new Bet();
+					if (RuleApplier.FirstNaive(grid, bet)) {
+						executionStack.stack(grid, bet);
+						ruleApplierIndex = 0;
+					} else {
+						ruleApplierIndex++;
+					}
+					break;
+			}
+			if (ruleApplierIndex == rules.length) {
+				Pair<Grid, Bet> backState = executionStack.pop();
+				// Unstack until we had to choose between 2 values
+				while (!executionStack.isEmpty() && backState.getItem2().getNextChoices().isEmpty()) {
+					backState = executionStack.pop();
+					if (executionStack.isEmpty() && backState.getItem2().getNextChoices().isEmpty()) return false;
+				}
+				Bet bet = backState.getItem2();
+				// Remove the next choice to put it at the same position
+				bet.setCurrent(backState.getItem2().getNextChoices().removeFirst());
+				clonedGridToStack = new Grid(backState.getItem1());
+				// Stack again with new bet state
+				executionStack.stack(clonedGridToStack, bet);
+				// Then update the current grid & back in solving
+				backState.getItem1().addNumber(bet.getPos(), bet.getCurrent());
+				grid = backState.getItem1();
+				ruleApplierIndex = 0;
 			}
 			try {
 				grid.nextAvailableCell(); // Throws NoSuchElementException if there's no more cells available

@@ -25,8 +25,9 @@ public class Pair<T1, T2> {
 	 *
 	 * @param item1 the new first item
 	 */
-	public void setItem1(T1 item1) {
+	public Pair<T1, T2> setItem1(T1 item1) {
 		this.item1 = item1;
+		return this;
 	}
 
 	/**
@@ -43,8 +44,9 @@ public class Pair<T1, T2> {
 	 *
 	 * @param item2 the new second item
 	 */
-	public void setItem2(T2 item2) {
+	public Pair<T1, T2> setItem2(T2 item2) {
 		this.item2 = item2;
+		return this;
 	}
 
 }

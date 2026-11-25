@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public class ExecutionStack {
 
-	private ArrayList<Pair<Grid, Integer>> stack;
+	private ArrayList<Pair<Grid, Bet>> stack;
 
 	/**
 	 * Creates an empty execution stack. Not implemented yet.
@@ -19,35 +19,34 @@ public class ExecutionStack {
 	 * @throws UnsupportedOperationException always, until the class is implemented
 	 */
 	public ExecutionStack() {
-		// TODO - implement ExecutionStack.ExecutionStack
-		throw new UnsupportedOperationException();
+		stack = new ArrayList<>();
 	}
 
 	/**
 	 * Pushes a grid state together with the rule that produced it. Not implemented yet.
 	 *
 	 * @param grid the grid state to save
-	 * @param rule the index of the applied rule, or -1 for the initial annotation
+	 * @param bet bet of choosing a value instead of others
 	 * @throws UnsupportedOperationException always, until the method is implemented
 	 */
-	public void stack(Grid grid, Integer rule) {
-		// TODO - implement ExecutionStack.stack
-		throw new UnsupportedOperationException("stack n'est pas encore implémenté.");
+	public ExecutionStack stack(Grid grid, Bet bet) {
+		stack.add(new Pair<Grid, Bet>()
+				.setItem1(grid)
+				.setItem2(bet)
+		);
+		return this;
 	}
 
 	/**
 	 * Removes and returns the last saved state.
-	 *
-	 * <p>/!\ TODO: to be rewritten. The current version is a placeholder that always returns an
-	 * empty 0x0 grid paired with rule 0, without reading the stack.</p>
-	 *
-	 * @return the last grid state and the rule that produced it
+	 * @return the last grid state and the rule to retrieve it
 	 */
-	public Pair<Grid, Integer> pop() {
-		Pair<Grid, Integer> p = new Pair<Grid, Integer>();
-		p.setItem1(new Grid(0, 0));
-		p.setItem2(0);
-		return p;
+	public Pair<Grid, Bet> pop() {
+		return stack.removeLast();
 	}
 
+	/**
+	 * Returns if the current stack is empty
+	 */
+	public boolean isEmpty() { return stack.isEmpty(); }
 }
