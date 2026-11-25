@@ -158,6 +158,9 @@ public class Grid {
     public boolean addNumber(int pos, int value) {
         this.cells[pos].setValue(value);
         this.availableCells.remove(Integer.valueOf(pos));
+        this.blockUpdate(pos, value);
+        this.lineUpdate(pos, value);
+        this.columnUpdate(pos, value);
         return true;
     }
 
@@ -232,7 +235,7 @@ public class Grid {
      * Removes a specific candidate note (pencil mark) for the cell at the given position.
      *
      * @param pos the 1D position index of the target cell
-     * @param note the zero-based index of the candidate note to remove (ranging from 0 to max values - 1)
+     * @param note the candidate note value to remove (ranging from 1 to max values)
      */
     public void removeNote(int pos, int note) {
         this.cells[pos].removeNote(note);
@@ -242,7 +245,7 @@ public class Grid {
      * Enables a specific candidate note (pencil mark) for the cell at the given position.
      *
      * @param pos the 1D position index of the target cell
-     * @param note the zero-based index of the candidate note to set (ranging from 0 to max values - 1)
+     * @param note the candidate note value to set (ranging from 1 to max values)
      */
 	public void setNote(int pos, int note) {
 		this.cells[pos].setNote(note);
@@ -526,7 +529,7 @@ public class Grid {
      */
     public void clearNotes(int pos) {
         int max = Math.max(this.WIDTH, this.HEIGHT);
-        for (int i = 0; i < max; i++) {
+        for (int i = 1; i <= max; i++) {
             this.cells[pos].removeNote(i);
         }
     }
@@ -566,9 +569,9 @@ public class Grid {
                 System.out.printf("%" + digits + "s ", value == 0 ? "." : String.valueOf(value));
 
                 ArrayList<Integer> cellNotes = new ArrayList<>();
-                for (int i = 0; i < max; i++) {
+                for (int i = 1; i <= max; i++) {
                     if (isCellContaining(pos, i)) {
-                        cellNotes.add(i + 1);
+                        cellNotes.add(i);
                     }
                 }
                 if (!cellNotes.isEmpty()) {

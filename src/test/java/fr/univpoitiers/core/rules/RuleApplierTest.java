@@ -148,8 +148,163 @@ class RuleApplierTest {
 
     @Nested
     @DisplayName("KObvious")
-    class KObviousTest{
+    class KObviousTest {
 
+        /** Adds every given note to a single cell. */
+        private void notes(int row, int col, int... values) {
+            for (int v : values) {
+                grid.setNote(pos(row, col), v);
+            }
+        }
+
+        @Test
+        @DisplayName("Pair on a row: removes both values from the rest of the row")
+        void kObvious_pairOnRow_removesNotesInRow() {
+            notes(0, 0, 2, 7);
+            notes(0, 1, 2, 7);
+            notes(0, 5, 2, 5);
+            notes(0, 8, 7, 9);
+            notes(1, 5, 2, 8); // outside the row: must be kept
+
+            assertTrue(RuleApplier.KObvious(grid));
+
+            assertTrue(has(0, 0, 2) && has(0, 0, 7), "the pair itself is kept");
+            assertTrue(has(0, 1, 2) && has(0, 1, 7), "the pair itself is kept");
+            assertFalse(has(0, 5, 2));
+            assertTrue(has(0, 5, 5));
+            assertFalse(has(0, 8, 7));
+            assertTrue(has(0, 8, 9), "the last note (9) is handled");
+            assertTrue(has(1, 5, 2), "a cell outside the row should not be modified");
+        }
+
+        @Test
+        @DisplayName("Pair on a column: removes both values from the rest of the column")
+        void kObvious_pairOnColumn_removesNotesInColumn() {
+            notes(0, 3, 1, 9);
+            notes(4, 3, 1, 9);
+            notes(7, 3, 1, 4);
+            notes(8, 3, 6, 9);
+
+            assertTrue(RuleApplier.KObvious(grid));
+
+            assertFalse(has(7, 3, 1));
+            assertTrue(has(7, 3, 4));
+            assertFalse(has(8, 3, 9));
+            assertTrue(has(8, 3, 6));
+        }
+
+        @Test
+        @DisplayName("Pair in a block (not aligned): removes both values from the rest of the block only")
+        void kObvious_pairInBlock_removesNotesInBlock() {
+            notes(0, 0, 3, 6);
+            notes(1, 1, 3, 6);
+            notes(2, 2, 3, 8);
+            notes(0, 5, 3, 5); // same row as (0,0) but outside the block: must be kept
+
+            assertTrue(RuleApplier.KObvious(grid));
+
+            assertFalse(has(2, 2, 3));
+            assertTrue(has(2, 2, 8));
+            assertTrue(has(0, 5, 3), "a cell outside the block should not be modified");
+        }
+
+        @Test
+        @DisplayName("Triple where no cell holds all 3 values ({1,2} {2,3} {1,3})")
+        void kObvious_incompleteTriple_removesNotesInRow() {
+            notes(3, 0, 1, 2);
+            notes(3, 4, 2, 3);
+            notes(3, 8, 1, 3);
+            notes(3, 2, 1, 2, 3, 7);
+
+            assertTrue(RuleApplier.KObvious(grid));
+
+            assertFalse(has(3, 2, 1));
+            assertFalse(has(3, 2, 2));
+            assertFalse(has(3, 2, 3));
+            assertTrue(has(3, 2, 7));
+            assertTrue(has(3, 0, 1) && has(3, 0, 2), "the triple itself is kept");
+            assertTrue(has(3, 4, 2) && has(3, 4, 3), "the triple itself is kept");
+            assertTrue(has(3, 8, 1) && has(3, 8, 3), "the triple itself is kept");
+        }
+
+        @Test
+        @DisplayName("K = 2 only: a triple is not applied")
+        void kObvious_kEquals2_ignoresTriple() {
+            notes(3, 0, 1, 2);
+            notes(3, 4, 2, 3);
+            notes(3, 8, 1, 3);
+            notes(3, 2, 1, 2, 3, 7);
+            Grid before = new Grid(grid);
+
+            assertFalse(RuleApplier.KObvious(grid, 2));
+            assertEquals(before, grid);
+        }
+
+        @Test
+        @DisplayName("Returns false and leaves the grid unchanged when there is nothing to remove")
+        void kObvious_whenNothingToRemove_returnsFalse() {
+            notes(0, 0, 2, 7);
+            notes(0, 1, 2, 7);
+            notes(0, 5, 4, 5);
+            Grid before = new Grid(grid);
+
+            assertFalse(RuleApplier.KObvious(grid));
+            assertEquals(before, grid);
+        }
+
+        @Test
+        @DisplayName("Ignores already filled cells, even if they still hold notes")
+        void kObvious_ignoresFilledCells() {
+            grid.addNumber(pos(0, 4), 5);
+            notes(0, 4, 2, 7); // stale notes on a filled cell
+            notes(0, 0, 2, 7);
+            notes(0, 1, 2, 7);
+            Grid before = new Grid(grid);
+
+            assertFalse(RuleApplier.KObvious(grid));
+            assertEquals(before, grid);
+        }
+
+        @Test
+        @DisplayName("Never places a value, even when a cell is left with a single note")
+        void kObvious_neverPlacesValue() {
+            notes(0, 0, 2, 7);
+            notes(0, 1, 2, 7);
+            notes(0, 8, 7, 9);
+
+            assertTrue(RuleApplier.KObvious(grid));
+
+            assertTrue(has(0, 8, 9));
+            assertEquals(0, grid.getNumber(pos(0, 8)), "KObvious only removes notes");
+        }
+
+        @Test
+        @DisplayName("Step by step: applies a single tuple per call")
+        void kObvious_appliesOneTuplePerCall() {
+            notes(0, 0, 2, 7);
+            notes(0, 1, 2, 7);
+            notes(0, 8, 2, 9);
+            notes(5, 0, 4, 6);
+            notes(5, 1, 4, 6);
+            notes(5, 8, 4, 9);
+
+            assertTrue(RuleApplier.KObvious(grid));
+            assertFalse(has(0, 8, 2), "first pair applied");
+            assertTrue(has(5, 8, 4), "second pair not applied yet");
+
+            assertTrue(RuleApplier.KObvious(grid));
+            assertFalse(has(5, 8, 4), "second pair applied on the next call");
+
+            assertFalse(RuleApplier.KObvious(grid));
+        }
+
+        @Test
+        @DisplayName("Throws IllegalArgumentException when K is outside [2, 3]")
+        void kObvious_invalidK_throws() {
+            assertThrows(IllegalArgumentException.class, () -> RuleApplier.KObvious(grid, 1));
+            assertThrows(IllegalArgumentException.class, () -> RuleApplier.KObvious(grid, 4));
+            assertThrows(IllegalArgumentException.class, () -> RuleApplier.KObvious(grid, 3, 2));
+        }
     }
 
     @Nested
