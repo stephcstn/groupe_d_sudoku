@@ -73,14 +73,14 @@ public class Grid {
     }
 
     /**
-     * Returns cell notes wanted
-     * @param pos
-     * @return byte[] of 0 or 1 (true/false) value where index refers to note value
+     * Returns the active candidate notes of a cell.
+     * @param pos the 1D position of the cell
+     * @return the zero-based indices of the active notes; empty if {@code pos} is outside the grid
      */
     public ArrayList<Integer> getNotes(int pos) {
         ArrayList<Integer> res = new ArrayList<>();
         if (0 <= pos && pos < this.cells.length) {
-            for (int i = 0; i < WIDTH; i++) {
+            for (int i = 1; i <= WIDTH; i++) {
                 if (this.cells[pos].getNote(i) == 1) {
                     res.add(i);
                 }
@@ -248,6 +248,9 @@ public class Grid {
 		this.cells[pos].setNote(note);
 	}
 
+	/**
+	 * Locks every cell that currently holds a value, so that it can no longer be modified.
+	 */
 	public void lockFilledCells() {
         for (Cell cell : this.cells) {
             if (cell.getValue() != 0) {
@@ -356,6 +359,13 @@ public class Grid {
         }
     }
 
+    /**
+     * Two grids are equal when they have the same dimensions and every cell holds the same
+     * value and the same candidate notes (lock status is ignored).
+     *
+     * @param obj the object to compare with
+     * @return true if {@code obj} is an equal grid
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass()) return false;
@@ -369,7 +379,7 @@ public class Grid {
                 return false;
             }
             int max = Math.max(this.WIDTH, this.HEIGHT);
-            for (int j = 0; j < max; j++) {
+            for (int j = 1; j <= max; j++) {
                 if (this.cells[i].getNote(j) != otherGrid.cells[i].getNote(j)) {
                     return false;
                 }
@@ -379,6 +389,11 @@ public class Grid {
         return true;
     }
 
+    /**
+     * Computes a hash code from the cells and the dimensions of the grid.
+     *
+     * @return the hash code of this grid
+     */
     @Override
     public int hashCode() {
         int result = java.util.Arrays.hashCode(this.cells);
@@ -390,11 +405,15 @@ public class Grid {
     /**
      * Converts 2D coordinates (x, y) into a 1D array index.
      *
-     * @param x
-     * @param y
+     * @param x the column, starting at 0
+     * @param y the row, starting at 0
      * @return the corresponding 1D index
+     * @throws IllegalArgumentException if the coordinates are outside the grid
      */
     public int cellToIndex(int x, int y) {
+        if (x < 0 || x >= this.WIDTH || y < 0 || y >= this.HEIGHT) {
+            throw new IllegalArgumentException("Coordonnées hors de la grille : (" + x + ", " + y + ").");
+        }
         return y * WIDTH + x;
     }
 
@@ -467,6 +486,102 @@ public class Grid {
         return true;
     }
 
-	public int getBlockWidth() { return this.BLOCK_WIDTH; }
-	public int getBlockHeight() { return this.BLOCK_HEIGHT; }
+    /**
+     * Returns the width of a sub-block.
+     *
+     * @return the number of columns in a sub-block
+     */
+    public int getBlockWidth() { return this.BLOCK_WIDTH; }
+
+    /**
+     * Returns the height of a sub-block.
+     *
+     * @return the number of rows in a sub-block
+     */
+    public int getBlockHeight() { return this.BLOCK_HEIGHT; }
+
+    /**
+     * Checks whether the cell at the given position is locked.
+     *
+     * @param pos the 1D position of the cell
+     * @return true if the cell is locked
+     */
+    public boolean isLocked(int pos) {
+        return this.cells[pos].isLocked();
+    }
+
+    /**
+     * Unlocks every cell of the grid, making all values editable again.
+     */
+    public void unlockGrid() {
+        for (Cell cell : this.cells) {
+            cell.unlock();
+        }
+    }
+
+    /**
+     * Removes every candidate note of the cell at the given position.
+     *
+     * @param pos the 1D position of the cell
+     */
+    public void clearNotes(int pos) {
+        int max = Math.max(this.WIDTH, this.HEIGHT);
+        for (int i = 0; i < max; i++) {
+            this.cells[pos].removeNote(i);
+        }
+    }
+
+    /**
+     * Prints the current state of the grid to the standard output
+     * ('.' for an empty cell), followed by the notes of each cell that has some.
+     */
+    public void printGrid() {
+        int max = Math.max(this.WIDTH, this.HEIGHT);
+        int digits = String.valueOf(max).length();
+        StringBuilder notes = new StringBuilder();
+
+        StringBuilder blockLine = new StringBuilder();
+        for (int x = 0; x < this.WIDTH; x++) {
+            if (x > 0 && x % this.BLOCK_WIDTH == 0) {
+                blockLine.append("+-");
+            }
+            blockLine.append("-".repeat(digits + 1));
+        }
+        String frame = "=".repeat(blockLine.length());
+
+        System.out.printf("%n%s%n", frame);
+        System.out.printf("ÉTAT DE LA GRILLE%n");
+        System.out.printf("%s%n", frame);
+
+        for (int y = 0; y < this.HEIGHT; y++) {
+            if (y > 0 && y % this.BLOCK_HEIGHT == 0) {
+                System.out.printf("%s%n", blockLine);
+            }
+            for (int x = 0; x < this.WIDTH; x++) {
+                if (x > 0 && x % this.BLOCK_WIDTH == 0) {
+                    System.out.printf("| ");
+                }
+                int pos = cellToIndex(x, y);
+                int value = this.cells[pos].getValue();
+                System.out.printf("%" + digits + "s ", value == 0 ? "." : String.valueOf(value));
+
+                ArrayList<Integer> cellNotes = new ArrayList<>();
+                for (int i = 0; i < max; i++) {
+                    if (isCellContaining(pos, i)) {
+                        cellNotes.add(i + 1);
+                    }
+                }
+                if (!cellNotes.isEmpty()) {
+                    notes.append(String.format("  (%d, %d) : %s%n", x, y, cellNotes));
+                }
+            }
+            System.out.printf("%n");
+        }
+        if (notes.length() > 0) {
+            System.out.printf("%s%n", blockLine);
+            System.out.printf("Notes :%n%s", notes);
+        }
+        System.out.printf("%s%n%n", frame);
+    }
+
 }

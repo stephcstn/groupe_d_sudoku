@@ -6,11 +6,20 @@ import fr.univpoitiers.core.rules.RuleApplier;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
+/**
+ * Solves a Sudoku grid by repeatedly applying the deduction rules of {@link RuleApplier},
+ * recording each successful step in an {@link ExecutionStack}.
+ */
 public class Solver implements RuleApplier {
 
 	private ExecutionStack executionStack;
 	private Grid solvedGrid;
 
+	/**
+	 * Creates a solver for a grid whose solution is already known.
+	 *
+	 * @param solvedGrid the reference solution of the grid
+	 */
 	public Solver(Grid solvedGrid) {
 		this.solvedGrid = solvedGrid;
 		executionStack = new ExecutionStack();
@@ -18,7 +27,7 @@ public class Solver implements RuleApplier {
 
 	/**
 	 * Replace the previous solution by another different solution of the grid.
-	 * @param newSolvedGrid
+	 * @param newSolvedGrid the new reference solution
 	 */
 	private void setSolvedGrid(Grid newSolvedGrid) {
 		solvedGrid = newSolvedGrid;
@@ -28,6 +37,7 @@ public class Solver implements RuleApplier {
 	 * Resolve the current grid based on rules that are given.
 	 * @param grid - The current grid to resolve
 	 * @param rules - All rules applied
+	 * @return true if the grid was completely filled before all rules were exhausted
 	 */
 	public boolean solve(Grid grid, int[] rules) {
 		int ruleApplierIndex = 0;
@@ -35,25 +45,20 @@ public class Solver implements RuleApplier {
 		try {
 			grid.nextAvailableCell(); // Throws NoSuchElementException if there's
 			hasNextValue = true;
+			RuleApplier.annotate(grid);
 		} catch (Exception e) {
 			hasNextValue = false;
 		}
-		annotate(grid);
+
 		while (ruleApplierIndex < rules.length && hasNextValue) {
 			Grid clonedGridToStack = new Grid(grid);
 			switch (ruleApplierIndex) {
 				case 0:
-					if (!RuleApplier.BasicRules(grid)) {
+					if (!RuleApplier.KObvious(grid)) {
 						ruleApplierIndex++;
 					} else executionStack.stack(clonedGridToStack, ruleApplierIndex);
 					break;
 				case 1:
-					if (RuleApplier.KObvious(grid)) {
-						executionStack.stack(clonedGridToStack, ruleApplierIndex);
-						ruleApplierIndex = 0;
-					}
-					break;
-				case 2:
 					if (RuleApplier.KHidden(grid)) {
 						executionStack.stack(clonedGridToStack, ruleApplierIndex);
 						ruleApplierIndex = 0;
@@ -119,83 +124,38 @@ public class Solver implements RuleApplier {
 		return ruleApplierIndex < rules.length && !hasNextValue;
 	}
 
-	private void restrictFromBlock(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
-		int value;
-		int startIndex = grid.getBlockIndex(currentPos);
-		for (int i = startIndex; i <= startIndex + 9 * 2; i++) {
-			for (int j = i; j < i + 3; j++) {
-				value = grid.getNumber(j);
-				if (value != 0 && notesToAdd.contains(value)) {
-					notesToAdd.remove(value);
-				}
-			}
-		}
-	}
-
-	private void restrictFromLine(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
-		int value;
-		int startIndex = grid.getStartRowIndex(currentPos);
-		for (int i = startIndex; i < startIndex + 9; i++) {
-			value = grid.getNumber(i);
-			if (value != 0 && notesToAdd.contains(value)) {
-				notesToAdd.remove(value);
-			}
-		}
-	}
-
-	private void restrictFromColumn(Grid grid, int currentPos, ArrayList<Integer> notesToAdd) {
-		int value;
-		int startIndex = grid.getColumnIndex(currentPos);
-		for (int i = startIndex; i <= startIndex * 9; i += 9) {
-			value = grid.getNumber(i);
-			if (value != 0 && notesToAdd.contains(value)) {
-				notesToAdd.remove(value);
-			}
-		}
-	}
-
-	public void annotate(Grid grid) {
-		ArrayList<Integer> notesToAdd = new ArrayList<>();
-
-		for (int pos = 0; pos < grid.getWidth(); pos++) {
-			RuleApplier.fillValues(notesToAdd, grid.getWidth());
-			restrictFromBlock(grid, pos, notesToAdd);
-			restrictFromLine(grid, pos, notesToAdd);
-			restrictFromColumn(grid, pos, notesToAdd);
-			// restrictFromDiagonal(grid, pos, notesToAdd); TODO: NOT NOW
-
-			for (Integer note : notesToAdd) {
-				grid.setNote(pos, note);
-			}
-			notesToAdd.clear();
-		}
-		executionStack.stack(grid, -1);
-	}
-
 	/**
-	 * 
-	 * @param grid
+	 * Checks the values entered in the grid against the solution. Not implemented yet.
+	 *
+	 * @param grid the grid to check
+	 * @return the positions of the wrong entries; currently always {@code null}
 	 */
 	public int[] checkEntries(Grid grid) {
+		// TODO - implement Solver.checkEntries
 		return null;
-
 	}
 
 	/**
-	 * 
-	 * @param grid
+	 * Generates a new puzzle in the given grid. Not implemented yet.
+	 *
+	 * @param grid the grid to fill
+	 * @throws UnsupportedOperationException always, until the method is implemented
 	 */
 	public void generate(Grid grid) {
-
+		// TODO - implement Solver.generate
+		throw new UnsupportedOperationException("generate n'est pas encore implémenté.");
 	}
 
 	/**
-	 * 
-	 * @param grid
-	 * @param countNumberLasting
+	 * Removes values from a full grid until the given number of values remains. Not implemented yet.
+	 *
+	 * @param grid the grid to reduce
+	 * @param countNumberLasting the number of values to keep
+	 * @throws UnsupportedOperationException always, until the method is implemented
 	 */
 	private void reduce(Grid grid, int countNumberLasting) {
-
+		// TODO - implement Solver.reduce
+		throw new UnsupportedOperationException("reduce n'est pas encore implémenté.");
 	}
 
 }

@@ -179,6 +179,30 @@ public interface RuleApplier {
 		return lastFreeCell(grid) || lastRemainingCell(grid) || lastPossibleCell(grid);
 	}
 
+	/**
+	 * Fills the candidate notes of the cells with the values not yet used in their block,
+	 * row and column, then records the annotated grid in the execution stack (rule -1).
+	 *
+	 * @param grid the grid to annotate, modified in place
+	 */
+	static void annotate(Grid grid) {
+		ArrayList<Integer> listOfValues = new ArrayList<>();
+
+		for (int cellIndex = 0; cellIndex < grid.getWidth() * grid.getWidth(); cellIndex++) {
+			if (grid.getNumber(cellIndex) == 0) {
+				RuleApplier.fillValues(listOfValues, grid.getWidth());
+				listOfValuesBlock(grid, listOfValues, cellIndex);
+				listOfValuesRow(grid, listOfValues, cellIndex);
+				listOfValuesColumn(grid, listOfValues, cellIndex);
+				// listOfValuesDiagonal(grid, cellIndex, notesToAdd); // TODO: NOT NOW
+
+				for (Integer note : listOfValues) {
+					grid.setNote(cellIndex, note);
+				}
+			}
+		}
+	}
+
 
 
 	/** Plus petite taille de K-uplet gérée pour l'instant (Naked Pairs). */
@@ -277,12 +301,12 @@ public interface RuleApplier {
 	}
 
 	/**
-	 * Encodes the candidate notes of a cell as a bitmask (bit i = note i).
+	 * Encodes the candidate notes of a cell as a bitmask (bit note - 1 = note, notes from 1 to n).
 	 */
 	private static int candidatesMask(Grid grid, int pos, int nbValues) {
 		int mask = 0;
-		for (int note = 0; note < nbValues; note++)
-			if (grid.isCellContaining(pos, note)) mask |= 1 << note;
+		for (int note = 1; note <= nbValues; note++)
+			if (grid.isCellContaining(pos, note)) mask |= 1 << (note - 1);
 		return mask;
 	}
 
@@ -301,8 +325,8 @@ public interface RuleApplier {
 			for (int i = 0; i < empty.size(); i++) {
 				if (chosen.contains(i)) continue;
 				int pos = empty.get(i);
-				for (int note = 0; note < nbValues; note++) {
-					if ((union & (1 << note)) != 0 && grid.isCellContaining(pos, note)) {
+				for (int note = 1; note <= nbValues; note++) {
+					if ((union & (1 << (note - 1))) != 0 && grid.isCellContaining(pos, note)) {
 						grid.removeNote(pos, note);
 						changed = true;
 					}
@@ -368,7 +392,7 @@ public interface RuleApplier {
 		for (int startY = 0; startY < height; startY += blockH) {
 			for (int startX = 0; startX < width; startX += blockW) {
 				for (int value = 1; value <= nbValues; value++) {
-					int note = value - 1;
+					int note = value;
 
 					List<Integer> positions = new ArrayList<>();
 					for (int y = startY; y < startY + blockH; y++) {
@@ -460,7 +484,7 @@ public interface RuleApplier {
 		int nbValues = Math.max(width, height);
 
 		for (int value = 1; value <= nbValues; value++) {
-			int note = value - 1;
+			int note = value;
 
 			// --- 1. Examen des Lignes ---
 			for (int row = 0; row < height; row++) {
@@ -650,7 +674,7 @@ public interface RuleApplier {
      */
     private static int countCandidates(Grid grid, int pos, int nbValues) {
         int count = 0;
-        for (int note = 0; note < nbValues; note++) {
+        for (int note = 1; note <= nbValues; note++) {
             if (grid.isCellContaining(pos, note)) {
                 count++;
             }
@@ -668,7 +692,7 @@ public interface RuleApplier {
      */
     private static List<Integer> getCandidates(Grid grid, int pos, int nbValues) {
         List<Integer> candidates = new ArrayList<>();
-        for (int note = 0; note < nbValues; note++) {
+        for (int note = 1; note <= nbValues; note++) {
             if (grid.isCellContaining(pos, note)) {
                 candidates.add(note);
             }
@@ -697,7 +721,7 @@ public interface RuleApplier {
         int n = grid.getWidth();
         int nbRows = grid.getHeight();
         for (int i = 1; i <= n; i++) {
-            int noteIndex = i - 1;
+            int noteIndex = i;
             for (int iR1 = 0; iR1 < nbRows - 1; iR1++) {
                 List<Integer> colsR1 = getColumnsWithCandidate(grid, iR1, noteIndex, n);
                 if (colsR1.size() == 2) {
@@ -761,7 +785,7 @@ public interface RuleApplier {
         int n = grid.getWidth();
         int nbRows = grid.getHeight();
         for (int i = 1; i <= n; i++) {
-            int noteIndex = i - 1;
+            int noteIndex = i;
             for (int iC1 = 0; iC1 < n - 1; iC1++) {
                 List<Integer> rowsC1 = getRowsWithCandidate(grid, iC1, noteIndex, n, nbRows);
                 if (rowsC1.size() == 2) {
@@ -837,7 +861,7 @@ public interface RuleApplier {
         int n = grid.getWidth();
         int nbRows = grid.getHeight();
         for (int i = 1; i <= n; i++) {
-            int noteIndex = i - 1;
+            int noteIndex = i;
             for (int iR1 = 0; iR1 < nbRows - 2; iR1++) {
                 List<Integer> colsR1 = getColumnsWithCandidate(grid, iR1, noteIndex, n);
                 if (colsR1.size() >= 2 && colsR1.size() <= 3) {
@@ -888,7 +912,7 @@ public interface RuleApplier {
         int n = grid.getWidth();
         int nbRows = grid.getHeight();
         for (int i = 1; i <= n; i++) {
-            int noteIndex = i - 1;
+            int noteIndex = i;
             for (int iC1 = 0; iC1 < n - 2; iC1++) {
                 List<Integer> rowsC1 = getRowsWithCandidate(grid, iC1, noteIndex, n, nbRows);
                 if (rowsC1.size() >= 2 && rowsC1.size() <= 3) {
